@@ -19,9 +19,9 @@ class simple_add_pars():
 class simple_add_io():
   """ simple add Interface Signals """
   def __init__(self,par):
-    self.in1  = Signal(intbv(0)[par.IN1_SYMBOL_WIDTH:])
-    self.in2  = Signal(intbv(0)[par.IN2_SYMBOL_WIDTH:])
-    self.op   = Signal(intbv(0)[par.OP_SYMBOL_WIDTH:])
+    self.in1_i  = Signal(intbv(0)[par.IN1_SYMBOL_WIDTH:])
+    self.in2_i  = Signal(intbv(0)[par.IN2_SYMBOL_WIDTH:])
+    self.op_o   = Signal(intbv(0)[par.OP_SYMBOL_WIDTH:])
 
 def simple_add(pars, reset, clk, simple_add_io):
   """ simple add lib"""
@@ -30,7 +30,7 @@ def simple_add(pars, reset, clk, simple_add_io):
   def adder():
   """ simple adder """
     if (reset == 1):
-      simple_add_io.op.next = 0
+      simple_add_io.op_o.next = 0
     else:
-      simple_add_io.op.next = simple_add_io.in1 +  simple_add_io.in2
+      simple_add_io.op_o.next = simple_add_io.in1_i +  simple_add_io.in2_i
    

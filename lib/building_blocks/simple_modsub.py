@@ -19,9 +19,9 @@ class simple_modsub_pars():
 class simple_modsub_io():
   """ simple modsub Interface Signals """
   def __init__(self,par):
-    self.in1  = Signal(intbv(0)[par.IN1_SYMBOL_WIDTH:])
-    self.in2  = Signal(intbv(0)[par.IN2_SYMBOL_WIDTH:])
-    self.op   = Signal(intbv(0)[par.OP_SYMBOL_WIDTH:])
+    self.in1_i  = Signal(intbv(0)[par.IN1_SYMBOL_WIDTH:])
+    self.in2_i  = Signal(intbv(0)[par.IN2_SYMBOL_WIDTH:])
+    self.op_o   = Signal(intbv(0)[par.OP_SYMBOL_WIDTH:])
 
 def simple_modsub(pars, reset, clk, simple_modsub_io):
   """ simple modsub lib"""
@@ -32,9 +32,9 @@ def simple_modsub(pars, reset, clk, simple_modsub_io):
   def modsubtract():
   """ output block """
     if (reset == 1):
-      simple_modsub_io.op.next = 0
+      simple_modsub_io.op_o.next = 0
     else:
-      simple_modsub_io.op.next = modsub[self.OP_SYMBOL_WIDTH:]
+      simple_modsub_io.op_o.next = modsub[pars.OP_SYMBOL_WIDTH:]
    
   @always(clk.posedge, reset.posedge)
   def modsubtract():
@@ -42,5 +42,5 @@ def simple_modsub(pars, reset, clk, simple_modsub_io):
     if (reset == 1):
       modsub.next = 0
     else:
-      modsub.next = simple_modsub_io.in1 - simple_modsub_io.in2
+      modsub.next = simple_modsub_io.in1_i - simple_modsub_io.in2_i
    
