@@ -1,0 +1,59 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Thu May 17 10:33:41 2018
+[*]
+[dumpfile] "/home/skr/embedded_fs/rfs_e95_24102017/home/root/ecco95_dev/sr_fpga_v2/blocks_myhdl/streaming_ip_a/tb/myhdl_work/sim_streaming_ip_a.vcd"
+[dumpfile_mtime] "Thu May 17 10:29:44 2018"
+[dumpfile_size] 7203
+[savefile] "/home/skr/embedded_fs/rfs_e95_24102017/home/root/ecco95_dev/sr_fpga_v2/blocks_myhdl/streaming_ip_a/tb/waves/streaming_ip_a.sav"
+[timestart] 0
+[size] 1920 1176
+[pos] -1 -1
+*-6.670026 70 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sim_streaming_ip_a.
+[treeopen] sim_streaming_ip_a.streaming_ip_a_top_inst.
+[sst_width] 297
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 362
+@28
+sim_streaming_ip_a.clk
+sim_streaming_ip_a.reset
+@200
+-src_bfm
+@22
+sim_streaming_ip_a.src_bfm_inst.aso_src_data_o[7:0]
+@28
+sim_streaming_ip_a.src_bfm_inst.aso_src_ready_i
+sim_streaming_ip_a.src_bfm_inst.aso_src_valid_o
+@200
+-streaming_ip_a_top
+@28
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_snk_if_valid_i
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_src_ready_i
+@22
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_snk_data_i[7:0]
+@29
+sim_streaming_ip_a.streaming_ip_a_top_inst.data_enable_o
+@28
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_src_if_valid_o
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_snk_if_ready_o
+@22
+sim_streaming_ip_a.streaming_ip_a_top_inst.av_src_data_o[7:0]
+@200
+-snk_bfm
+@28
+sim_streaming_ip_a.snk_bfm_inst.asi_snk_valid_i
+sim_streaming_ip_a.snk_bfm_inst.asi_snk_ready_o
+@22
+sim_streaming_ip_a.snk_bfm_inst.aso_src_data_o[7:0]
+@200
+-streaming_ip_a
+@28
+sim_streaming_ip_a.streaming_ip_a_top_inst.streaming_ip_a_inst.av_snk_valid_i
+sim_streaming_ip_a.streaming_ip_a_top_inst.streaming_ip_a_inst.av_src_ready_i
+sim_streaming_ip_a.streaming_ip_a_top_inst.streaming_ip_a_inst.data_enable_o
+sim_streaming_ip_a.streaming_ip_a_top_inst.streaming_ip_a_inst.av_src_valid_o
+sim_streaming_ip_a.streaming_ip_a_top_inst.streaming_ip_a_inst.av_snk_ready_o
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,96 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Mon Jun 12 07:45:37 2017
+[*]
+[dumpfile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_module_comb/myhdl/sim_stream_ip_comb.vcd"
+[dumpfile_mtime] "Mon Jun 12 07:45:27 2017"
+[dumpfile_size] 10393
+[savefile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_module_comb/myhdl/sim_stream_ip_comb.sav"
+[timestart] 0
+[size] 1880 1024
+[pos] -1 -1
+*-8.212687 502 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sim_stream_ip_comb.
+[sst_width] 225
+[signals_width] 268
+[sst_expanded] 1
+[sst_vpaned_height] 298
+@28
+sim_stream_ip_comb.clkgen.cycle_count
+sim_stream_ip_comb.clkgen.elapsed_time
+sim_stream_ip_comb.r_pattern
+sim_stream_ip_comb.v_pattern
+@22
+sim_stream_ip_comb.data_i[7:0]
+@28
+sim_stream_ip_comb.clkgen.clk
+sim_stream_ip_comb.stream_ip_comb_inst.reset
+sim_stream_ip_comb.src_bfm_aso_valid_o
+@22
+sim_stream_ip_comb.src_bfm_aso_data_o[7:0]
+@28
+sim_stream_ip_comb.src_bfm_aso_ready_i
+sim_stream_ip_comb.asi_st1_valid_i
+@29
+sim_stream_ip_comb.src_bfm_inst.en_shift_vld
+@c00022
+sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+@28
+(0)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(1)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(2)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(3)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(4)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(5)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(6)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(7)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(8)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(9)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(10)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(11)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(12)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(13)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(14)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+(15)sim_stream_ip_comb.src_bfm_inst.shift_vld[15:0]
+@1401200
+-group_end
+@c00022
+sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+@28
+(0)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(1)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(2)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(3)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(4)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(5)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(6)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(7)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(8)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(9)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(10)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(11)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(12)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(13)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(14)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+(15)sim_stream_ip_comb.snk_bfm_inst.shift[15:0]
+@1401200
+-group_end
+@22
+sim_stream_ip_comb.asi_st1_data_i[7:0]
+@28
+sim_stream_ip_comb.asi_st1_ready_o
+sim_stream_ip_comb.aso_st2_valid_o
+@22
+sim_stream_ip_comb.aso_st2_data_o[7:0]
+@28
+sim_stream_ip_comb.aso_st2_ready_i
+sim_stream_ip_comb.data_enable
+sim_stream_ip_comb.snk_bfm_asi_valid_i
+@22
+sim_stream_ip_comb.snk_bfm_asi_data_i[7:0]
+@28
+sim_stream_ip_comb.snk_bfm_asi_ready_o
+@22
+sim_stream_ip_comb.src_bfm_inst.data_o[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
