@@ -1,0 +1,31 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Thu Jun  8 13:52:51 2017
+[*]
+[dumpfile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_snk_bfm/myhdl/sim_snk_bfm.vcd"
+[dumpfile_mtime] "Thu Jun  8 13:52:03 2017"
+[dumpfile_size] 6010
+[savefile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_snk_bfm/myhdl/sim_snk_bfm.sav"
+[timestart] 0
+[size] 1880 1024
+[pos] -1 -1
+*-8.149906 140 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sim_snk_bfm.
+[sst_width] 225
+[signals_width] 248
+[sst_expanded] 1
+[sst_vpaned_height] 354
+@28
+sim_snk_bfm.clkgen.elapsed_time
+sim_snk_bfm.clkgen.cycle_count
+sim_snk_bfm.snk_bfm_inst.reset
+sim_snk_bfm.snk_bfm_inst.clk
+@22
+sim_snk_bfm.v_pattern
+@28
+sim_snk_bfm.r_pattern
+sim_snk_bfm.snk_bfm_inst.asi_st2_ready_o
+@29
+sim_snk_bfm.snk_bfm_inst.asi_st2_valid_i
+[pattern_trace] 1
+[pattern_trace] 0

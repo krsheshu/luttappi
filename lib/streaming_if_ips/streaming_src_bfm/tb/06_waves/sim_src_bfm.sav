@@ -1,0 +1,42 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Thu Oct 19 13:29:35 2017
+[*]
+[dumpfile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_src_bfm/tb/myhdl_work/sim_src_bfm.vcd"
+[dumpfile_mtime] "Thu Oct 19 13:28:05 2017"
+[dumpfile_size] 7447
+[savefile] "/home/skr/embedded_fs/rfs_e95_03032017/home/root/ecco95_meta3/sr_fpga_v2/blocks_myhdl/smr_streaming_src_bfm/tb/06_waves/sim_src_bfm.sav"
+[timestart] 0
+[size] 1855 1024
+[pos] 545 53
+*-8.191455 873 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sim_src_bfm.
+[sst_width] 225
+[signals_width] 248
+[sst_expanded] 1
+[sst_vpaned_height] 354
+@28
+sim_src_bfm.clkgen.elapsed_time
+sim_src_bfm.clkgen.cycle_count
+sim_src_bfm.src_bfm_inst.reset
+sim_src_bfm.src_bfm_inst.clk
+@22
+sim_src_bfm.v_pattern
+@28
+sim_src_bfm.r_pattern
+@22
+sim_src_bfm.src_bfm_inst.shift_vld[15:0]
+@28
+sim_src_bfm.src_bfm_inst.en_shift_vld
+@22
+sim_src_bfm.src_bfm_inst.src_bfm_i_data_i[7:0]
+@28
+sim_src_bfm.src_bfm_inst.aso_src_valid_o
+sim_src_bfm.src_bfm_inst.aso_src_startofpacket_o
+sim_src_bfm.src_bfm_inst.aso_src_ready_i
+@22
+sim_src_bfm.src_bfm_inst.aso_src_endofpacket_o
+@23
+sim_src_bfm.src_bfm_inst.aso_src_data_o[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
