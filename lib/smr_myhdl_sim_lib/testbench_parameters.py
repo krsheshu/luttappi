@@ -1,12 +1,21 @@
 import re, sys
 
+class Valid():
+  def __init__(self):
+    self.pattern0=0xabcd
+    self.pattern1=0x1234
+    self.pattern2=0xa1b4
+    self.pattern3=0x1f6b
+
 class testbench_parameters(object):
   output_dir = ""
   pattern_dir = ""
-  valid = 0
+  valid = Valid()
   ready = 0
   nb_frames = 0
   config_file = ""
+
+  
 
 # The class "constructor" - It's actually an initializer
   def __init__(self, output_dir, pattern_dir, valid, ready, nb_frames, config_file):

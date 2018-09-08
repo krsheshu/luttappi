@@ -5,11 +5,11 @@ from streaming_ip_a import streaming_ip_a_top
 class StreamingSimpleLoadPars():
   def __init__(self):
     """ simple load pars """
-    self.SNK_SYMBOL_WIDTH=32
-    self.SRC_SYMBOL_WIDTH=32
+    self.SNK_DATAWIDTH=32
+    self.SRC_DATAWIDTH=32
   def __call__(self, pars):
-    self.SNK_SYMBOL_WIDTH   = pars.SNK_SYMBOL_WIDTH
-    self.SRC_SYMBOL_WIDTH   = pars.SRC_SYMBOL_WIDTH
+    self.SNK_DATAWIDTH   = pars.SNK_DATAWIDTH
+    self.SRC_DATAWIDTH   = pars.SRC_DATAWIDTH
 
 class StreamingSimpleLoad():
   """ StreamingSimpleLoad Top """
@@ -19,8 +19,8 @@ class StreamingSimpleLoad():
   def block_connect(pars, reset, clk, av_snk, av_src ):
     """ simple load block"""
  
-    av_snk_if = AvalonST_SNK(pars.SNK_SYMBOL_WIDTH)
-    av_src_if = AvalonST_SRC(pars.SRC_SYMBOL_WIDTH)
+    av_snk_if = AvalonST_SNK(pars.SNK_DATAWIDTH)
+    av_src_if = AvalonST_SRC(pars.SRC_DATAWIDTH)
  
     @always_comb
     def signal_assignments():

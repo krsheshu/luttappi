@@ -3,13 +3,13 @@ import myhdl
 class StreamingSimpleModSubPars():
   def __init__(self):
     """ simple modsub pars """
-    self.SNK0_SYMBOL_WIDTH=32
-    self.SNK1_SYMBOL_WIDTH=32
-    self.SRC_SYMBOL_WIDTH=32
+    self.SNK0_DATAWIDTH=32
+    self.SNK1_DATAWIDTH=32
+    self.SRC_DATAWIDTH=32
   def __call__(self, pars):
-    self.SNK0_SYMBOL_WIDTH   = pars.SNK0_SYMBOL_WIDTH
-    self.SNK1_SYMBOL_WIDTH   = pars.SNK1_SYMBOL_WIDTH
-    self.SRC_SYMBOL_WIDTH    = pars.SRC_SYMBOL_WIDTH
+    self.SNK0_DATAWIDTH   = pars.SNK0_DATAWIDTH
+    self.SNK1_DATAWIDTH   = pars.SNK1_DATAWIDTH
+    self.SRC_DATAWIDTH    = pars.SRC_DATAWIDTH
 
 class StreamingSimpleModSub():
   """ StreamingSimpleModSub Top """
@@ -21,9 +21,9 @@ class StreamingSimpleModSub():
 
   data_enable_o=Signal(bool(0))
 
-  av_snk0_if = AvalonST_SNK(pars.SNK0_SYMBOL_WIDTH)
-  av_snk1_if = AvalonST_SNK(pars.SNK1_SYMBOL_WIDTH)
-  av_src_if = AvalonST_SRC(pars.SRC_SYMBOL_WIDTH)
+  av_snk0_if = AvalonST_SNK(pars.SNK0_DATAWIDTH)
+  av_snk1_if = AvalonST_SNK(pars.SNK1_DATAWIDTH)
+  av_src_if = AvalonST_SRC(pars.SRC_DATAWIDTH)
 
 
   @always_comb
