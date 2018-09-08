@@ -17,7 +17,6 @@ sys.path.append(myhdl_base)
 from scr_myhdl_lib_paths import set_myhdl_lib_paths 
 # setup paths in myhdl lib
 set_myhdl_lib_paths()
-from gen_pattern import gen_pattern_core
 from testbench_parameters import testbench_parameters, pass_testbench
 from myhdl_design_flow_libs import myhdl_module
 
@@ -51,7 +50,7 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
   cwd=os.getcwd()
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
-  pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames)
+  pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames, None)
   tb=traceSignals(sim_streaming_ip_wire,pars_obj)
   sim=Simulation(tb)
   if (sim_time is None):
