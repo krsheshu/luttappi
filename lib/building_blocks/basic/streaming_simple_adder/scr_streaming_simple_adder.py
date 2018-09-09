@@ -11,8 +11,8 @@ from subprocess import call
 
 #------------Project General Module Imports----------#
 current_dir=os.getcwd()
-myhdl_base=os.path.join(current_dir,"..")     #path to myhdl_base
-sys.path.append(myhdl_base)
+#myhdl_base=os.path.join(current_dir,"../../")     #path to myhdl_base
+#sys.path.append(myhdl_base)
 #import myhdl library
 from scr_myhdl_lib_paths import set_myhdl_lib_paths 
 # setup paths in myhdl lib
@@ -24,7 +24,7 @@ from myhdl_design_flow_libs import myhdl_module
 inst=myhdl_module(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
-from tb.sim_streaming_simple_adder import sim_streaming_simple_adder, check_simulation_results
+from sim_streaming_simple_adder import sim_streaming_simple_adder, check_simulation_results
 #from streaming_simple_adder_convert import streaming_simple_adder_convert
 
 #------script parameters------#
@@ -42,7 +42,6 @@ vcd_file="{:s}/{:s}{:s}".format(inst.sim_temp_dir, TB_NAME, inst.sim_vcd_file_ex
 sav_file = "{:s}/{:s}{:s}".format(inst.sim_wave_dirname, TB_NAME, inst.saved_vcd_file_ext)
 qpf_file="{:s}/{:s}{:s}".format(inst.synthesis_dirname, SYNTHESIS_TOP, inst.synthesis_proj_file_ext)
 sv_sim_scr="{:s}/{:s}/{:s}".format(inst.sim_hdl_dirname, inst.sim_hdl_scr_dirname, SV_SIM_HDL_SCR)
-
 
 #------Local specific functions------#
 def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_frames,sim_time=None):

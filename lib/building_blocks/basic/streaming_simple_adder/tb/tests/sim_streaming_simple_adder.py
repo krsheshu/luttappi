@@ -8,6 +8,7 @@ from clk_driver import clk_driver
 
 from streaming_simple_adder import StreamingSimpleAdderPars, StreamingSimpleAdder
 
+
 MAX_SIM_TIME = 10000
 MAX_NB_TRANSFERS=32
 trans_data = []
@@ -40,9 +41,8 @@ def sim_streaming_simple_adder(pars_obj):
   add_pars.SNK0_DATA_WIDTH=DATA_WIDTH
   add_pars.SNK1_DATA_WIDTH=DATA_WIDTH
   add_pars.SRC_DATA_WIDTH=DATA_WIDTH
-  #add_pars(add_pars)
+  add_pars(add_pars)
   add_i=StreamingSimpleAdder()
-  print add_pars
   src0_bfm_inst = src_bfm(reset, clk, pars_obj.valid.pattern0, src_bfm_i, av_src0_bfm)
   
   src1_bfm_inst = src_bfm(reset, clk, pars_obj.valid.pattern1, src_bfm_i, av_src1_bfm)
