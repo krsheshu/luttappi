@@ -90,9 +90,9 @@ def myhdl_module_cli():
     inst.convert_settings_defaults(inst.converted_hdl_dir)
     #streaming_simple_adder_convert()
   if args.simulate:
-    #valid.pattern0 = DEF_VALID_READY
-    #valid.pattern1= DEF_VALID_READY 
-    #ready_pattern = DEF_VALID_READY
+    valid.pattern0 = DEF_VALID_READY
+    valid.pattern1= DEF_VALID_READY 
+    ready_pattern = DEF_VALID_READY
     sim_time = DEFAULT_SIM_TIME
     inst.remove_temp_files(inst.sim_temp_dir)       # remove previous files
     if args.valid0:

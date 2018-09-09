@@ -2,3 +2,5 @@ tags
 *.orig
 converted_hdl/
 *.swp
+*.pyc
+myhdl_work/
