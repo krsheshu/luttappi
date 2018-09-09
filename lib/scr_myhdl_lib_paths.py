@@ -6,10 +6,10 @@ import sys
 
 def set_myhdl_lib_paths():
   print "setting the path to simulation library"
-  sys.path.append(os.path.join(os.path.dirname(__file__), "smr_myhdl_sim_lib/"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "bridge_libs/"))
   print "setting the paths of the myhdl library"
-  sys.path.append(os.path.join(os.path.dirname(__file__), "smr_pkg/"))
-  sys.path.append(os.path.join(os.path.dirname(__file__), "smr_pkg/clock_driver/myhdl"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "packages/"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "packages/clock_driver/myhdl"))
   print "setting the paths of the building blocks"
   sys.path.append(os.path.join(os.path.dirname(__file__), "building_blocks/basic"))
   sys.path.append(os.path.join(os.path.dirname(__file__), "building_blocks/level_1"))
