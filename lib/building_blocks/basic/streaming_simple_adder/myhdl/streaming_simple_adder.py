@@ -28,7 +28,6 @@ class StreamingSimpleAdder():
     av_snk1_if = AvalonST_SNK(pars.SNK1_DATAWIDTH)
     av_src_if = AvalonST_SRC(pars.SRC_DATAWIDTH)
 
-
     @always_comb
     def signal_assignments():
       av_snk0_if.valid_i.next=av_snk0.valid_i

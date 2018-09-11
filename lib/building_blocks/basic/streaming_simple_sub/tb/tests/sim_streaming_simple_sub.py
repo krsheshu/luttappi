@@ -6,7 +6,7 @@ from src_bfm import src_bfm
 from snk_bfm import snk_bfm
 from clk_driver import clk_driver
 
-from streaming_simple_adder import StreamingSimpleAdderPars, StreamingSimpleAdder
+from streaming_simple_sub import StreamingSimpleSubPars, StreamingSimpleSub
 
 
 MAX_SIM_TIME = 10000
@@ -17,7 +17,7 @@ ready_pulses=intbv(0)
 nb1=0 # A global currently inevitable
 nb2=0 # A global currently inevitable
 
-def sim_streaming_simple_adder(pars_obj):
+def sim_streaming_simple_sub(pars_obj):
   PATTERN_WIDTH = 16
   DATA_WIDTH = 8
    
@@ -37,17 +37,17 @@ def sim_streaming_simple_adder(pars_obj):
   
   clkgen=clk_driver(elapsed_time,clk,period=20)
 
-  add_pars=StreamingSimpleAdderPars()
-  add_pars.SNK0_DATA_WIDTH=DATA_WIDTH
-  add_pars.SNK1_DATA_WIDTH=DATA_WIDTH
-  add_pars.SRC_DATA_WIDTH=DATA_WIDTH
-  add_pars(add_pars)
-  add_i=StreamingSimpleAdder()
+  sub_pars=StreamingSimpleSubPars()
+  sub_pars.SNK0_DATA_WIDTH=DATA_WIDTH
+  sub_pars.SNK1_DATA_WIDTH=DATA_WIDTH
+  sub_pars.SRC_DATA_WIDTH=DATA_WIDTH
+  sub_pars(sub_pars)
+  sub_i=StreamingSimpleSub()
   src0_bfm_inst = src_bfm(reset, clk, pars_obj.valid.pattern0, src_bfm_i, av_src0_bfm)
   
   src1_bfm_inst = src_bfm(reset, clk, pars_obj.valid.pattern1, src_bfm_i, av_src1_bfm)
 
-  streaming_simple_adder_inst = add_i.block_connect(add_pars, reset, clk, av_snk0, av_snk1, av_src)
+  streaming_simple_sub_inst = sub_i.block_connect(sub_pars, reset, clk, av_snk0, av_snk1, av_src)
 
   snk_bfm_inst = snk_bfm(reset, clk, pars_obj.ready, av_snk_bfm, src_bfm_o)
 
@@ -134,7 +134,7 @@ def check_simulation_results(pars_obj):
   print "Transmitted data: ", str(trans_data)
   print "Received data: ", str(recv_data)
   print "Num ready pulses: ", str(ready_pulses)
-  print "Operation intended: Addition"
+  print "Operation intended: Subtraction"
   trans_l=len(trans_data)
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
@@ -146,13 +146,13 @@ def check_simulation_results(pars_obj):
     print "Total num transmitted data= %d" % trans_l  
     print "Total num received data= %d" % recv_l 
     for i in range(0,len(trans_data)):
-      if ((trans_data[i] + trans_data[i] ) != recv_data[i]):
+      if ((trans_data[i] - trans_data[i] ) != recv_data[i]):
         print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
         err_cnt+=1
     if (err_cnt):
       print "ERR134: Results not Matched. Simulation unsuccessful!"
     else:
-      print "Receive and transmit data exactly matches for addition..." 
+      print "Receive and transmit data exactly matches for subtraction..." 
       print "Simulation Successful!"
 
 

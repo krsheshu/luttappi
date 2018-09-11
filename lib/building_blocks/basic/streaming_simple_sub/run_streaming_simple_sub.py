@@ -21,14 +21,14 @@ from myhdl_bridge_lib import MyhdlBridgeLib
 inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
-from sim_streaming_simple_adder import sim_streaming_simple_adder, check_simulation_results
-#from streaming_simple_adder_convert import streaming_simple_adder_convert
+from sim_streaming_simple_sub import sim_streaming_simple_sub, check_simulation_results
+#from streaming_simple_sub_convert import streaming_simple_sub_convert
 
 #------script parameters------#
 DEF_VALID_READY=0xffff
 DEFAULT_SIM_TIME=2000
-TB_NAME = 'sim_streaming_simple_adder'           # test file
-SYNTHESIS_TOP = 'syn_streaming_simple_adder_top' # synthesis top level
+TB_NAME = 'sim_streaming_simple_sub'           # test file
+SYNTHESIS_TOP = 'syn_streaming_simple_sub_top' # synthesis top level
 
 #-------- systemverilog testbench script name.........#
 SV_SIM_HDL_SCR = 'nrt01_fixed_valid_ready.sh'
@@ -47,7 +47,7 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
   pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames,None)
-  tb=traceSignals(sim_streaming_simple_adder,pars_obj)
+  tb=traceSignals(sim_streaming_simple_sub,pars_obj)
   sim=Simulation(tb)
   if (sim_time is None):
     sim.run()
@@ -84,7 +84,7 @@ def myhdl_module_cli():
   nb_frames=1
   if args.convert:
     inst.convert_settings_defaults(inst.converted_hdl_dir)
-    #streaming_simple_adder_convert()
+    #streaming_simple_sub_convert()
   if args.simulate:
     valid.pattern0 = DEF_VALID_READY
     valid.pattern1= DEF_VALID_READY 
