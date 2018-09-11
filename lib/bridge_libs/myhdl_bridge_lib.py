@@ -3,13 +3,12 @@ import os
 import sys
 from myhdl import traceSignals
 import shutil
-from testbench_parameters import testbench_parameters, pass_testbench
 from subprocess import call
 from myhdl import toVerilog
 from myhdl.conversion import analyze
 
 
-class rel_paths:
+class RelPaths:
   algo_model_base_dirname = '../../almo/pcog_gen/'
   test_image_gen_base_dirname = '../../almo/image_generation_pgm/'
   algo_model_config_dirname = 'config_files'
@@ -31,7 +30,7 @@ class rel_paths:
   synthesis_proj_file_ext = '.qpf'
 
 
-class abs_paths:
+class AbsPaths:
   src_code_dir=''
   sim_tb_dir=''
   converted_hdl_dir=''
@@ -41,7 +40,7 @@ class abs_paths:
   config_file=''
 
 
-class myhdl_module(rel_paths,abs_paths):
+class MyhdlBridgeLib(RelPaths,AbsPaths):
 
   def sim_defaults(self,simulation_temp_dir_abs):
     traceSignals.directory = simulation_temp_dir_abs
@@ -80,22 +79,22 @@ class myhdl_module(rel_paths,abs_paths):
     call(['sh', "{:s}".format(script_path), "{:s}".format(file_path)])
     call(['mv', "gen_img.txt", "{:s}".format(testbench_dir_path)])
 
-  def __init__(self,current_dir):
+  def __init__(self,base_dir):
     #local module paths
-    self.src_code_dir = os.path.join(current_dir, "{:s}".format(self.src_code_dirname))
+    self.src_code_dir = os.path.join(base_dir, "{:s}".format(self.src_code_dirname))
     sys.path.append(self.src_code_dir)
-    self.sim_tb_dir=os.path.join(current_dir, "{:s}".format(self.sim_tb_dirname))
+    self.sim_tb_dir=os.path.join(base_dir, "{:s}".format(self.sim_tb_dirname))
     sys.path.append(self.sim_tb_dir)
-    self.converted_hdl_dir = os.path.join(current_dir, "{:s}".format(self.converted_hdl_dirname))
+    self.converted_hdl_dir = os.path.join(base_dir, "{:s}".format(self.converted_hdl_dirname))
     if not os.path.exists(self.converted_hdl_dir):
       os.makedirs(self.converted_hdl_dir)
-    self.sim_temp_dir = os.path.join(current_dir, "{:s}".format(self.sim_temp_dirname))
+    self.sim_temp_dir = os.path.join(base_dir, "{:s}".format(self.sim_temp_dirname))
     if not os.path.exists(self.sim_temp_dir):
       os.makedirs(self.sim_temp_dir)
-    self.sim_pattern_dir=os.path.join(current_dir, "{:s}/{:s}".format(self.sim_temp_dirname,self.sim_pattern_dirname))
+    self.sim_pattern_dir=os.path.join(base_dir, "{:s}/{:s}".format(self.sim_temp_dirname,self.sim_pattern_dirname))
     if not os.path.exists(self.sim_pattern_dir):
       os.makedirs(self.sim_pattern_dir)
-    self.sim_wave_dir=os.path.join(current_dir, "{:s}".format(self.sim_wave_dirname))
+    self.sim_wave_dir=os.path.join(base_dir, "{:s}".format(self.sim_wave_dirname))
     if not os.path.exists(self.sim_wave_dir):
       os.makedirs(self.sim_wave_dir)
 

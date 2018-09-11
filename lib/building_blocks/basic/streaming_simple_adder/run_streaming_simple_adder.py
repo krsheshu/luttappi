@@ -6,22 +6,19 @@ import argparse
 from myhdl import toVerilog, traceSignals, Simulation
 from myhdl.conversion import analyze
 from subprocess import call
-#set paths for the required modules
 
 
 #------------Project General Module Imports----------#
+#set paths for the required modules
 current_dir=os.getcwd()
-#myhdl_base=os.path.join(current_dir,"../../")     #path to myhdl_base
-#sys.path.append(myhdl_base)
-#import myhdl library
-from scr_myhdl_lib_paths import set_myhdl_lib_paths 
+from scr.set_myhdl_lib_paths import set_myhdl_lib_paths 
 # setup paths in myhdl lib
 set_myhdl_lib_paths()
-from testbench_parameters import testbench_parameters, pass_testbench, Valid
-from myhdl_design_flow_libs import myhdl_module
+from testbench_parameters import pass_testbench, Valid
+from myhdl_bridge_lib import MyhdlBridgeLib
 
 #---Creating a myhdl module instance with all dir and set path information to all files----#
-inst=myhdl_module(current_dir)
+inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
 from sim_streaming_simple_adder import sim_streaming_simple_adder, check_simulation_results
