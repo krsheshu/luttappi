@@ -16,7 +16,6 @@ def vector_to_array(data_width, index, input_vector, output_array):
   return vector_to_array_process
 
 def simple_wire_assign(dout,din):
-  #print "in wire assign"
   @always_comb
   def simple_wire_assign_process():
     dout.next = din
@@ -24,20 +23,38 @@ def simple_wire_assign(dout,din):
       pass
   return simple_wire_assign_process
 
-def simple_reg_assign(reset,clk,dout,din):
+
+def conditional_wire_assign(dout, condition, inp1, inp2):
+  @always_comb
+  def conditional_wire_assign_process():
+    dout.next = inp1 if (condition == 1) else inp2
+    if __debug__:   # to create a reg keyword in verilog 
+      pass
+  return conditional_wire_assign_process
+
+
+def simple_reg_assign(reset, clk, dout, reset_val, din):
   @always(clk.posedge, reset.posedge)
   def simple_reg_assign_process():
     if(reset==1):
-      dout.next = 0
+      dout.next = reset_val
     else:
-      dout.next = din
+      dout.next = din 
   return simple_reg_assign_process
 
-def conditional_reg_assign(reset,clk,dout,din,condition):
+
+def conditional_reg_assign(reset, clk, dout, reset_val, inp1, condition):
   @always(clk.posedge, reset.posedge)
   def conditional_reg_assign_process():
     if(reset==1):
-      dout.next = 0
+      dout.next = reset_val
     elif (condition == 1):
-      dout.next = din
+      dout.next = inp1
   return conditional_reg_assign_process
+
+def conditional_clocked_append(reset, clk, out, inp1, condition):
+  @always(clk.posedge, reset.posedge)
+  def conditional_clocked_append_process():
+    if (condition == 1):
+      out.append(inp1)
+  return conditional_clocked_append_process

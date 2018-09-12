@@ -10,6 +10,7 @@ class StreamingChainAdderPars():
     self.SNK0_DATAWIDTH=32
     self.SNK1_DATAWIDTH=32
     self.SRC_DATAWIDTH=32
+    self.a=0
   def __call__(self, pars):
     self.NB_CHAIN_ADDERS=pars.NB_CHAIN_ADDERS
     self.SNK0_DATAWIDTH   = pars.SNK0_DATAWIDTH
@@ -24,8 +25,6 @@ class StreamingChainAdder():
 
   def block_connect(self, pars, reset, clk, av_snk0, av_snk1, av_src):
     """ streaming_simple adder block"""
-
-    data_enable_o=Signal(bool(0))
 
     av_snk0_if  = [AvalonST_SNK(pars.SNK0_DATAWIDTH) for i in range(pars.NB_CHAIN_ADDERS)]
     av_snk1_if  = [AvalonST_SNK(pars.SNK1_DATAWIDTH) for i in range(pars.NB_CHAIN_ADDERS)]
@@ -50,12 +49,15 @@ class StreamingChainAdder():
 
     for i in range(pars.NB_CHAIN_ADDERS):
       snk0_valid_inst[i]  = simple_wire_assign(av_snk0_if[i].valid_i, av_snk0[i].valid_i)
+      snk0_data_inst[i]   = simple_wire_assign(av_snk0_if[i].data_i, av_snk0[i].data_i)
       snk0_ready_inst[i]  = simple_wire_assign(av_snk0[i].ready_o, av_snk0_if[i].ready_o)
 
       snk1_valid_inst[i]  = simple_wire_assign(av_snk1_if[i].valid_i , av_snk1[i].valid_i)
+      snk1_data_inst[i]   = simple_wire_assign(av_snk1_if[i].data_i , av_snk1[i].data_i)
       snk1_ready_inst[i]  = simple_wire_assign(av_snk1_if[i].valid_i , av_snk1[i].valid_i)
 
       src_valid_inst[i]   = simple_wire_assign(av_src[i].valid_o , av_src_if[i].valid_o)
+      src_data_inst[i]    = simple_wire_assign(av_src[i].data_o , av_src_if[i].data_o)
       src_ready_inst[i]   = simple_wire_assign(av_src_if[i].ready_i , av_src[i].ready_i)
 
   
