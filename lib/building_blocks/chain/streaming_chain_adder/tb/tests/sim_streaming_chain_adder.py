@@ -18,7 +18,7 @@ NB_CHAIN_ADDERS = 10
 STREAM_DATA_WIDTH = 16
  
 txdata_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
-rxdata_filename   = [ [] for i in range(NB_CHAIN_ADDERS)]
+rxdata_filename   = [ "" for i in range(NB_CHAIN_ADDERS)]
 ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
 
 
