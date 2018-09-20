@@ -144,10 +144,10 @@ def sim_streaming_chain_adder(pars_obj):
   
   #Dataout is just an increment (for next valid data)
   for i in range(NB_CHAIN_ADDERS):
-    #data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
-                              #(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
-    data_in_inst[i] = conditional_reg_assign( reset, clk, data_in[i], int(INIT_DATA[i]),  
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ), (data_in[i] + 1))       
+    data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
+    #data_in_inst[i] = conditional_reg_assign( reset, clk, data_in[i], int(INIT_DATA[i]),  
+    #                          (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ), (data_in[i] + 1))       
     nb_transmit_inst[i] = conditional_reg_counter( reset, clk, nb_transmit[i], Reset.LOW, 
                               (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
     transmit_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
