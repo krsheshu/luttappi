@@ -1,5 +1,9 @@
 from myhdl import always_comb,always
 
+class Reset():
+  LOW=0 
+  HIGH=1 
+
 #ceil of the log base 2
 def CLogB2(x):
   if x < 2:
@@ -24,10 +28,10 @@ def simple_wire_assign(dout,din):
   return simple_wire_assign_process
 
 
-def conditional_wire_assign(dout, condition, inp1, inp2):
+def conditional_wire_assign(dout, condition, din1, din2):
   @always_comb
   def conditional_wire_assign_process():
-    dout.next = inp1 if (condition == 1) else inp2
+    dout.next = din1 if (condition == 1) else din2
     if __debug__:   # to create a reg keyword in verilog 
       pass
   return conditional_wire_assign_process
@@ -39,22 +43,45 @@ def simple_reg_assign(reset, clk, dout, reset_val, din):
     if(reset==1):
       dout.next = reset_val
     else:
-      dout.next = din 
+      dout.next = din
   return simple_reg_assign_process
 
 
-def conditional_reg_assign(reset, clk, dout, reset_val, inp1, condition):
+def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
   @always(clk.posedge, reset.posedge)
   def conditional_reg_assign_process():
     if(reset==1):
       dout.next = reset_val
     elif (condition == 1):
-      dout.next = inp1
+      dout.next = din
+      print(din) 
   return conditional_reg_assign_process
 
-def conditional_clocked_append(reset, clk, out, inp1, condition):
+def conditional_clocked_append(reset, clk, out, condition, inp):
   @always(clk.posedge, reset.posedge)
   def conditional_clocked_append_process():
     if (condition == 1):
-      out.append(inp1)
+      print(inp)
+      print(out)
+      out.append(inp)
+      print(out)
   return conditional_clocked_append_process
+
+def conditional_reg_counter(reset, clk, counter, reset_val, condition):
+  @always(clk.posedge, reset.posedge)
+  def conditional_reg_counter_process():
+    if(reset==1):
+      counter.next = reset_val
+    elif (condition == 1):
+      counter.next = counter + 1
+  return conditional_reg_counter_process
+
+def conditional_clocked_appendfile(reset, clk, condition, inp, filename):
+  @always(clk.posedge, reset.posedge)
+  def conditional_clocked_appendfile_process():
+    if (condition == 1):
+      #print inp
+      fp=open(filename,"a")
+      fp.write("{:d}\n".format(int(inp)))
+      fp.close()
+  return conditional_clocked_appendfile_process

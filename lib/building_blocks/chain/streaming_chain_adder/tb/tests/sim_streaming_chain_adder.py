@@ -1,11 +1,12 @@
-import sys
+import sys, os
 from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation
 from avalon_buses import AvalonMM, AvalonST_SNK, AvalonST_SRC
 from streaming_ip_a import streaming_ip_a_top
 from src_bfm import src_bfm
 from snk_bfm import snk_bfm
 from clk_driver import clk_driver
-from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, CLogB2, conditional_reg_assign, conditional_clocked_append
+from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, conditional_clocked_appendfile 
+from common_functions import CLogB2, conditional_reg_assign, conditional_clocked_append, conditional_reg_counter,Reset
 
 from streaming_chain_adder import StreamingChainAdderPars, StreamingChainAdder
 
@@ -13,31 +14,43 @@ from streaming_chain_adder import StreamingChainAdderPars, StreamingChainAdder
 MAX_SIM_TIME = 10000
 MAX_NB_TRANSFERS=Signal(int(32))
 
-NB_CHAIN_ADDERS = 2 
+NB_CHAIN_ADDERS = 2
+STREAM_DATA_WIDTH = 16
  
 trans_data  = [ [] for i in range(NB_CHAIN_ADDERS)]
+txdata_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
 recv_data   = [ [] for i in range(NB_CHAIN_ADDERS)]
-ready_pulses=intbv(0)
+rxdata_filename   = [ [] for i in range(NB_CHAIN_ADDERS)]
+ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
+
 
 def sim_streaming_chain_adder(pars_obj):
-  PATTERN_WIDTH = 16
-  DATA_WIDTH    = 8
+  # removing the files if already available 
+  for i in range(NB_CHAIN_ADDERS):
+    txdata_filename[i]="transmit_data_{:d}.log".format(i) 
+    if (os.path.exists(txdata_filename[i])):
+      os.remove(txdata_filename[i]) 
+    rxdata_filename[i]="receive_data_{:d}.log".format(i) 
+    if (os.path.exists(rxdata_filename[i])):
+      os.remove(rxdata_filename[i]) 
  
   reset = Signal(bool(1))
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
   
-  nb_transmit=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]  # A global currently inevitable
-  nb_receive=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]  # A global currently inevitable
+  nb_transmit=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
+  nb_receive=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]  
   
-  av_src0_bfm = [AvalonST_SRC(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_src1_bfm = [AvalonST_SRC(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_snk0     = [AvalonST_SNK(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_snk1     = [AvalonST_SNK(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_src      = [AvalonST_SRC(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_snk_bfm  = [AvalonST_SNK(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_i   = [AvalonST_SNK(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_o   = [AvalonST_SRC(DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_src0_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_src1_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_snk0     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_snk1     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_src      = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_snk_bfm  = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_i   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_0   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_1   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_o   = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
 
   clkgen=clk_driver(elapsed_time,clk,period=20)
 
@@ -58,9 +71,9 @@ def sim_streaming_chain_adder(pars_obj):
     snk_bfm_inst[i] = snk_bfm(reset, clk, pars_obj.ready, av_snk_bfm[i], src_bfm_o[i])
     
   add_pars=StreamingChainAdderPars()
-  add_pars.SNK0_DATAWIDTH=DATA_WIDTH
-  add_pars.SNK1_DATAWIDTH=DATA_WIDTH
-  add_pars.SRCD_ATAWIDTH=DATA_WIDTH
+  add_pars.SNK0_DATAWIDTH=STREAM_DATA_WIDTH
+  add_pars.SNK1_DATAWIDTH=STREAM_DATA_WIDTH
+  add_pars.SRCD_ATAWIDTH=STREAM_DATA_WIDTH
   add_pars.NB_CHAIN_ADDERS=NB_CHAIN_ADDERS
   add_pars(add_pars)
   add_i=StreamingChainAdder()
@@ -103,59 +116,52 @@ def sim_streaming_chain_adder(pars_obj):
       reset.next = 0
 
 
-  src_bfm_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  for i in range(NB_CHAIN_ADDERS): 
-    src_bfm_valid_inst[i]= conditional_wire_assign(src_bfm_i[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
-  
-
-  INIT_DATA=1
+  INIT_DATA=[ 10 for i in range(NB_CHAIN_ADDERS)]
+  for i in range(NB_CHAIN_ADDERS):
+    INIT_DATA[i]+=(i*20)   
+ 
   data_in=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
-  
+  src_bfm_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
   src_bfm_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_0_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_1_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_0_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_1_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
   for i in range(NB_CHAIN_ADDERS): 
     src_bfm_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_i[i].data_i) 
+    #src_bfm_0_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_0[i].data_i) 
+    #src_bfm_1_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_1[i].data_i) 
+  for i in range(NB_CHAIN_ADDERS): 
+    src_bfm_valid_inst[i]= conditional_wire_assign(src_bfm_i[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
+    #src_bfm_0_valid_inst[i]= conditional_wire_assign(src_bfm_0[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
+    #src_bfm_1_valid_inst[i]= conditional_wire_assign(src_bfm_1[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
  
   data_in_inst=[None for i in range(NB_CHAIN_ADDERS)]
   nb_transmit_inst=[None for i in range(NB_CHAIN_ADDERS)]
   transmit_data_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  receive_data_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
+
+  
   #Dataout is just an increment (for next valid data)
   for i in range(NB_CHAIN_ADDERS):
-    data_in_inst[i] = conditional_reg_assign( reset, clk, data_in[i], int(INIT_DATA), (data_in[i]+1), 
+    data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
                               (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
-    nb_transmit_inst[i] = conditional_reg_assign( reset, clk, nb_transmit[i], 0, (nb_transmit[i]+1), 
+    nb_transmit_inst[i] = conditional_reg_counter( reset, clk, nb_transmit[i], Reset.LOW, 
                               (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
-    transmit_data_append_inst[i] = conditional_clocked_append( reset, clk, trans_data[i], int(data_in[i]), 
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))
-
-
-  #@always(clk.posedge, reset.posedge)
-  #def transmit_data_clk_process():
-  #  global trans_data
-  #  if (av_src0_bfm[0].ready_i == 1 and av_src0_bfm[0].valid_o == 1 and src_bfm_i[0].valid_i == 1):
-  #    trans_data.append(int(data_in[0]))
+    transmit_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ),  data_in[i], txdata_filename[i])
+    receive_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
+                              (src_bfm_o[i].valid_o),  src_bfm_o[i].data_o, rxdata_filename[i])
   
-  #@always(clk.posedge, reset.posedge)
-  #def transmit_data_clk_process():
-  #  global trans_data
-  #  if reset==1:
-  #    data_in.next = int(INIT_DATA)
-  #    #nb_transmit.next= 0
-  #  elif (av_src0_bfm[0].ready_i == 1 and av_src0_bfm[0].valid_o == 1 and src_bfm_i[0].valid_i == 1):
-  #    nb_transmit.next= nb_transmit+ 1
-  #    #print str(nb_transmit) + ". Transmitted data to src bfm:",  ": ", src_bfm_i[0].data_i 
-  #    trans_data.append(int(data_in))
-  #    data_in.next = data_in + 1
-  
+
   
   @always(clk.posedge)
   def receive_data_process():
-    global recv_data
+    TIME_SHUTDOWN=5000
     if (src_bfm_o[0].valid_o == 1):
       nb_receive[0].next = nb_receive[0] + 1
-      print str(nb_receive[0]) + ". Received data from sink bfm:", ": ", src_bfm_o[0].data_o
-      recv_data.append(int(src_bfm_o[0].data_o))
       sim_time_now=now()
-      if (nb_receive[0] == MAX_NB_TRANSFERS):
+      if (nb_receive[0] == MAX_NB_TRANSFERS): # A better solution maybe to count the number of lines int the receive log file
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
@@ -165,12 +171,9 @@ def sim_streaming_chain_adder(pars_obj):
         raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")  
 
 
-  @always(clk.posedge)
-  def cnt_ready_pulses():
-    global ready_pulses
-    if (av_snk_bfm[0].ready_o == 1):
-      ready_pulses+=1 
-      #print "ready received from bfm" 
+  ready_pulse_cnt_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  for i in range(NB_CHAIN_ADDERS):
+    ready_pulse_cnt_inst[i]=conditional_reg_counter(reset, clk, ready_pulses[i], Reset.LOW, (av_snk_bfm[i].ready_o) )
 
 
   return instances()

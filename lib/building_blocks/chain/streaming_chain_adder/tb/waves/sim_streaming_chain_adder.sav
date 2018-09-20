@@ -1,15 +1,15 @@
 [*]
-[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Wed Sep 12 09:59:21 2018
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Thu Sep 20 11:32:38 2018
 [*]
 [dumpfile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/myhdl_work/sim_streaming_chain_adder.vcd"
-[dumpfile_mtime] "Wed Sep 12 09:56:55 2018"
-[dumpfile_size] 24382
+[dumpfile_mtime] "Thu Sep 20 11:02:45 2018"
+[dumpfile_size] 14894
 [savefile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/waves/sim_streaming_chain_adder.sav"
 [timestart] 0
-[size] 1920 1021
+[size] 1881 1025
 [pos] -1 -1
-*-7.780707 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.978829 10 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] sim_streaming_chain_adder.
 [treeopen] sim_streaming_chain_adder.streaming_chain_adder_inst.
 [sst_width] 439
@@ -18,16 +18,22 @@
 [sst_vpaned_height] 308
 @28
 sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_valid_i
-sim_streaming_chain_adder.nb1
-sim_streaming_chain_adder.condition_sig
 @22
 sim_streaming_chain_adder.streaming_chain_adder_inst.chain_inst_0.av_snk0_data_i[7:0]
-@29
+@28
 sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_valid_i
 @22
 sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_data_i[7:0]
 sim_streaming_chain_adder.src0_bfm_inst_0.av_src_data_o[7:0]
 @28
 sim_streaming_chain_adder.src0_bfm_inst_0.av_src_valid_o
+sim_streaming_chain_adder.data_in.data_in(0)
+sim_streaming_chain_adder.data_in.data_in(1)
+@22
+sim_streaming_chain_adder.streaming_chain_adder_inst.snk1_data_inst_1.dout[7:0]
+@28
+sim_streaming_chain_adder.transmit_data_append_inst_1.reset
+sim_streaming_chain_adder.clk
+sim_streaming_chain_adder.data_in_sig.data_in_sig(0)
 [pattern_trace] 1
 [pattern_trace] 0
