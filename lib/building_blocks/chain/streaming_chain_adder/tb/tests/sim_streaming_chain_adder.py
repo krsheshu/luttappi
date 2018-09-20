@@ -144,8 +144,10 @@ def sim_streaming_chain_adder(pars_obj):
   
   #Dataout is just an increment (for next valid data)
   for i in range(NB_CHAIN_ADDERS):
-    data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
+    #data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
+                              #(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
+    data_in_inst[i] = conditional_reg_assign( reset, clk, data_in[i], int(INIT_DATA[i]),  
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ), (data_in[i] + 1))       
     nb_transmit_inst[i] = conditional_reg_counter( reset, clk, nb_transmit[i], Reset.LOW, 
                               (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
     transmit_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
@@ -161,7 +163,7 @@ def sim_streaming_chain_adder(pars_obj):
     if (src_bfm_o[0].valid_o == 1):
       nb_receive[0].next = nb_receive[0] + 1
       sim_time_now=now()
-      if (nb_receive[0] == MAX_NB_TRANSFERS): # A better solution maybe to count the number of lines int the receive log file
+      if (nb_receive[0] == MAX_NB_TRANSFERS): # A better solution maybe to count the number of lines in the receive log file
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
@@ -180,7 +182,19 @@ def sim_streaming_chain_adder(pars_obj):
 
 
 def check_simulation_results(pars_obj):
-  global trans_data,recv_data,ready_pulses
+
+  for i in range(NB_CHAIN_ADDERS):
+    if (os.path.exists(txdata_filename[i]) == False):
+      print "ERR186: Error finding file!" + txdata_filename[i] 
+    else:
+      print "INF186: Found transmit file: " + txdata_filename[i] 
+    if (os.path.exists(rxdata_filename[i]) == False):
+      print "ERR186: Error finding file!" + rxdata_filename[i] 
+    else:
+      print "INF186: Found receive file: " + rxdata_filename[i] 
+
+
+
   err_cnt=0
   trans_l=0
   net_trans_l=0
