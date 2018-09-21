@@ -5,7 +5,7 @@ from streaming_ip_a import streaming_ip_a_top
 from src_bfm import src_bfm
 from snk_bfm import snk_bfm
 from clk_driver import clk_driver
-from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, conditional_clocked_appendfile 
+from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, conditional_clocked_appendfile, conditional_wire_assign_lt
 from common_functions import CLogB2, conditional_reg_assign, conditional_clocked_append, conditional_reg_counter,Reset
 
 from streaming_chain_adder import StreamingChainAdderPars, StreamingChainAdder
@@ -114,7 +114,7 @@ def sim_streaming_chain_adder(pars_obj):
       reset.next = 0
 
 
-  INIT_DATA=[ 10 for i in range(NB_CHAIN_ADDERS)]
+  INIT_DATA=[10 for i in range(NB_CHAIN_ADDERS)]
   for i in range(NB_CHAIN_ADDERS):
     INIT_DATA[i]+=(i*20)   
  
@@ -130,7 +130,7 @@ def sim_streaming_chain_adder(pars_obj):
     #src_bfm_0_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_0[i].data_i) 
     #src_bfm_1_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_1[i].data_i) 
   for i in range(NB_CHAIN_ADDERS): 
-    src_bfm_valid_inst[i]= conditional_wire_assign(src_bfm_i[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
+    src_bfm_valid_inst[i]= conditional_wire_assign_lt(src_bfm_i[i].valid_i, nb_transmit[i], Signal(MAX_NB_TRANSFERS), 1, 0) 
     #src_bfm_0_valid_inst[i]= conditional_wire_assign(src_bfm_0[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
     #src_bfm_1_valid_inst[i]= conditional_wire_assign(src_bfm_1[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
  
@@ -161,7 +161,9 @@ def sim_streaming_chain_adder(pars_obj):
     if (src_bfm_o[0].valid_o == 1):
       nb_receive[0].next = nb_receive[0] + 1
       sim_time_now=now()
-      if (nb_receive[0] == MAX_NB_TRANSFERS): # A better solution maybe to count the number of lines in the receive log file
+      if (nb_receive[0] == MAX_NB_TRANSFERS-1): # A better solution maybe to count the number of lines in the receive log file
+        for i in range(NB_CHAIN_ADDERS):
+          print "INF240: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses[i])) 
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
@@ -183,6 +185,7 @@ def check_simulation_results(pars_obj):
   trans_data0  = [ [] for i in range(NB_CHAIN_ADDERS)]
   trans_data1  = [ [] for i in range(NB_CHAIN_ADDERS)]
   recv_data   = [ [] for i in range(NB_CHAIN_ADDERS)]
+  #global ready_pulses
   
   for i in range(NB_CHAIN_ADDERS):
     if (os.path.exists(txdata_filename[i]) == False):
@@ -215,8 +218,7 @@ def check_simulation_results(pars_obj):
   trans_l0=0
   trans_l1=0
   #print "Received data: ", str(recv_data)
-  for i in range(NB_CHAIN_ADDERS):
-    print "INF240: Num ready pulses: ", str(int(ready_pulses[i]))
+  #print "Transmitted data: ", str(trans_data[i])
   
   print "Operation intended: Chain Addition"
   
@@ -226,8 +228,7 @@ def check_simulation_results(pars_obj):
     if (trans_l0 != trans_l1) or (trans_l0 != MAX_NB_TRANSFERS  or trans_l1 != MAX_NB_TRANSFERS):
       print "ERR242: Transmitted data lengths does not match. Tx Len0: " + str(trans_l0) + ", Tx Len1: " + str(trans_l1) + ", Rx len: " + str(MAX_NB_TRANSFERS)+" Quitting..."
       sys.exit(2) 
-    print "Length of transmitted data : chain " + str(i) + ": " + str(trans_l0) + " + " + str(trans_l1) 
-    #print "Transmitted data: ", str(trans_data[i])
+    print "Length of transmitted data : adder " + str(i) + ": nb. inpa: " + str(trans_l0) + " nb. inpb: " + str(trans_l1) 
 
   for i in range(NB_CHAIN_ADDERS):
     if (len(recv_data[i]) != MAX_NB_TRANSFERS):
@@ -245,7 +246,7 @@ def check_simulation_results(pars_obj):
       print "ERR260: Results not Matched. Simulation unsuccessful!"
       sys.exit(2)
     else:
-      print "Receive and transmit data exactly matches for chain adder: " + str(i)
+      print "Receive and transmit data exactly matches for chain adder: " + str(i) + " Received/Expected datawords: %d/%d " %(len(recv_data[i]),MAX_NB_TRANSFERS) 
   print "INF217: All Chain addition results comparisons successful. Simulations successful!" 
 
 

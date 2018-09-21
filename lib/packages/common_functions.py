@@ -1,4 +1,4 @@
-from myhdl import always_comb,always
+from myhdl import always_comb,always, Signal
 
 class Reset():
   LOW=0 
@@ -36,6 +36,14 @@ def conditional_wire_assign(dout, condition, din1, din2):
       pass
   return conditional_wire_assign_process
 
+def conditional_wire_assign_lt(dout, op1, op2, din1, din2):
+  """ Conditional wire assign where dout = din1 when op1<op2 else din2"""
+  @always_comb
+  def conditional_wire_assign_lt_process():
+    dout.next = din1 if (op1 < op2) else din2
+    if __debug__:   # to create a reg keyword in verilog 
+      pass
+  return conditional_wire_assign_lt_process
 
 def simple_reg_assign(reset, clk, dout, reset_val, din):
   @always(clk.posedge, reset.posedge)

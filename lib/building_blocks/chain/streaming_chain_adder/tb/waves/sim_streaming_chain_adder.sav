@@ -1,39 +1,26 @@
 [*]
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Thu Sep 20 11:32:38 2018
+[*] Fri Sep 21 13:55:08 2018
 [*]
 [dumpfile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/myhdl_work/sim_streaming_chain_adder.vcd"
-[dumpfile_mtime] "Thu Sep 20 11:02:45 2018"
-[dumpfile_size] 14894
+[dumpfile_mtime] "Fri Sep 21 13:54:40 2018"
+[dumpfile_size] 276544
 [savefile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/waves/sim_streaming_chain_adder.sav"
 [timestart] 0
 [size] 1881 1025
 [pos] -1 -1
-*-4.978829 10 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-8.745721 2410 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] sim_streaming_chain_adder.
-[treeopen] sim_streaming_chain_adder.streaming_chain_adder_inst.
-[sst_width] 439
-[signals_width] 237
+[sst_width] 407
+[signals_width] 322
 [sst_expanded] 1
-[sst_vpaned_height] 308
+[sst_vpaned_height] 301
 @28
-sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_valid_i
-@22
-sim_streaming_chain_adder.streaming_chain_adder_inst.chain_inst_0.av_snk0_data_i[7:0]
-@28
-sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_valid_i
-@22
-sim_streaming_chain_adder.src0_bfm_inst_0.src_bfm_i_data_i[7:0]
-sim_streaming_chain_adder.src0_bfm_inst_0.av_src_data_o[7:0]
-@28
-sim_streaming_chain_adder.src0_bfm_inst_0.av_src_valid_o
-sim_streaming_chain_adder.data_in.data_in(0)
-sim_streaming_chain_adder.data_in.data_in(1)
-@22
-sim_streaming_chain_adder.streaming_chain_adder_inst.snk1_data_inst_1.dout[7:0]
-@28
-sim_streaming_chain_adder.transmit_data_append_inst_1.reset
 sim_streaming_chain_adder.clk
-sim_streaming_chain_adder.data_in_sig.data_in_sig(0)
+sim_streaming_chain_adder.reset
+sim_streaming_chain_adder.nb_transmit.nb_transmit(0)
+sim_streaming_chain_adder.nb_transmit.nb_transmit(1)
+sim_streaming_chain_adder.src_bfm_valid_inst_0.dout
+sim_streaming_chain_adder.ready_pulses.ready_pulses(0)
 [pattern_trace] 1
 [pattern_trace] 0
