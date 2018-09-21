@@ -54,7 +54,7 @@ class StreamingChainAdder():
 
       snk1_valid_inst[i]  = simple_wire_assign(av_snk1_if[i].valid_i , av_snk1[i].valid_i)
       snk1_data_inst[i]   = simple_wire_assign(av_snk1_if[i].data_i , av_snk1[i].data_i)
-      snk1_ready_inst[i]  = simple_wire_assign(av_snk1_if[i].valid_i , av_snk1[i].valid_i)
+      snk1_ready_inst[i]  = simple_wire_assign(av_snk1[i].ready_o , av_snk1_if[i].ready_o)
 
       src_valid_inst[i]   = simple_wire_assign(av_src[i].valid_o , av_src_if[i].valid_o)
       src_data_inst[i]    = simple_wire_assign(av_src[i].data_o , av_src_if[i].data_o)

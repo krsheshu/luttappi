@@ -1,4 +1,5 @@
 from myhdl import always_comb,always, Signal
+import random
 
 class Reset():
   LOW=0 
@@ -84,11 +85,20 @@ def conditional_reg_counter(reset, clk, counter, reset_val, condition):
       counter.next = counter + 1
   return conditional_reg_counter_process
 
+def conditional_random_generator(reset, clk, out, reset_val, condition, randrange):
+  @always(clk.posedge, reset.posedge)
+  def conditional_random_generator_process():
+    if(reset==1):
+      out.next = reset_val
+    elif (condition == 1):
+      out.next = random.randint(0,randrange)
+  return conditional_random_generator_process
+
 def conditional_clocked_appendfile(reset, clk, condition, inp, filename):
   @always(clk.posedge, reset.posedge)
   def conditional_clocked_appendfile_process():
     if (condition == 1):
-      #print inp
+      #print int(inp), filename
       fp=open(filename,"a")
       fp.write("{:d}\n".format(int(inp)))
       fp.close()

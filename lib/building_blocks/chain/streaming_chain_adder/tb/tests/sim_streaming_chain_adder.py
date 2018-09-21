@@ -6,29 +6,39 @@ from src_bfm import src_bfm
 from snk_bfm import snk_bfm
 from clk_driver import clk_driver
 from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, conditional_clocked_appendfile, conditional_wire_assign_lt
-from common_functions import CLogB2, conditional_reg_assign, conditional_clocked_append, conditional_reg_counter,Reset
+from common_functions import CLogB2, conditional_reg_assign, conditional_clocked_append, conditional_reg_counter,Reset, conditional_random_generator
 
 from streaming_chain_adder import StreamingChainAdderPars, StreamingChainAdder
 
+import random # for randomized tests
+
 
 MAX_SIM_TIME = 10000
-MAX_NB_TRANSFERS=32
+MAX_NB_TRANSFERS=50
 
 NB_CHAIN_ADDERS = 10
 STREAM_DATA_WIDTH = 16
+RANDRANGE=pow(2,STREAM_DATA_WIDTH-1)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
  
-txdata_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
+#txdata_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
+txdata0_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
+txdata1_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
 rxdata_filename   = [ "" for i in range(NB_CHAIN_ADDERS)]
 ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
+ready_pulses0=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
+ready_pulses1=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
 
 
 def sim_streaming_chain_adder(pars_obj):
   # removing the files if already available 
   for i in range(NB_CHAIN_ADDERS):
-    txdata_filename[i]="transmit_data_{:d}.log".format(i) 
-    if (os.path.exists(txdata_filename[i])):
-      os.remove(txdata_filename[i]) 
-    rxdata_filename[i]="receive_data_{:d}.log".format(i) 
+    txdata0_filename[i]="transmit_data_inp0_adder{:d}.log".format(i) 
+    if (os.path.exists(txdata0_filename[i])):
+      os.remove(txdata0_filename[i]) 
+    txdata1_filename[i]="transmit_data_inp1_adder{:d}.log".format(i) 
+    if (os.path.exists(txdata1_filename[i])):
+      os.remove(txdata1_filename[i]) 
+    rxdata_filename[i]="receive_data_adder{:d}.log".format(i) 
     if (os.path.exists(rxdata_filename[i])):
       os.remove(rxdata_filename[i]) 
  
@@ -37,6 +47,8 @@ def sim_streaming_chain_adder(pars_obj):
   elapsed_time=Signal(0)
   
   nb_transmit=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
+  nb_transmit0=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
+  nb_transmit1=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
   nb_receive=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]  
   
   av_src0_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
@@ -62,9 +74,9 @@ def sim_streaming_chain_adder(pars_obj):
 
 
   for i in range(NB_CHAIN_ADDERS):
-    src0_bfm_inst[i]  = src_bfm(reset, clk, pars_obj.valid.pattern0, src_bfm_i[i], av_src0_bfm[i])
+    src0_bfm_inst[i]  = src_bfm(reset, clk, pars_obj.valid.pattern0, src_bfm_0[i], av_src0_bfm[i])
   
-    src1_bfm_inst[i]  = src_bfm(reset, clk, pars_obj.valid.pattern1, src_bfm_i[i], av_src1_bfm[i])
+    src1_bfm_inst[i]  = src_bfm(reset, clk, pars_obj.valid.pattern1, src_bfm_1[i], av_src1_bfm[i])
     
     snk_bfm_inst[i] = snk_bfm(reset, clk, pars_obj.ready, av_snk_bfm[i], src_bfm_o[i])
     
@@ -114,42 +126,62 @@ def sim_streaming_chain_adder(pars_obj):
       reset.next = 0
 
 
-  INIT_DATA=[10 for i in range(NB_CHAIN_ADDERS)]
-  for i in range(NB_CHAIN_ADDERS):
-    INIT_DATA[i]+=(i*20)   
- 
-  data_in=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  #src_bfm_0_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  #src_bfm_1_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  #src_bfm_0_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  #src_bfm_1_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  INIT_DATA0=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_ADDERS)]
+  INIT_DATA1=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_ADDERS)]
+  #print INIT_DATA1,INIT_DATA0 
+  
+  data_in0=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
+  data_in1=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #src_bfm_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_0_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_1_valid_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_0_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_1_data_inst=[None for i in range(NB_CHAIN_ADDERS)]
   for i in range(NB_CHAIN_ADDERS): 
-    src_bfm_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_i[i].data_i) 
-    #src_bfm_0_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_0[i].data_i) 
-    #src_bfm_1_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in[i], src_bfm_1[i].data_i) 
+    #src_bfm_data_inst[i]= conditional_wire_assign(src_bfm_i[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in0[i], src_bfm_i[i].data_i) 
+    src_bfm_0_data_inst[i]= conditional_wire_assign(src_bfm_0[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), data_in0[i], src_bfm_0[i].data_i) 
+    src_bfm_1_data_inst[i]= conditional_wire_assign(src_bfm_1[i].data_i,(av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o), data_in1[i], src_bfm_1[i].data_i) 
   for i in range(NB_CHAIN_ADDERS): 
-    src_bfm_valid_inst[i]= conditional_wire_assign_lt(src_bfm_i[i].valid_i, nb_transmit[i], Signal(MAX_NB_TRANSFERS), 1, 0) 
-    #src_bfm_0_valid_inst[i]= conditional_wire_assign(src_bfm_0[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
-    #src_bfm_1_valid_inst[i]= conditional_wire_assign(src_bfm_1[i].valid_i,Signal(nb_transmit[i] < MAX_NB_TRANSFERS), 1, 0) 
+    #src_bfm_valid_inst[i]= conditional_wire_assign_lt(src_bfm_i[i].valid_i, nb_transmit[i], Signal(MAX_NB_TRANSFERS), 1, 0) 
+    src_bfm_0_valid_inst[i]= conditional_wire_assign_lt(src_bfm_0[i].valid_i, nb_transmit0[i], Signal(MAX_NB_TRANSFERS), 1, 0) 
+    src_bfm_1_valid_inst[i]= conditional_wire_assign_lt(src_bfm_1[i].valid_i, nb_transmit1[i], Signal(MAX_NB_TRANSFERS), 1, 0) 
  
-  data_in_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  nb_transmit_inst=[None for i in range(NB_CHAIN_ADDERS)]
-  transmit_data_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #data_in_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  data_in0_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  data_in1_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #nb_transmit_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  nb_transmit0_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  nb_transmit1_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #transmit_data_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  transmit_data0_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  transmit_data1_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
   receive_data_append_inst=[None for i in range(NB_CHAIN_ADDERS)]
 
   
-  #Dataout is just an increment (for next valid data)
+  #Datain is randomized values (for next valid data)
   for i in range(NB_CHAIN_ADDERS):
-    data_in_inst[i] = conditional_reg_counter( reset, clk, data_in[i], int(INIT_DATA[i]),  
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
-    #data_in_inst[i] = conditional_reg_assign( reset, clk, data_in[i], int(INIT_DATA[i]),  
-    #                          (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ), (data_in[i] + 1))       
-    nb_transmit_inst[i] = conditional_reg_counter( reset, clk, nb_transmit[i], Reset.LOW, 
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
-    transmit_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
-                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ),  data_in[i], txdata_filename[i])
+    #data_in_inst[i] = conditional_reg_counter( reset, clk, data_in0[i], int(INIT_DATA[i]),  
+    #                          (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
+    data_in0_inst[i] = conditional_random_generator( reset, clk, data_in0[i], int(INIT_DATA0[i]),  
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_0[i].valid_i ), RANDRANGE)       
+    data_in1_inst[i] = conditional_random_generator( reset, clk, data_in1[i], int(INIT_DATA1[i]),  
+                              (av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o and src_bfm_1[i].valid_i ), RANDRANGE)      
+ 
+    #nb_transmit_inst[i] = conditional_reg_counter( reset, clk, nb_transmit[i], Reset.LOW, 
+    #                          (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ))       
+    nb_transmit0_inst[i] = conditional_reg_counter( reset, clk, nb_transmit0[i], Reset.LOW, 
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_0[i].valid_i ))       
+    nb_transmit1_inst[i] = conditional_reg_counter( reset, clk, nb_transmit1[i], Reset.LOW, 
+                              (av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o and src_bfm_1[i].valid_i ))       
+
+    #transmit_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
+    #                          (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_i[i].valid_i ),  data_in0[i], txdata_filename[i])
+    transmit_data0_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
+                              (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_0[i].valid_i ),  data_in0[i], txdata0_filename[i])
+    transmit_data1_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
+                              (av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o and src_bfm_1[i].valid_i ),  data_in1[i], txdata1_filename[i])
+
     receive_data_append_inst[i] = conditional_clocked_appendfile( reset, clk, 
                               (src_bfm_o[i].valid_o),  src_bfm_o[i].data_o, rxdata_filename[i])
   
@@ -163,7 +195,9 @@ def sim_streaming_chain_adder(pars_obj):
       sim_time_now=now()
       if (nb_receive[0] == MAX_NB_TRANSFERS-1): # A better solution maybe to count the number of lines in the receive log file
         for i in range(NB_CHAIN_ADDERS):
-          print "INF240: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses[i])) 
+          #print "INF240: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses0[i])) 
+          #print "INF241: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses1[i])) 
+          print "INF242: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses[i])) 
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
@@ -174,8 +208,12 @@ def sim_streaming_chain_adder(pars_obj):
 
 
   ready_pulse_cnt_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #ready_pulse0_cnt_inst=[None for i in range(NB_CHAIN_ADDERS)]
+  #ready_pulse1_cnt_inst=[None for i in range(NB_CHAIN_ADDERS)]
   for i in range(NB_CHAIN_ADDERS):
-    ready_pulse_cnt_inst[i]=conditional_reg_counter(reset, clk, ready_pulses[i], Reset.LOW, (av_snk_bfm[i].ready_o) )
+    #ready_pulse0_cnt_inst[i]=conditional_reg_counter(reset, clk, ready_pulses0[i], Reset.LOW, (av_snk0[i].ready_o) )
+    #ready_pulse1_cnt_inst[i]=conditional_reg_counter(reset, clk, ready_pulses1[i], Reset.LOW, (av_snk1[i].ready_o) )
+    ready_pulse_cnt_inst[i]=conditional_reg_counter(reset, clk, ready_pulses[i], Reset.LOW, ( av_snk_bfm[i].ready_o) )
 
 
   return instances()
@@ -188,25 +226,29 @@ def check_simulation_results(pars_obj):
   #global ready_pulses
   
   for i in range(NB_CHAIN_ADDERS):
-    if (os.path.exists(txdata_filename[i]) == False):
-      print "ERR186: Error finding file!" + txdata_filename[i] 
+    if (os.path.exists(txdata0_filename[i]) == False):
+      print "ERR186: Error finding file!: " + txdata0_filename[i] 
+    #else:
+    #  print "INF186: Found transmit file: " + txdata_filename[i] 
+    if (os.path.exists(txdata1_filename[i]) == False):
+      print "ERR186: Error finding file!: " + txdata1_filename[i] 
     #else:
     #  print "INF186: Found transmit file: " + txdata_filename[i] 
     if (os.path.exists(rxdata_filename[i]) == False):
-      print "ERR186: Error finding file!" + rxdata_filename[i] 
+      print "ERR186: Error finding file!: " + rxdata_filename[i] 
     #else:
     #  print "INF186: Found receive file: " + rxdata_filename[i] 
 
   for i in range(NB_CHAIN_ADDERS):
-    add1 = open(txdata_filename[i], 'r')
-    add2 = open(txdata_filename[i], 'r')
+    add1 = open(txdata0_filename[i], 'r')
+    add2 = open(txdata1_filename[i], 'r')
     result = open(rxdata_filename[i], 'r')
     for line in add1.readlines():
       trans_data0[i].append(int(line))
-    print "INF204: Read transmit file: " + txdata_filename[i] 
+    print "INF204: Read transmit file: " + txdata0_filename[i] 
     for line in add2.readlines():
       trans_data1[i].append(int(line))
-    print "INF207: Read transmit file: " + txdata_filename[i] 
+    print "INF207: Read transmit file: " + txdata1_filename[i] 
     for line in result.readlines():
       recv_data[i].append(int(line))
     print "INF207: Read  receive file: " + rxdata_filename[i] 
@@ -228,7 +270,7 @@ def check_simulation_results(pars_obj):
     if (trans_l0 != trans_l1) or (trans_l0 != MAX_NB_TRANSFERS  or trans_l1 != MAX_NB_TRANSFERS):
       print "ERR242: Transmitted data lengths does not match. Tx Len0: " + str(trans_l0) + ", Tx Len1: " + str(trans_l1) + ", Rx len: " + str(MAX_NB_TRANSFERS)+" Quitting..."
       sys.exit(2) 
-    print "Length of transmitted data : adder " + str(i) + ": nb. inpa: " + str(trans_l0) + " nb. inpb: " + str(trans_l1) 
+    #print "Length of transmitted data : adder " + str(i) + ": nb. inpa: " + str(trans_l0) + " nb. inpb: " + str(trans_l1) 
 
   for i in range(NB_CHAIN_ADDERS):
     if (len(recv_data[i]) != MAX_NB_TRANSFERS):

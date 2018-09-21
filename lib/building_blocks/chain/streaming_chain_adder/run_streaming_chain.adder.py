@@ -25,7 +25,12 @@ from sim_streaming_chain_adder import sim_streaming_chain_adder, check_simulatio
 #from streaming_chain_adder_convert import streaming_chain_adder_convert
 
 #------script parameters------#
-DEF_VALID_READY=0xffff
+DEF_VALID0=0xabcd
+DEF_VALID1=0x1234
+DEF_READY=0xa12b
+#DEF_VALID0=0xabcd
+#DEF_VALID1=0xabcd
+#DEF_READY=0xabcd
 DEFAULT_SIM_TIME=2000
 TB_NAME = 'sim_streaming_chain_adder'           # test file
 SYNTHESIS_TOP = 'syn_streaming_chain_adder_top' # synthesis top level
@@ -86,9 +91,9 @@ def myhdl_module_cli():
     inst.convert_settings_defaults(inst.converted_hdl_dir)
     #streaming_chain_adder_convert()
   if args.simulate:
-    valid.pattern0 = DEF_VALID_READY
-    valid.pattern1= DEF_VALID_READY 
-    ready_pattern = DEF_VALID_READY
+    valid.pattern0 = DEF_VALID0
+    valid.pattern1= DEF_VALID1 
+    ready_pattern = DEF_READY
     sim_time = DEFAULT_SIM_TIME
     inst.remove_temp_files(inst.sim_temp_dir)       # remove previous files
     if args.valid0:
