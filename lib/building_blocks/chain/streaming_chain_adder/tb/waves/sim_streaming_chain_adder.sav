@@ -1,27 +1,27 @@
 [*]
-[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Sat Sep 22 10:48:03 2018
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Tue Sep 25 14:07:31 2018
 [*]
 [dumpfile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/myhdl_work/sim_streaming_chain_adder.vcd"
-[dumpfile_mtime] "Sat Sep 22 10:46:59 2018"
-[dumpfile_size] 89381
+[dumpfile_mtime] "Tue Sep 25 13:59:06 2018"
+[dumpfile_size] 21108
 [savefile] "/home/skr/Projects/meta_bbb/shakti/lib/building_blocks/chain/streaming_chain_adder/tb/waves/sim_streaming_chain_adder.sav"
-[timestart] 2590
-[size] 1301 744
+[timestart] 0
+[size] 1881 1025
 [pos] -1 -1
-*-7.989278 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.493866 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] sim_streaming_chain_adder.
 [sst_width] 407
 [signals_width] 322
 [sst_expanded] 1
-[sst_vpaned_height] 301
+[sst_vpaned_height] 448
 @28
 sim_streaming_chain_adder.clk
 sim_streaming_chain_adder.reset
-sim_streaming_chain_adder.ready_pulses.ready_pulses(0)
-sim_streaming_chain_adder.nb_transmit0.nb_transmit0(0)
-sim_streaming_chain_adder.nb_transmit1.nb_transmit1(0)
-sim_streaming_chain_adder.nb_transmit0.nb_transmit0(1)
-sim_streaming_chain_adder.nb_transmit1.nb_transmit1(1)
+sim_streaming_chain_adder.src_bfm_0_data_inst_0.din1
+@24
+sim_streaming_chain_adder.src_bfm_0_data_inst_0.din2[15:0]
+@25
+sim_streaming_chain_adder.src_bfm_0_data_inst_0.dout[15:0]
 [pattern_trace] 1
 [pattern_trace] 0
