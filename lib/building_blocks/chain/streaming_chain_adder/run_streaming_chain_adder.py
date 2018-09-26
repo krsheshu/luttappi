@@ -21,7 +21,7 @@ from myhdl_bridge_lib import MyhdlBridgeLib
 inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
-from sim_reduction_streaming_chain_adder import sim_streaming_chain_adder, check_simulation_results
+from sim_streaming_chain_adder import sim_streaming_chain_adder, check_simulation_results
 #from streaming_chain_adder_convert import streaming_chain_adder_convert
 
 #------script parameters------#

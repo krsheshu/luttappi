@@ -18,8 +18,8 @@ MAX_SIM_TIME = 10000
 MAX_NB_TRANSFERS=50
 
 NB_CHAIN_MULTIPLIERS = 10
-STREAM_DATA_WIDTH = 16
-RANDRANGE=pow(2,STREAM_DATA_WIDTH-1)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
+STREAM_DATA_WIDTH = 32
+RANDRANGE=pow(2,4)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
  
 txdata0_filename  = [ "" for i in range(NB_CHAIN_MULTIPLIERS)]
 txdata1_filename  = [ "" for i in range(NB_CHAIN_MULTIPLIERS)]
@@ -260,7 +260,7 @@ def check_simulation_results(pars_obj):
   print "INF207: Comparing the addition results for " + str(NB_CHAIN_MULTIPLIERS) + " chain mults" 
   for i in range(NB_CHAIN_MULTIPLIERS):
     for j in range(MAX_NB_TRANSFERS):
-      if ((trans_data0[i][j] + trans_data1[i][j] ) != recv_data[i][j]):
+      if ((trans_data0[i][j] * trans_data1[i][j] ) != recv_data[i][j]):
         print "ERR257: Error in chain addition! " + str(trans_data0[i][j]) + " + " + str(trans_data1[i][j]) + " != " + str(recv_data[i][j]) 
         err_cnt+=1
     if (err_cnt):
