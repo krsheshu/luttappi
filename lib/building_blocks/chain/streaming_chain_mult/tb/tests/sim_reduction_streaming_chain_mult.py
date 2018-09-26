@@ -8,39 +8,39 @@ from clk_driver import clk_driver
 from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign, conditional_clocked_appendfile, conditional_wire_assign_lt
 from common_functions import CLogB2, conditional_reg_assign, conditional_clocked_append, conditional_reg_counter,Reset, conditional_random_generator
 
-from streaming_chain_adder import StreamingChainAdderPars, StreamingChainAdder
+from streaming_chain_mult import StreamingChainMultPars, StreamingChainMult
 
 import random # for randomized test
 #from __future__ import print_function
 
 
-MAX_NB_TRANSFERS=100
-NB_CHAIN_ADDERS = 100
-STREAM_DATA_WIDTH = 16
+MAX_NB_TRANSFERS=10
+NB_CHAIN_MULTIPLIERS = 5
+STREAM_DATA_WIDTH = 32
 
-RANDRANGE=pow(2,STREAM_DATA_WIDTH-8)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
+RANDRANGE=pow(2,3)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
 MAX_SIM_TIME = 100000
  
-txdata0_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
-txdata1_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
+txdata0_filename  = [ "" for i in range(NB_CHAIN_MULTIPLIERS)]
+txdata1_filename  = [ "" for i in range(NB_CHAIN_MULTIPLIERS)]
 rxdata_filename   = "receive_data.log"
-ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
-ready_pulses0=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
-ready_pulses1=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
+ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_MULTIPLIERS)]
+ready_pulses0=[Signal(int(0))  for i in range(NB_CHAIN_MULTIPLIERS)]
+ready_pulses1=[Signal(int(0))  for i in range(NB_CHAIN_MULTIPLIERS)]
 ready_pulses=Signal(int(0))
 
 
-def sim_streaming_chain_adder(pars_obj):
+def sim_streaming_chain_mult(pars_obj):
   global  rxdata_filename
   global  txdata0_filename
   global  txdata1_filename
   
   # removing the files if already available 
-  for i in range(NB_CHAIN_ADDERS):
-    txdata0_filename[i]="transmit_data_inpA_adder{:d}.log".format(i) 
+  for i in range(NB_CHAIN_MULTIPLIERS):
+    txdata0_filename[i]="transmit_data_inpA_mult{:d}.log".format(i) 
     if (os.path.exists(txdata0_filename[i])):
       os.remove(txdata0_filename[i]) 
-    txdata1_filename[i]="transmit_data_inpB_adder{:d}.log".format(i) 
+    txdata1_filename[i]="transmit_data_inpB_mult{:d}.log".format(i) 
     if (os.path.exists(txdata1_filename[i])):
       os.remove(txdata1_filename[i]) 
   
@@ -51,33 +51,33 @@ def sim_streaming_chain_adder(pars_obj):
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
   
-  nb_transmit=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
-  nb_transmit0=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
-  nb_transmit1=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)] 
+  nb_transmit=[Signal(int(0)) for i in range(NB_CHAIN_MULTIPLIERS)] 
+  nb_transmit0=[Signal(int(0)) for i in range(NB_CHAIN_MULTIPLIERS)] 
+  nb_transmit1=[Signal(int(0)) for i in range(NB_CHAIN_MULTIPLIERS)] 
   nb_receive=Signal(int(0))  
   
-  av_src0_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_src1_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_snk0     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  av_snk1     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  av_src0_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
+  av_src1_bfm = [AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
+  av_snk0     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
+  av_snk1     = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
   av_snk_bfm  = AvalonST_SNK(STREAM_DATA_WIDTH)
-  src_bfm_i   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_0   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
-  src_bfm_1   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)]
+  src_bfm_i   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
+  src_bfm_0   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
+  src_bfm_1   = [AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)]
   src_bfm_o   = AvalonST_SRC(STREAM_DATA_WIDTH)
 
   clkgen=clk_driver(elapsed_time,clk,period=20)
 
-  src0_bfm_inst= [None for i in range(NB_CHAIN_ADDERS)]
-  src1_bfm_inst= [None for i in range(NB_CHAIN_ADDERS)]
+  src0_bfm_inst= [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  src1_bfm_inst= [None for i in range(NB_CHAIN_MULTIPLIERS)]
   snk_bfm_inst= None
   
-  VALID_PATTERN0=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_ADDERS)]
-  VALID_PATTERN1=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_ADDERS)]
-  READY_PATTERN=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_ADDERS)]
+  VALID_PATTERN0=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_MULTIPLIERS)]
+  VALID_PATTERN1=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_MULTIPLIERS)]
+  READY_PATTERN=[random.randint(0x0100,0xffff) for i in range(NB_CHAIN_MULTIPLIERS)]
 
-  for i in range(NB_CHAIN_ADDERS):
-    print "Chain Adder: " + str(i) + " Valid0: " +str(VALID_PATTERN0[i]) + " Valid1: " +str(VALID_PATTERN1[i]) +" Ready: " +str(READY_PATTERN[i])
+  for i in range(NB_CHAIN_MULTIPLIERS):
+    print "Chain Mult: " + str(i) + " Valid0: " +str(VALID_PATTERN0[i]) + " Valid1: " +str(VALID_PATTERN1[i]) +" Ready: " +str(READY_PATTERN[i])
     src0_bfm_inst[i]  = src_bfm(reset, clk, VALID_PATTERN0[i], src_bfm_0[i], av_src0_bfm[i])
   
     src1_bfm_inst[i]  = src_bfm(reset, clk, VALID_PATTERN1[i], src_bfm_1[i], av_src1_bfm[i])
@@ -85,65 +85,65 @@ def sim_streaming_chain_adder(pars_obj):
   snk_bfm_inst = snk_bfm(reset, clk, READY_PATTERN[0], av_snk_bfm, src_bfm_o)
    
 
-  i=NB_CHAIN_ADDERS*2
+  i=NB_CHAIN_MULTIPLIERS*2
   
-  nb_chain_adders=0
-  nb_chain_adders_list=[]
+  nb_chain_mults=0
+  nb_chain_mults_list=[]
   mod_list=[]
-  nb_adder_stages=0
+  nb_mult_stages=0
   while i>1: 
     mod_val = 0 if (i%2 == 0 or i == 1) else 1
     mod_list.append(mod_val)
     i = i/2 if (i%2 == 0) else i/2+1
-    nb_chain_adders+=i
-    nb_chain_adders_list.append(i)
-    nb_adder_stages+=1
+    nb_chain_mults+=i
+    nb_chain_mults_list.append(i)
+    nb_mult_stages+=1
 
-  print "nb_chain_adders: " + str(nb_chain_adders)
-  print "nb_adder_stages: " + str(nb_adder_stages)
+  print "nb_chain_mults: " + str(nb_chain_mults)
+  print "nb_mult_stages: " + str(nb_mult_stages)
   print "mod_list: " + str(mod_list)
-  print "nb_chain_adders_list: " + str(nb_chain_adders_list)
+  print "nb_chain_mults_list: " + str(nb_chain_mults_list)
 
     
-  av_snk0_cmb = [[AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)] for j in range(nb_adder_stages)]
-  av_snk1_cmb = [[AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)] for j in range(nb_adder_stages)]
-  av_src      = [[AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_ADDERS)] for j in range(nb_adder_stages)]
+  av_snk0_cmb = [[AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)] for j in range(nb_mult_stages)]
+  av_snk1_cmb = [[AvalonST_SNK(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)] for j in range(nb_mult_stages)]
+  av_src      = [[AvalonST_SRC(STREAM_DATA_WIDTH)  for i in range(NB_CHAIN_MULTIPLIERS)] for j in range(nb_mult_stages)]
   
-  snk0_valid_inst = [None for i in range(NB_CHAIN_ADDERS)]
-  snk0_data_inst  = [None for i in range(NB_CHAIN_ADDERS)]
-  snk0_ready_inst = [None for i in range(NB_CHAIN_ADDERS)]
-  snk1_valid_inst = [None for i in range(NB_CHAIN_ADDERS)]
-  snk1_data_inst  = [None for i in range(NB_CHAIN_ADDERS)]
-  snk1_ready_inst = [None for i in range(NB_CHAIN_ADDERS)]
+  snk0_valid_inst = [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  snk0_data_inst  = [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  snk0_ready_inst = [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  snk1_valid_inst = [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  snk1_data_inst  = [None for i in range(NB_CHAIN_MULTIPLIERS)]
+  snk1_ready_inst = [None for i in range(NB_CHAIN_MULTIPLIERS)]
   src_valid_inst  = None 
   src_data_inst   = None 
   src_ready_inst  = None 
   
-  streaming_chain_adder_inst= [None for i in range(nb_adder_stages)]
-  add_i = [None for i in range(nb_adder_stages)]  
-  add_pars=[None for i in range(nb_adder_stages)]
+  streaming_chain_mult_inst= [None for i in range(nb_mult_stages)]
+  add_i = [None for i in range(nb_mult_stages)]  
+  add_pars=[None for i in range(nb_mult_stages)]
   snk0_inst=[]
   snk1_inst=[]
 
-  for i in range(nb_adder_stages): 
-    add_pars[i]=StreamingChainAdderPars()
+  for i in range(nb_mult_stages): 
+    add_pars[i]=StreamingChainMultPars()
     add_pars[i].SNK0_DATAWIDTH=STREAM_DATA_WIDTH
     add_pars[i].SNK1_DATAWIDTH=STREAM_DATA_WIDTH
     add_pars[i].SRC_DATAWIDTH=STREAM_DATA_WIDTH
-    add_pars[i].NB_CHAIN_ADDERS=NB_CHAIN_ADDERS
+    add_pars[i].NB_CHAIN_MULTIPLIERS=NB_CHAIN_MULTIPLIERS
     add_pars[i](add_pars[i])
-    add_i[i]=StreamingChainAdder()
+    add_i[i]=StreamingChainMult()
  
-    if (i!=0 and i<=nb_adder_stages-1):
-      for j in range(nb_chain_adders_list[i]):
+    if (i!=0 and i<=nb_mult_stages-1):
+      for j in range(nb_chain_mults_list[i]):
         k=j*2
         snk0_inst.append(simple_wire_assign(av_snk0_cmb[i][j].valid_i, av_src[i-1][k].valid_o))
         snk0_inst.append(simple_wire_assign(av_snk0_cmb[i][j].data_i, av_src[i-1][k].data_o))
         snk0_inst.append(simple_wire_assign(av_src[i-1][k].ready_i, av_snk0_cmb[i][j].ready_o))
       
-        if (mod_list[i]==1 and j==(nb_chain_adders_list[i])-1):
+        if (mod_list[i]==1 and j==(nb_chain_mults_list[i])-1):
           snk1_inst.append(simple_wire_assign(av_snk1_cmb[i][j].valid_i, Signal(1)))
-          snk1_inst.append(simple_wire_assign(av_snk1_cmb[i][j].data_i, Signal(0)))
+          snk1_inst.append(simple_wire_assign(av_snk1_cmb[i][j].data_i, Signal(1)))
           snk1_inst.append(simple_wire_assign(Signal(1), av_snk1_cmb[i][j].ready_o))
           
         else: 
@@ -152,7 +152,7 @@ def sim_streaming_chain_adder(pars_obj):
           snk1_inst.append(simple_wire_assign(av_src[i-1][k+1].ready_i, av_snk1_cmb[i][j].ready_o))
         
     elif (i==0):
-      for k in range(NB_CHAIN_ADDERS):
+      for k in range(NB_CHAIN_MULTIPLIERS):
         snk0_valid_inst[k]  = simple_wire_assign(av_snk0_cmb[0][k].valid_i, av_src0_bfm[k].valid_o)
         snk0_data_inst[k]   = simple_wire_assign(av_snk0_cmb[0][k].data_i, av_src0_bfm[k].data_o)
         snk0_ready_inst[k]  = simple_wire_assign(av_src0_bfm[k].ready_i, av_snk0_cmb[0][k].ready_o)
@@ -162,11 +162,11 @@ def sim_streaming_chain_adder(pars_obj):
         snk1_ready_inst[k]  = simple_wire_assign(av_src1_bfm[k].ready_i, av_snk1_cmb[0][k].ready_o)
        
         
-    streaming_chain_adder_inst[i] = add_i[i].block_connect(add_pars[i], reset, clk, av_snk0_cmb[i], av_snk1_cmb[i], av_src[i])
+    streaming_chain_mult_inst[i] = add_i[i].block_connect(add_pars[i], reset, clk, av_snk0_cmb[i], av_snk1_cmb[i], av_src[i])
 
-  src_valid_inst  = simple_wire_assign(av_snk_bfm.valid_i, av_src[nb_adder_stages-1][0].valid_o)
-  src_data_inst   = simple_wire_assign(av_snk_bfm.data_i, av_src[nb_adder_stages-1][0].data_o)
-  src_ready_inst  = simple_wire_assign(av_src[nb_adder_stages-1][0].ready_i, av_snk_bfm.ready_o)
+  src_valid_inst  = simple_wire_assign(av_snk_bfm.valid_i, av_src[nb_mult_stages-1][0].valid_o)
+  src_data_inst   = simple_wire_assign(av_snk_bfm.data_i, av_src[nb_mult_stages-1][0].data_o)
+  src_ready_inst  = simple_wire_assign(av_src[nb_mult_stages-1][0].ready_i, av_snk_bfm.ready_o)
   
   @always(clk.posedge)
   def stimulus():
@@ -174,23 +174,23 @@ def sim_streaming_chain_adder(pars_obj):
       reset.next = 0
 
 
-  INIT_DATA0=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_ADDERS)]
-  INIT_DATA1=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_ADDERS)]
+  INIT_DATA0=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_MULTIPLIERS)]
+  INIT_DATA1=[random.randint(1,RANDRANGE) for i in range(NB_CHAIN_MULTIPLIERS)]
   
-  data_in0=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
-  data_in1=[Signal(int(0)) for i in range(NB_CHAIN_ADDERS)]
+  data_in0=[Signal(int(0)) for i in range(NB_CHAIN_MULTIPLIERS)]
+  data_in1=[Signal(int(0)) for i in range(NB_CHAIN_MULTIPLIERS)]
   src_bfm_0_valid_inst=[]
   src_bfm_1_valid_inst=[]
   src_bfm_0_data_inst=[]
   src_bfm_1_data_inst=[]
   
-  for i in range(NB_CHAIN_ADDERS): 
+  for i in range(NB_CHAIN_MULTIPLIERS): 
       src_bfm_0_data_inst.append(conditional_wire_assign(src_bfm_0[i].data_i,(av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o), 
                                                           data_in0[i], src_bfm_0[i].data_i)) 
       src_bfm_1_data_inst.append(conditional_wire_assign(src_bfm_1[i].data_i,(av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o), 
                                                           data_in1[i], src_bfm_1[i].data_i)) 
 
-  for i in range(NB_CHAIN_ADDERS): 
+  for i in range(NB_CHAIN_MULTIPLIERS): 
       src_bfm_0_valid_inst.append(conditional_wire_assign_lt(src_bfm_0[i].valid_i, nb_transmit0[i], Signal(MAX_NB_TRANSFERS), 1, 0))
       src_bfm_1_valid_inst.append(conditional_wire_assign_lt(src_bfm_1[i].valid_i, nb_transmit1[i], Signal(MAX_NB_TRANSFERS), 1, 0))
  
@@ -203,7 +203,7 @@ def sim_streaming_chain_adder(pars_obj):
   receive_data_append_inst=[]
 
   
-  for i in range(NB_CHAIN_ADDERS): 
+  for i in range(NB_CHAIN_MULTIPLIERS): 
       data_in0_inst.append(conditional_random_generator( reset, clk, data_in0[i], int(INIT_DATA0[i]),  
                                 (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_0[i].valid_i ), RANDRANGE))       
       data_in1_inst.append(conditional_random_generator( reset, clk, data_in1[i], int(INIT_DATA1[i]),  
@@ -258,17 +258,17 @@ def check_simulation_results(pars_obj):
   global  rxdata_filename
   global  txdata0_filename
   global  txdata1_filename
-  trans_data0  = [ [] for i in range(NB_CHAIN_ADDERS)]
-  trans_data1  = [ [] for i in range(NB_CHAIN_ADDERS)]
+  trans_data0  = [ [] for i in range(NB_CHAIN_MULTIPLIERS)]
+  trans_data1  = [ [] for i in range(NB_CHAIN_MULTIPLIERS)]
   recv_data   = [] 
   
-  for i in range(NB_CHAIN_ADDERS):
+  for i in range(NB_CHAIN_MULTIPLIERS):
     if (os.path.exists(txdata0_filename[i]) == False):
       print "ERR186: Error finding file!: " + txdata0_filename[i] 
     if (os.path.exists(txdata1_filename[i]) == False):
       print "ERR186: Error finding file!: " + txdata1_filename[i] 
 
-  for i in range(NB_CHAIN_ADDERS):
+  for i in range(NB_CHAIN_MULTIPLIERS):
     add1 = open(txdata0_filename[i], 'r')
     add2 = open(txdata1_filename[i], 'r')
     for line in add1.readlines():
@@ -295,9 +295,9 @@ def check_simulation_results(pars_obj):
   #print "Received data: ", str(recv_data)
   #print "Transmitted data: ", str(trans_data[i])
   
-  print "Operation intended: Reduction Chain Addition"
+  print "Operation intended: Reduction Chain Multiplication"
   
-  for i in range(NB_CHAIN_ADDERS):
+  for i in range(NB_CHAIN_MULTIPLIERS):
     trans_l0=len(trans_data0[i])
     trans_l1=len(trans_data1[i])
     if (trans_l0 != trans_l1) or (trans_l0 != MAX_NB_TRANSFERS  or trans_l1 != MAX_NB_TRANSFERS):
@@ -309,20 +309,21 @@ def check_simulation_results(pars_obj):
     print "ERR252: Simulation unsuccessful!."
     sys.exit(2)
 
-  print "INF207: Comparing the addition results for " + str(NB_CHAIN_ADDERS) + " chain adders" 
+  print "INF207: Comparing the multiplication results for " + str(NB_CHAIN_MULTIPLIERS) + " chain mults" 
   for j in range(MAX_NB_TRANSFERS):
-    reduction_adder=0
-    for i in range(NB_CHAIN_ADDERS):
-      reduction_adder+=(trans_data0[i][j] + trans_data1[i][j])
-    if (reduction_adder != recv_data[j]):
-      print "ERR257: Error in reduction chain addition! nb_transmit: " + str(j) + " reduction result: "+str(reduction_adder) + " recv data:  " + str(recv_data[j]) 
+    reduction_mult=1
+    for i in range(NB_CHAIN_MULTIPLIERS):
+      #print trans_data0[i][j], trans_data1[i][j]
+      reduction_mult*=(trans_data0[i][j] * trans_data1[i][j])
+    if (reduction_mult != recv_data[j]):
+      print "ERR257: Error in reduction chain multiplication! nb_transmit: " + str(j) + " reduction result: "+str(reduction_mult) + " recv data:  " + str(recv_data[j]) 
       err_cnt+=1
   if (err_cnt):
     print "ERR260: Results not Matched. Simulation unsuccessful!"
     sys.exit(2)
   else:
-    print "Reduction Chain adder operation successfully matched." + " Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
-  print "INF217: All Reduction Chain addition results comparisons successful. Simulations successful!" 
+    print "Reduction Chain mult operation successfully matched." + " Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
+  print "INF217: All Reduction Chain multiplication results comparisons successful. Simulations successful!" 
 
 
 

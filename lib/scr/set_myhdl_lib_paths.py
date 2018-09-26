@@ -16,6 +16,7 @@ def set_myhdl_lib_paths():
 
   print "setting the paths of the building blocks simple lib"
   sys.path.append(os.path.join(os.path.dirname(__file__), "../building_blocks/simple/streaming_simple_adder/myhdl"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../building_blocks/simple/streaming_simple_mult/myhdl"))
 
   print "setting the paths of the streaming if ips"
   sys.path.append(os.path.join(os.path.dirname(__file__), "../streaming_if_ips/streaming_ip_a/myhdl/"))
