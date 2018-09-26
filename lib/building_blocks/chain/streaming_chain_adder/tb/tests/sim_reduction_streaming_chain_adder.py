@@ -14,16 +14,16 @@ import random # for randomized test
 #from __future__ import print_function
 
 
-MAX_SIM_TIME = 100000
-MAX_NB_TRANSFERS=1
-
-NB_CHAIN_ADDERS = 10
+MAX_NB_TRANSFERS=100
+NB_CHAIN_ADDERS = 100
 STREAM_DATA_WIDTH = 16
+
 RANDRANGE=pow(2,STREAM_DATA_WIDTH-8)-1 # Maximum value allowed is 2^15-1 for avoiding overflow
+MAX_SIM_TIME = 100000
  
 txdata0_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
 txdata1_filename  = [ "" for i in range(NB_CHAIN_ADDERS)]
-rxdata_filename   = [ "" for i in range(NB_CHAIN_ADDERS)]
+rxdata_filename   = "receive_data.log"
 ready_pulses=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
 ready_pulses0=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
 ready_pulses1=[Signal(int(0))  for i in range(NB_CHAIN_ADDERS)]
@@ -32,6 +32,10 @@ ready_pulses=Signal(int(0))
 
 def sim_streaming_chain_adder(pars_obj):
   # removing the files if already available 
+  global  rxdata_filename
+  global  txdata0_filename
+  global  txdata1_filename
+  
   for i in range(NB_CHAIN_ADDERS):
     txdata0_filename[i]="transmit_data_inpA_adder{:d}.log".format(i) 
     if (os.path.exists(txdata0_filename[i])):
@@ -39,10 +43,10 @@ def sim_streaming_chain_adder(pars_obj):
     txdata1_filename[i]="transmit_data_inpB_adder{:d}.log".format(i) 
     if (os.path.exists(txdata1_filename[i])):
       os.remove(txdata1_filename[i]) 
-    rxdata_filename[i]="receive_data_adder{:d}.log".format(i) 
-    if (os.path.exists(rxdata_filename[i])):
-      os.remove(rxdata_filename[i]) 
- 
+  
+  if (os.path.exists(rxdata_filename)):
+    os.remove(rxdata_filename) 
+  
   reset = Signal(bool(1))
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
@@ -213,14 +217,12 @@ def sim_streaming_chain_adder(pars_obj):
       transmit_data0_append_inst.append(conditional_clocked_appendfile( reset, clk, 
                                 (av_src0_bfm[i].ready_i and av_src0_bfm[i].valid_o and src_bfm_0[i].valid_i ),  
                                   data_in0[i], txdata0_filename[i]))
-      print txdata0_filename[i]
       transmit_data1_append_inst.append(conditional_clocked_appendfile( reset, clk, 
                                 (av_src1_bfm[i].ready_i and av_src1_bfm[i].valid_o and src_bfm_1[i].valid_i ),  
                                   data_in1[i], txdata1_filename[i]))
-      print txdata1_filename[i]
  
   receive_data_append_inst.append(conditional_clocked_appendfile( reset, clk, 
-                                    (src_bfm_o.valid_o),  src_bfm_o.data_o, "rxdata.log"))
+                                    (src_bfm_o.valid_o),  src_bfm_o.data_o, rxdata_filename))
   
 
  
@@ -233,9 +235,9 @@ def sim_streaming_chain_adder(pars_obj):
     TIME_SHUTDOWN=5000
     nb_recv=0
     sim_time_now=now()
-    nb_recv+=nb_receive#[i]
+    nb_recv+=nb_receive
     if(nb_recv == (MAX_NB_TRANSFERS)): 
-      print "INF242: adder: " +str(i)+ " Num ready pulses: "+ str(int(ready_pulses)) 
+      print "INF242: Num ready pulses: "+ str(int(ready_pulses)) 
       raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(nb_recv) + " data words received")  
 
   @always(clk.posedge)
@@ -253,36 +255,39 @@ def sim_streaming_chain_adder(pars_obj):
 
 
 def check_simulation_results(pars_obj):
-  sys.exit() 
+  global  rxdata_filename
+  global  txdata0_filename
+  global  txdata1_filename
   trans_data0  = [ [] for i in range(NB_CHAIN_ADDERS)]
   trans_data1  = [ [] for i in range(NB_CHAIN_ADDERS)]
-  recv_data   = [ [] for i in range(NB_CHAIN_ADDERS)]
+  recv_data   = [] 
   
   for i in range(NB_CHAIN_ADDERS):
     if (os.path.exists(txdata0_filename[i]) == False):
       print "ERR186: Error finding file!: " + txdata0_filename[i] 
     if (os.path.exists(txdata1_filename[i]) == False):
       print "ERR186: Error finding file!: " + txdata1_filename[i] 
-    if (os.path.exists(rxdata_filename[i]) == False):
-      print "ERR186: Error finding file!: " + rxdata_filename[i] 
 
-  #sys.exit() 
   for i in range(NB_CHAIN_ADDERS):
     add1 = open(txdata0_filename[i], 'r')
     add2 = open(txdata1_filename[i], 'r')
-    result = open(rxdata_filename[i], 'r')
     for line in add1.readlines():
       trans_data0[i].append(int(line))
     print "INF204: Read transmit file: " + txdata0_filename[i] 
     for line in add2.readlines():
       trans_data1[i].append(int(line))
     print "INF207: Read transmit file: " + txdata1_filename[i] 
-    for line in result.readlines():
-      recv_data[i].append(int(line))
-    print "INF207: Read  receive file: " + rxdata_filename[i] 
     add1.close()
     add2.close()
-    result.close()
+ 
+  if (os.path.exists(rxdata_filename) == False):
+    print "ERR186: Error finding file!: " + rxdata_filename 
+  
+  result = open(rxdata_filename, 'r')
+  for line in result.readlines():
+    recv_data.append(int(line))
+  print "INF207: Read  receive file: " + rxdata_filename
+  result.close()
   
   err_cnt=0
   trans_l0=0
@@ -290,7 +295,7 @@ def check_simulation_results(pars_obj):
   #print "Received data: ", str(recv_data)
   #print "Transmitted data: ", str(trans_data[i])
   
-  print "Operation intended: Chain Addition"
+  print "Operation intended: Reduction Chain Addition"
   
   for i in range(NB_CHAIN_ADDERS):
     trans_l0=len(trans_data0[i])
@@ -299,24 +304,25 @@ def check_simulation_results(pars_obj):
       print "ERR242: Transmitted data lengths does not match. Tx Len0: " + str(trans_l0) + ", Tx Len1: " + str(trans_l1) + ", Rx len: " + str(MAX_NB_TRANSFERS)+" Quitting..."
       sys.exit(2) 
 
-  for i in range(NB_CHAIN_ADDERS):
-    if (len(recv_data[i]) != MAX_NB_TRANSFERS):
-      print "ERR251: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data[i]),MAX_NB_TRANSFERS) 
-      print "ERR252: Simulation unsuccessful!."
-      sys.exit(2)
+  if (len(recv_data) != MAX_NB_TRANSFERS):
+    print "ERR251: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
+    print "ERR252: Simulation unsuccessful!."
+    sys.exit(2)
 
   print "INF207: Comparing the addition results for " + str(NB_CHAIN_ADDERS) + " chain adders" 
-  for i in range(NB_CHAIN_ADDERS):
-    for j in range(MAX_NB_TRANSFERS):
-      if ((trans_data0[i][j] + trans_data1[i][j] ) != recv_data[i][j]):
-        print "ERR257: Error in chain addition! " + str(trans_data0[i][j]) + " + " + str(trans_data1[i][j]) + " != " + str(recv_data[i][j]) 
-        err_cnt+=1
-    if (err_cnt):
-      print "ERR260: Results not Matched. Simulation unsuccessful!"
-      sys.exit(2)
-    else:
-      print "Receive and transmit data exactly matches for chain adder: " + str(i) + " Received/Expected datawords: %d/%d " %(len(recv_data[i]),MAX_NB_TRANSFERS) 
-  print "INF217: All Chain addition results comparisons successful. Simulations successful!" 
+  for j in range(MAX_NB_TRANSFERS):
+    reduction_adder=0
+    for i in range(NB_CHAIN_ADDERS):
+      reduction_adder+=(trans_data0[i][j] + trans_data1[i][j])
+    if (reduction_adder != recv_data[j]):
+      print "ERR257: Error in reduction chain addition! nb_transmit: " + str(j) + " reduction result: "+str(reduction_adder) + " recv data:  " + str(recv_data[j]) 
+      err_cnt+=1
+  if (err_cnt):
+    print "ERR260: Results not Matched. Simulation unsuccessful!"
+    sys.exit(2)
+  else:
+    print "Reduction Chain adder operation successfully matched." + " Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
+  print "INF217: All Reduction Chain addition results comparisons successful. Simulations successful!" 
 
 
 
