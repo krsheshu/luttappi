@@ -37,6 +37,10 @@ def sim_operand_pipeline(pars_obj):
   inst.append(operand_a.block_connect(reset,clk,pipe_inp, pipe_out, shift_en, stage_o))
 
   @always(clk.posedge)
+  def shift_signal():
+    shift_en.next = not shift_en
+ 
+  @always(clk.posedge)
   def stimulus():
     if elapsed_time == 40:
       reset.next = 0
