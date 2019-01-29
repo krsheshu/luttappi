@@ -3,6 +3,8 @@ from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSigna
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 from operand_pipeline import OperandPipeline 
+from operand_pipeline_pars import OperandPipelinePars 
+from operand_pipeline_io import OperandPipelineIo 
 
 
 MAX_SIM_TIME = 10000
@@ -14,7 +16,7 @@ nb1=0 # A global currently inevitable
 nb2=0 # A global currently inevitable
 
 def sim_operand_pipeline(pars_obj):
-  NB_PIPELINE_STAGES  = 4 
+  NB_PIPELINE_STAGES  = 10 
   DATAWIDTH           = 32
    
   reset = Signal(bool(1))
@@ -23,22 +25,47 @@ def sim_operand_pipeline(pars_obj):
   
   clkgen=clk_driver(elapsed_time,clk,period=20)
  
-  pipe_inp  = PipelineST(DATAWIDTH) 
-  pipe_out  = PipelineST(DATAWIDTH) 
+  pipe_inpA  = PipelineST(DATAWIDTH) 
+  pipe_outA  = PipelineST(DATAWIDTH) 
+
+  pipe_inpB  = PipelineST(DATAWIDTH) 
+  pipe_outB  = PipelineST(DATAWIDTH) 
 
   operand_a=OperandPipeline()
-  operand_a.pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
-  operand_a.pars.DATAWIDTH=DATAWIDTH
-
-  shift_en= Signal(bool(1))
-  stage_o =  [PipelineST(operand_a.pars.DATAWIDTH) for i in range(operand_a.pars.NB_PIPELINE_STAGES)]
+  pars=OperandPipelinePars()
+  pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
+  pars.DATAWIDTH=DATAWIDTH
+  pars(pars)
+  ioA=OperandPipelineIo()
+  ioA(pars)
 
   inst=[]
-  inst.append(operand_a.block_connect(reset,clk,pipe_inp, pipe_out, shift_en, stage_o))
+  inst.append(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
 
+  operand_b=OperandPipeline()
+  ioB=OperandPipelineIo()
+  ioB(pars)
+
+  inst.append(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
+  
+  mult = Signal(intbv(DATAWIDTH+DATAWIDTH))
+  @always(clk.posedge, reset.posedge)
+  def mult_process():
+    if reset==1:
+      mult.next = intbv(0)
+    elif (ioA.stage_o[5].valid == 1 and ioB.stage_o[5].valid == 1):
+      mult.next = mult + ioA.stage_o[5].data * ioB.stage_o[5].data
+      print int(mult.next) 
+
+  shiftEn_i = Signal(bool(0))
   @always(clk.posedge)
   def shift_signal():
-    shift_en.next = not shift_en
+    shiftEn_i.next = not shiftEn_i
+  
+  @always_comb
+  def shiftOperand_signal():
+    ioB.shiftEn_i.next = shiftEn_i
+    ioA.shiftEn_i.next = shiftEn_i
  
   @always(clk.posedge)
   def stimulus():
@@ -49,11 +76,14 @@ def sim_operand_pipeline(pars_obj):
   data_in=Signal(int(0))
   @always_comb
   def transmit_data_process():
-    if (shift_en == 1 and nb1 < MAX_NB_TRANSFERS):
-      pipe_inp.data.next = data_in 
-      pipe_inp.valid.next = 1
+    if (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
+      pipe_inpA.data.next = data_in 
+      pipe_inpA.valid.next = 1
+      pipe_inpB.data.next = data_in 
+      pipe_inpB.valid.next = 1
     else: 
-      pipe_inp.valid.next = 0
+      pipe_inpA.valid.next = 0
+      pipe_inpB.valid.next = 0
 
   #Dataout is just an increment (for next valid data)
   @always(clk.posedge, reset.posedge)
@@ -61,7 +91,7 @@ def sim_operand_pipeline(pars_obj):
     global trans_data,nb1
     if reset==1:
       data_in.next = int(INIT_DATA)
-    elif (shift_en == 1 and nb1 < MAX_NB_TRANSFERS):
+    elif (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
       nb1+=1
       #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i 
       trans_data.append(int(data_in))
@@ -71,10 +101,10 @@ def sim_operand_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
-    if (pipe_out.valid == 1):
+    if (pipe_outA.valid == 1):
       nb2+=1
       #print str(nb2) + ". Received data from sink bfm:", ": ", src_bfm_o.data_o
-      recv_data.append(int(pipe_out.data))
+      recv_data.append(int(pipe_outA.data))
       sim_time_now=now()
       if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
