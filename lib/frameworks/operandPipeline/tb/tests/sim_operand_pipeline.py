@@ -3,8 +3,8 @@ from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSigna
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 from operand_pipeline import OperandPipeline 
-from operand_pipeline_pars import OperandPipelinePars 
-from operand_pipeline_io import OperandPipelineIo 
+from operand_pipeline import OperandPipelinePars 
+from operand_pipeline import OperandPipelineIo 
 
 
 MAX_SIM_TIME = 10000

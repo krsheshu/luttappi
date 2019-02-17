@@ -1,4 +1,4 @@
-#----operandPipeline Class 
+#----operationPipeline Class 
 
 #----imports
 from myhdl import always, always_comb, Signal, instances, block
@@ -6,43 +6,78 @@ from avalon_buses import PipelineST
 from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign
 
 #---- Class description
-class OperandPipelineIo(): 
+class OperationPipelineIo(): 
   def __init__(self):
-    """ Initialize OperandPipeline Ios """
+    """ Initialize OperationPipeline Ios """
     self.NB_PIPELINE_STAGES = 4
     self.DATAWIDTH = 32
-    self.shiftEn_i  = Signal(bool(0))
     self.stage_o    = [PipelineST(self.DATAWIDTH) for i in range(self.NB_PIPELINE_STAGES)]
  
   
   def __call__(self,pars):
-    """ Overwrite OperandPipeline Ios """
-    self.shiftEn_i  = Signal(bool(0))
+    """ Overwrite OperationPipeline Ios """
     self.stage_o    = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
 
-#----Parameters for operandPipeline Class
-class OperandPipelinePars(): 
+#----Parameters for operationPipeline Class
+class OperationPipelinePars(): 
   def __init__(self):
-    """ Initialize OperandPipeline parameters """
+    """ Initialize OperationPipeline parameters """
     self.NB_PIPELINE_STAGES = 4
     self.DATAWIDTH          = 32 
   
   def __call__(self,pars):
-    """ Overwrite OperandPipeline parameters """
+    """ Overwrite OperationPipeline parameters """
     self.NB_PIPELINE_STAGES = pars.NB_PIPELINE_STAGES
     self.DATAWIDTH          = pars.DATAWIDTH
 
 
 
 #-----Class Description
-class OperandPipeline():
+class OperationPipeline():
   
   def __init__(self):
-    """ OperandPipeline Init"""
+    """ OperationPipeline Init"""
 
   #@block 
-  def block_connect(self, pars, reset, clk, pipest_snk, pipest_src, io):
-    """ OperandPipeline block """
+  def cmd_convert_to_string(self, pars, cmdFile):
+    """ Convert cmfFile to a cmdStringList of Pipeline operators"""
+    cmdStringList=[]
+    with open('filename') as f:
+      cmdStringList.append(f.readlines()) 
+    
+    return cmdStringList
+
+  #@block 
+  def blk_atomic_oper(self, pars, clk, cmdStr, stage_iA, stage_iB, stage_o):
+    """ Atomic Operation block """
+    
+    @always(clk.posedge)
+    def atomic_operation_assign_process():
+      if ( cmdStr == "ADD"):     # A+B 
+        if (stage_iA.valid == 1 and stage_iB.valid == 1):
+          stage_o.data = stage_iA.data + stage_iB.data
+          stage_o.valid = 1
+      elif ( cmdStr == "SUB"):   # A-B     
+        if (stage_iA.valid == 1 and stage_iB.valid == 1):
+          stage_o.data = stage_iA.data - stage_iB.data
+          stage_o.valid = 1
+      elif ( cmdStr == "SUBR"):  # B-A       
+        if (stage_iA.valid == 1 and stage_iB.valid == 1):
+          stage_o.data = stage_iA.data - stage_iB.data
+          stage_o.valid = 1
+      elif ( cmdStr == "MULT"):  # A*B       
+        if (stage_iA.valid == 1 and stage_iB.valid == 1):
+          stage_o.data = stage_iA.data * stage_iB.data
+          stage_o.valid = 1
+      else:
+          stage_o.data =  0 
+          stage_o.valid = 0
+ 
+
+
+  #@block 
+  def block_connect(self, pars, reset, clk, cmdStringList, pipest_snk1, pipest_snk2, pipest_src, io):
+    """ OperationPipeline block """
    
     stage = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
    
@@ -73,13 +108,9 @@ class OperandPipeline():
     reg_stage_eop_inst    = [None for i in range(pars.NB_PIPELINE_STAGES)]
     reg_stage_valid_inst  = [None for i in range(pars.NB_PIPELINE_STAGES)]
     
-    reg_stage_data_inst[0]  = conditional_wire_assign(stage[0].data, io.shiftEn_i, pipest_snk.data, 0); 
-    reg_stage_sop_inst[0]   = conditional_wire_assign(stage[0].sop, io.shiftEn_i, pipest_snk.sop, 0); 
-    reg_stage_eop_inst[0]   = conditional_wire_assign(stage[0].eop, io.shiftEn_i, pipest_snk.eop, 0); 
-    reg_stage_valid_inst[0] = conditional_wire_assign(stage[0].valid, io.shiftEn_i, pipest_snk.valid, 0); 
     
     for i in range(1,pars.NB_PIPELINE_STAGES):
-      reg_stage_data_inst[i]  = simple_reg_assign(reset, clk, stage[i].data, 0, stage[i-1].data)    
+      reg_stage_data_inst[i]  = simple_reg_assign(reset, clk, stage[i].datacommandPipeline, 0, stage[i-1].data)    
       reg_stage_sop_inst[i]   = simple_reg_assign(reset, clk, stage[i].sop, 0, stage[i-1].sop)    
       reg_stage_eop_inst[i]   = simple_reg_assign(reset, clk, stage[i].eop, 0, stage[i-1].eop)    
       reg_stage_valid_inst[i] = simple_reg_assign(reset, clk, stage[i].valid, 0, stage[i-1].valid)    
