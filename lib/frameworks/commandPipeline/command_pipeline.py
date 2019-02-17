@@ -61,8 +61,6 @@ class OperationPipeline():
         stage_o.data.next = stage_iA.data - stage_iB.data
       elif ( cmdStr == "MULT"):  # A*B       
         stage_o.data.next = stage_iA.data * stage_iB.data
-      else:
-        stage_o.data.next = 0 
 
       if (stage_iA.valid == 1 and stage_iB.valid == 1):
           stage_o.valid.next = 1
@@ -79,11 +77,11 @@ class OperationPipeline():
       else:
           stage_o.eop.next = 0
  
-      return instances()
+    return instances()
 
 
   #@block 
-  def block_connect(self, pars, reset, clk, cmdStringList, pipest_snk1, pipest_snk2, pipest_src, io):
+  def block_connect(self, pars, reset, clk, cmdStringList, pipe_stageA, pipe_stageB, pipest_src, io):
     """ OperationPipeline block """
    
     stage = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
@@ -110,17 +108,10 @@ class OperationPipeline():
 
     """ Stage instance, has extra ready and valid lines """ 
     
-    reg_stage_data_inst   = [None for i in range(pars.NB_PIPELINE_STAGES)]
-    reg_stage_sop_inst    = [None for i in range(pars.NB_PIPELINE_STAGES)]
-    reg_stage_eop_inst    = [None for i in range(pars.NB_PIPELINE_STAGES)]
-    reg_stage_valid_inst  = [None for i in range(pars.NB_PIPELINE_STAGES)]
-    
+    reg_stage_inst   = []
     
     for i in range(1,pars.NB_PIPELINE_STAGES):
-      reg_stage_data_inst[i]  = simple_reg_assign(reset, clk, stage[i].datacommandPipeline, 0, stage[i-1].data)    
-      reg_stage_sop_inst[i]   = simple_reg_assign(reset, clk, stage[i].sop, 0, stage[i-1].sop)    
-      reg_stage_eop_inst[i]   = simple_reg_assign(reset, clk, stage[i].eop, 0, stage[i-1].eop)    
-      reg_stage_valid_inst[i] = simple_reg_assign(reset, clk, stage[i].valid, 0, stage[i-1].valid)    
+      reg_stage_inst.append(simple_reg_assign(pars, clk, pipest_snk1[i], pipest_snk2[i], io.stage_o[i]))    
 
     return instances() 
   
