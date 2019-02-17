@@ -54,24 +54,28 @@ class OperationPipeline():
     @always(clk.posedge)
     def atomic_operation_assign_process():
       if ( cmdStr == "ADD"):     # A+B 
-        if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.data = stage_iA.data + stage_iB.data
-          stage_o.valid = 1
+        stage_o.data = stage_iA.data + stage_iB.data
       elif ( cmdStr == "SUB"):   # A-B     
-        if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.data = stage_iA.data - stage_iB.data
-          stage_o.valid = 1
+        stage_o.data = stage_iA.data - stage_iB.data
       elif ( cmdStr == "SUBR"):  # B-A       
-        if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.data = stage_iA.data - stage_iB.data
-          stage_o.valid = 1
+        stage_o.data = stage_iA.data - stage_iB.data
       elif ( cmdStr == "MULT"):  # A*B       
-        if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.data = stage_iA.data * stage_iB.data
+        stage_o.data = stage_iA.data * stage_iB.data
+
+      if (stage_iA.valid == 1 and stage_iB.valid == 1):
           stage_o.valid = 1
       else:
-          stage_o.data =  0 
           stage_o.valid = 0
+      
+      if (stage_iA.sop == 1 and stage_iB.sop == 1):
+          stage_o.sop = 1
+      else:
+          stage_o.sop = 0
+      
+      if (stage_iA.eop == 1 and stage_iB.eop == 1):
+          stage_o.eop = 1
+      else:
+          stage_o.eop = 0
  
 
 
