@@ -54,29 +54,32 @@ class OperationPipeline():
     @always(clk.posedge)
     def atomic_operation_assign_process():
       if ( cmdStr == "ADD"):     # A+B 
-        stage_o.data = stage_iA.data + stage_iB.data
+        stage_o.data.next = stage_iA.data + stage_iB.data
       elif ( cmdStr == "SUB"):   # A-B     
-        stage_o.data = stage_iA.data - stage_iB.data
+        stage_o.data.next = stage_iA.data - stage_iB.data
       elif ( cmdStr == "SUBR"):  # B-A       
-        stage_o.data = stage_iA.data - stage_iB.data
+        stage_o.data.next = stage_iA.data - stage_iB.data
       elif ( cmdStr == "MULT"):  # A*B       
-        stage_o.data = stage_iA.data * stage_iB.data
+        stage_o.data.next = stage_iA.data * stage_iB.data
+      else:
+        stage_o.data.next = 0 
 
       if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.valid = 1
+          stage_o.valid.next = 1
       else:
-          stage_o.valid = 0
+          stage_o.valid.next = 0
       
       if (stage_iA.sop == 1 and stage_iB.sop == 1):
-          stage_o.sop = 1
+          stage_o.sop.next = 1
       else:
-          stage_o.sop = 0
+          stage_o.sop.next = 0
       
       if (stage_iA.eop == 1 and stage_iB.eop == 1):
-          stage_o.eop = 1
+          stage_o.eop.next = 1
       else:
-          stage_o.eop = 0
+          stage_o.eop.next = 0
  
+      return instances()
 
 
   #@block 
