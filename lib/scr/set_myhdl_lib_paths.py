@@ -29,6 +29,9 @@ def set_myhdl_lib_paths():
   sys.path.append(os.path.join(os.path.dirname(__file__), "../streaming_if_ips/streaming_src_bfm/myhdl/"))
   sys.path.append(os.path.join(os.path.dirname(__file__), "../streaming_if_ips/streaming_snk_bfm/myhdl/"))
 
+  print "setting the paths of the pipeline frameworks"
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../frameworks/commandPipeline/myhdl"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../frameworks/operandPipeline/myhdl"))
 
 if __name__ == "__main__":
   obj = set_myhdl_lib_paths()

@@ -43,41 +43,53 @@ class CommandPipeline():
     """ Convert cmfFile to a cmdStringList of Pipeline operators"""
     cmdStringList=[]
     with open(cmdFile) as f:
-      cmdStringList.append(f.readlines()) 
-    
+      cmdStringList.append(f.readlines())
+       
     return cmdStringList
 
   #@block 
   def block_atomic_oper(self, pars, clk, cmdStr, stage_iA, stage_iB, stage_o):
     """ Atomic Command block """
     
-    @always(clk.posedge)
-    def atomic_operation_assign_process():
-      if ( cmdStr == "ADD"):     # A+B 
-        stage_o.data.next = stage_iA.data + stage_iB.data
-      elif ( cmdStr == "SUB"):   # A-B     
-        stage_o.data.next = stage_iA.data - stage_iB.data
-      elif ( cmdStr == "SUBR"):  # B-A       
-        stage_o.data.next = stage_iA.data - stage_iB.data
-      elif ( cmdStr == "MULT"):  # A*B       
-        stage_o.data.next = stage_iA.data * stage_iB.data
-      elif ( cmdStr == "NOP"):   # No Operation       
-        stage_o.data.next = stage_o.data
+    #@always(clk.posedge)
+    #def atomic_operation_assign_process():
+    #  if ( cmdStr == "ADD"):     # A+B 
+    #    stage_o.next = stage_iA+ stage_iB
+    #  elif ( cmdStr == "SUB"):   # A-B     
+    #    stage_o.next = stage_iA- stage_iB
+    #  elif ( cmdStr == "SUBR"):  # B-A       
+    #    stage_o.next = stage_iB- stage_iA
+    #  elif ( cmdStr == "MULT"):  # A*B       
+    #    stage_o.next = stage_iA* stage_iB
+    #  elif ( cmdStr == "NOP"):   # No Operation       
+    #    stage_o.next = stage_o
+    #@always(clk.posedge)
+    #def atomic_operation_assign_process():
+    #  if ( cmdStr == "ADD"):     # A+B 
+    #    stage_o.data.next = stage_iA.data + stage_iB.data
+    #  elif ( cmdStr == "SUB"):   # A-B     
+    #    stage_o.data.next = stage_iA.data - stage_iB.data
+    #  elif ( cmdStr == "SUBR"):  # B-A       
+    #    stage_o.data.next = stage_iA.data - stage_iB.data
+    #  elif ( cmdStr == "MULT"):  # A*B       
+    #    stage_o.data.next = stage_iA.data * stage_iB.data
+    #  elif ( cmdStr == "NOP"):   # No Operation       
+    #    stage_o.data.next = stage_o.data
 
-      if (stage_iA.valid == 1 and stage_iB.valid == 1):
-          stage_o.valid.next = 1
-      else:
-          stage_o.valid.next = 0
-      
-      if (stage_iA.sop == 1 and stage_iB.sop == 1):
-          stage_o.sop.next = 1
-      else:
-          stage_o.sop.next = 0
-      
-      if (stage_iA.eop == 1 and stage_iB.eop == 1):
-          stage_o.eop.next = 1
-      else:
-          stage_o.eop.next = 0
+      #if (stage_iA.valid == 1 and stage_iB.valid == 1):
+      #    stage_o.valid.next = 1
+      #else:
+      #    stage_o.valid.next = 0
+     # 
+     # if (stage_iA.sop == 1 and stage_iB.sop == 1):
+     #     stage_o.sop.next = 1
+     # else:
+     #     stage_o.sop.next = 0
+     # 
+     # if (stage_iA.eop == 1 and stage_iB.eop == 1):
+     #     stage_o.eop.next = 1
+     # else:
+     #     stage_o.eop.next = 0
  
     return instances()
 
@@ -112,9 +124,27 @@ class CommandPipeline():
     
     reg_stage_inst   = []
     
-    for i in range(1,pars.NB_PIPELINE_STAGES):
-      reg_stage_inst.append(block_atomic_oper(pars, clk, cmdStringList[i], pipe_stageA[i], pipe_stageB[i], io.stage_o[i]))    
+    #for i in range(pars.NB_PIPELINE_STAGES):
+    #for i in range(1):
+    #  reg_stage_inst.append(self.block_atomic_oper(pars, clk, cmdStringList[i], pipe_stageA[i], pipe_stageB[i], stage[i]))    
+    @always(clk.posedge)
+    def atomic_operation_assign_process():
+      if ( cmdStringList[0][0] == "ADD"):     # A+B 
+        stage_o[0].data.next = stage_iA[0].data + stage_iB[0].data
+      elif ( cmdStringList[0][0] == "SUB"):   # A-B     
+        stage_o[0].data.next = stage_iA[0].data - stage_iB[0].data
+      elif ( cmdStringList[0][0] == "SUBR"):  # B-A       
+        stage_o[0].data.next = stage_iA[0].data - stage_iB[0].data
+      elif ( cmdStringList[0][0] == "MULT"):  # A*B       
+        stage_o[0].data.next = stage_iA[0].data * stage_iB[0].data
+      elif ( cmdStringList[0][0] == "NOP"):   # No Operation       
+        stage_o[0].data.next = stage_o[0].data
 
+      #if (stage_iA[0].valid == 1 and stage_iB[0].valid == 1):
+      #stage_o[0].valid.next = 1
+      #else:
+       #   stage_o[0].valid.next = 0
+      
     return instances() 
   
   def validate(self, ipFile, opFile):

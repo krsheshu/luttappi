@@ -3,6 +3,8 @@ from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSigna
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 
+import subprocess
+
 from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
 from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
 
@@ -21,7 +23,7 @@ def sim_command_pipeline(pars_obj):
 
   #------------------ Initializing Pipeline depths ---------------
   
-  NB_PIPELINE_STAGES  = 5
+  NB_PIPELINE_STAGES  = 1
   DATAWIDTH           = 32
    
   #------------------------- Initialisations ---------------------
@@ -42,25 +44,28 @@ def sim_command_pipeline(pars_obj):
   pars.DATAWIDTH=DATAWIDTH
   
   # --- Initializing Pipeline A
-  pipe_inpA  = PipelineST(DATAWIDTH) 
-  pipe_outA  = PipelineST(DATAWIDTH) 
+  pipe_inpA  = PipelineST(pars.DATAWIDTH) 
+  pipe_outA  = PipelineST(pars.DATAWIDTH) 
 
   operand_a=OperandPipeline()
-  ioA=OperandPipelineIo(pars)
+  ioA=OperandPipelineIo()
+  ioA(pars)
 
   # --- Initializing Pipeline B
-  pipe_inpB  = PipelineST(DATAWIDTH) 
-  pipe_outB  = PipelineST(DATAWIDTH) 
+  pipe_inpB  = PipelineST(pars.DATAWIDTH) 
+  pipe_outB  = PipelineST(pars.DATAWIDTH) 
 
   operand_b=OperandPipeline()
-  ioB=OperandPipelineIo(pars)
+  ioB=OperandPipelineIo()
+  ioB(pars)
 
   # --- Initializing Command Pipeline
-  pipe_outC  = PipelineST(DATAWIDTH) 
-  cmdFile='cmd_pipeline.list'
+  pipe_outC  = PipelineST(pars.DATAWIDTH)
+  cmdFile='../tests/cmd_pipeline.list'
   cmdPipe=CommandPipeline()
   cmdStr=cmdPipe.cmd_convert_to_string(pars,cmdFile)
-  ioC=CommandPipelineIo(pars)
+  ioC=CommandPipelineIo()
+  ioC(pars)
 
   #----------------------------------------------------------------
  
@@ -73,20 +78,11 @@ def sim_command_pipeline(pars_obj):
  
   #----------------- Connecting Command Pipeline -------------------
   
-  inst.append(cmdPipe.block_connect(pars, reset, clk, cmdStr, ioA, ioB, pipe_outC, ioC)   
+  inst.append(cmdPipe.block_connect(pars, reset, clk, cmdStr, ioA, ioB, pipe_outC, ioC))   
  
   #----------------------------------------------------------------
   
 
-
-  mult = Signal(intbv(DATAWIDTH+DATAWIDTH))
-  @always(clk.posedge, reset.posedge)
-  def mult_process():
-    if reset==1:
-      mult.next = intbv(0)
-    elif (ioA.stage_o[5].valid == 1 and ioB.stage_o[5].valid == 1):
-      mult.next = mult + ioA.stage_o[5].data * ioB.stage_o[5].data
-      print int(mult.next) 
 
   shiftEn_i = Signal(bool(0))
   @always(clk.posedge)
@@ -132,12 +128,13 @@ def sim_command_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
-    if (pipe_outC.valid == 1):
+    if (1):#pipe_outC.valid == 1):
       nb2+=1
       #print str(nb2) + ". Received data from sink bfm:", ": ", src_bfm_o.data_o
+      print str(nb2) + ". Received data from cmdPipe:", ": ", pipe_outC.data
       recv_data.append(int(pipe_outC.data))
       sim_time_now=now()
-      if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES):
+      if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES + 100):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
