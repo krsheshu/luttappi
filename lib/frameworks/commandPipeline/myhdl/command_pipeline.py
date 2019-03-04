@@ -56,8 +56,6 @@ class CommandPipeline():
 
     print(__name__)
     print(cmdStr) 
-    if (cmdStr == "MULT\n"):
-      print("Mult Found")
     @always(clk.posedge)
     def atomic_operation_assign_process():
       if ( cmdStr == "ADD"):     # A+B 
@@ -68,6 +66,8 @@ class CommandPipeline():
         stage_o.data.next = stage_iB.data - stage_iA.data
       elif ( cmdStr == "MULT"):  # A*B          
         stage_o.data.next = stage_iA.data * stage_iB.data
+      elif ( cmdStr == "ACC"):  # Accumulate          
+        stage_o.data.next =  stage_o.data + stage_iA.data + stage_iB.data
       elif ( cmdStr == "NOP"):   # No Operation       
         stage_o.data.next = stage_o.data
 
@@ -118,9 +118,16 @@ class CommandPipeline():
     """ Call block atomic operation on each stage """ 
     
     reg_stage_inst   = []
-    
-    for i in range(pars.NB_PIPELINE_STAGES):
-      reg_stage_inst.append(self.block_atomic_oper(pars, clk, cmdStringList[i], pipe_stageA.stage_o[i], pipe_stageB.stage_o[i], stage[i]))    
+   
+    for i in range(len(cmdStringList)):
+      if (cmdStringList[i] != "NOP"):
+        index=i 
+    reg_stage_inst.append(self.block_atomic_oper(pars, clk, cmdStringList[index], pipe_stageA.stage_o[index], pipe_stageB.stage_o[index], stage[0]))    
+    for j in range(1,pars.NB_PIPELINE_STAGES):
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, 0, stage[j-1].data) )    
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, 0, stage[j-1].sop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, 0, stage[j-1].eop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, 0, stage[j-1].valid) )
       
     return instances() 
   

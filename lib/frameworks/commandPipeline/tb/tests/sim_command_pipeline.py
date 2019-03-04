@@ -14,7 +14,6 @@ MAX_SIM_TIME = 10000
 MAX_NB_TRANSFERS=32
 trans_data = []
 recv_data = []
-ready_pulses=intbv(0)
 nb1=0 # A global currently inevitable
 nb2=0 # A global currently inevitable
 
@@ -23,7 +22,7 @@ def sim_command_pipeline(pars_obj):
 
   #------------------ Initializing Pipeline depths ---------------
   
-  NB_PIPELINE_STAGES  = 1
+  NB_PIPELINE_STAGES  = 5
   DATAWIDTH           = 32
    
   #------------------------- Initialisations ---------------------
@@ -60,13 +59,21 @@ def sim_command_pipeline(pars_obj):
   ioB(pars)
 
   # --- Initializing Command Pipeline
-  pipe_outC  = PipelineST(pars.DATAWIDTH)
-  cmdFile='../tests/cmd_pipeline.list'
-  cmdPipe=CommandPipeline()
-  cmdStr=cmdPipe.cmd_convert_to_string(pars,cmdFile)
-  ioC=CommandPipelineIo()
-  ioC(pars)
+  pipe_out_mult  = PipelineST(pars.DATAWIDTH)
+  multcmdFile='../tests/mult_pipeline.list'
+  multPipe=CommandPipeline()
+  multCmdStr=multPipe.cmd_convert_to_string(pars,multcmdFile)
+  ioMult=CommandPipelineIo()
+  ioMult(pars)
 
+  # --- Initializing Command Pipeline
+  #pipe_out_acc  = PipelineST(pars.DATAWIDTH)
+  #acccmdFile='../tests/acc_pipeline.list'
+  #accPipe=CommandPipeline()
+  #accCmdStr=accPipe.cmd_convert_to_string(pars,acccmdFile)
+  #ioAcc=CommandPipelineIo()
+  #ioAccIn=CommandPipelineIo()
+  #ioAcc(pars)
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -77,8 +84,10 @@ def sim_command_pipeline(pars_obj):
   #----------------------------------------------------------------
  
   #----------------- Connecting Command Pipeline -------------------
-  
-  inst.append(cmdPipe.block_connect(pars, reset, clk, cmdStr, ioA, ioB, pipe_outC, ioC))   
+  # Mult Pipeline 
+  inst.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_out_mult, ioMult))   
+  # Acc Pipeline 
+  #inst.append(accPipe.block_connect(pars, reset, clk, accCmdStr, ioMult, ioAccIn, pipe_out_acc, ioAcc))   
  
   #----------------------------------------------------------------
   
@@ -99,7 +108,7 @@ def sim_command_pipeline(pars_obj):
     if elapsed_time == 40:
       reset.next = 0
 
-  INIT_DATA=1
+  INIT_DATA=20
   data_in=Signal(int(0))
   @always_comb
   def transmit_data_process():
@@ -128,13 +137,12 @@ def sim_command_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
-    if (pipe_outC.valid == 1):
+    if (pipe_out_mult.valid == 1):
       nb2+=1
-      #print str(nb2) + ". Received data from sink bfm:", ": ", src_bfm_o.data_o
-      print str(nb2) + ". Received data from cmdPipe:", ": ", int(pipe_outC.data)
-      recv_data.append(int(pipe_outC.data))
+      #print str(nb2) + ". Received data from multPipe:", ": ", int(pipe_out_mult.data)
+      recv_data.append(int(pipe_out_mult.data))
       sim_time_now=now()
-      if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES + 100):
+      if (nb2 == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
 
   @always(clk.posedge)
@@ -147,14 +155,13 @@ def sim_command_pipeline(pars_obj):
 
 
 def check_simulation_results(pars_obj):
-  global trans_data,recv_data,ready_pulses
+  global trans_data,recv_data
   err_cnt=0
   trans_l=0
   rest_l=0
   recv_l=0 
   print "Transmitted data: ", str(trans_data)
   print "Received data: ", str(recv_data)
-  print "Num ready pulses: ", str(ready_pulses)
   trans_l=len(trans_data)
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
@@ -166,7 +173,7 @@ def check_simulation_results(pars_obj):
     print "Total num transmitted data= %d" % trans_l  
     print "Total num received data= %d" % recv_l 
     for i in range(0,len(trans_data)):
-      if (trans_data[i]*(trans_data[i]+1) != recv_data[i+1]):
+      if (trans_data[i]*(trans_data[i]+1) != recv_data[i]):
         print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
         err_cnt+=1
     if (err_cnt):
