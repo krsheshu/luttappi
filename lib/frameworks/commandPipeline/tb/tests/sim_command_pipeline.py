@@ -128,10 +128,10 @@ def sim_command_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
-    if (1):#pipe_outC.valid == 1):
+    if (pipe_outC.valid == 1):
       nb2+=1
       #print str(nb2) + ". Received data from sink bfm:", ": ", src_bfm_o.data_o
-      print str(nb2) + ". Received data from cmdPipe:", ": ", pipe_outC.data
+      print str(nb2) + ". Received data from cmdPipe:", ": ", int(pipe_outC.data)
       recv_data.append(int(pipe_outC.data))
       sim_time_now=now()
       if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES + 100):
@@ -166,7 +166,7 @@ def check_simulation_results(pars_obj):
     print "Total num transmitted data= %d" % trans_l  
     print "Total num received data= %d" % recv_l 
     for i in range(0,len(trans_data)):
-      if (trans_data[i] != recv_data[i]):
+      if (trans_data[i]*(trans_data[i]+1) != recv_data[i+1]):
         print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
         err_cnt+=1
     if (err_cnt):
