@@ -10,8 +10,14 @@ from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipeli
 
 #------------------ Globals ---------------
 
-MAX_SIM_TIME = 10000
-MAX_NB_TRANSFERS=500
+DEF_ROUND     = 2
+line_nb=0
+LEN_THETA=3
+acc_out = 0.0# PipelineST(pars.DATAWIDTH)
+
+NB_TRAINING_DATA=100
+MAX_SIM_TIME = LEN_THETA*10000
+MAX_NB_TRANSFERS=LEN_THETA*NB_TRAINING_DATA
 trans_dataA = []
 trans_dataB = []
 recv_data = []
@@ -19,10 +25,6 @@ nbTA=0 # A global currently inevitable
 nbTB=0 # A global currently inevitable
 nbR=0 # A global currently inevitable
 
-DEF_ROUND     = 2
-line_nb=0
-LEN_THETA=3
-acc_out = 0.0# PipelineST(pars.DATAWIDTH)
 
 def sim_command_pipeline(pars_obj):
 
@@ -205,12 +207,14 @@ def sim_command_pipeline(pars_obj):
       nbR+=1
       #print str(nb2) + ". Received data from multPipe:", ": ", int(pipe_out_mult.data)
       recv_data.extend([round(pipe_out_mult.data.next,DEF_ROUND)])
-      if (nbR%LEN_THETA!=0):
+      if (nbR%LEN_THETA ==0 ):
         acc_out = acc_out + pipe_out_mult.data
-        #print("Accumulated Output: {:0.2f} ".format(acc_out))
-      else:  
-        print("Accumulated Output: {:0.2f} g(z): {:d}".format( acc_out,int( (1.0/(1+ (exp**acc_out))) ) )
+        #print("{:d} Acc: {:0.2f} g(z): {:0.2f}".format(nbR/LEN_THETA, acc_out,( (1.0/(1+ (exp**(-1.0*acc_out) ))) ) ) )
+        print("{:d} Acc: {:0.2f} g(z): {:d}".format(nbR/LEN_THETA, acc_out,( int(round(1.0/(1+ (exp**(-1.0*acc_out) )),2)) ) ) )
         acc_out= 0.0
+      else:  
+        acc_out = acc_out + pipe_out_mult.data
+        #print("pipe_out_mult.data: {:0.2f} Accumulated Output: {:0.2f} ".format(float(pipe_out_mult.data), acc_out))
       sim_time_now=now()
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
