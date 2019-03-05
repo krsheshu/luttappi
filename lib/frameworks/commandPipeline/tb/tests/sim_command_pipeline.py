@@ -11,12 +11,13 @@ from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipeli
 #------------------ Globals ---------------
 
 MAX_SIM_TIME = 10000
-MAX_NB_TRANSFERS=32
+MAX_NB_TRANSFERS=4
 trans_data = []
 recv_data = []
 nb1=0 # A global currently inevitable
 nb2=0 # A global currently inevitable
 
+line_nb=0
 
 def sim_command_pipeline(pars_obj):
 
@@ -25,7 +26,7 @@ def sim_command_pipeline(pars_obj):
   NB_PIPELINE_STAGES  = 5
   DATAWIDTH           = 32
    
-  #------------------------- Initialisations ---------------------
+  #-------------- Simulation Initialisations ---------------------
   
   reset = Signal(bool(1))
   clk = Signal(bool(0))
@@ -66,14 +67,8 @@ def sim_command_pipeline(pars_obj):
   ioMult=CommandPipelineIo()
   ioMult(pars)
 
-  # --- Initializing Command Pipeline
-  #pipe_out_acc  = PipelineST(pars.DATAWIDTH)
-  #acccmdFile='../tests/acc_pipeline.list'
-  #accPipe=CommandPipeline()
-  #accCmdStr=accPipe.cmd_convert_to_string(pars,acccmdFile)
-  #ioAcc=CommandPipelineIo()
-  #ioAccIn=CommandPipelineIo()
-  #ioAcc(pars)
+  # Accumulator Output
+  acc_out = PipelineST(pars.DATAWIDTH)
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -86,13 +81,19 @@ def sim_command_pipeline(pars_obj):
   #----------------- Connecting Command Pipeline -------------------
   # Mult Pipeline 
   inst.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_out_mult, ioMult))   
-  # Acc Pipeline 
-  #inst.append(accPipe.block_connect(pars, reset, clk, accCmdStr, ioMult, ioAccIn, pipe_out_acc, ioAcc))   
  
+  #----------------------------------------------------------------
+ 
+  #----------------- Logistic Regression Test File -------------------
+  
+  lr_test_file="../tests/ex2data1.txt"
+  lr_theta_file="../tests/theta1.txt"
+
   #----------------------------------------------------------------
   
 
-
+  #----------------- Shift Enable for pipeData -------------------
+  
   shiftEn_i = Signal(bool(0))
   @always(clk.posedge)
   def shift_signal():
@@ -103,54 +104,101 @@ def sim_command_pipeline(pars_obj):
     ioB.shiftEn_i.next = shiftEn_i
     ioA.shiftEn_i.next = shiftEn_i
  
+  #----------------------------------------------------------------
+  
+  #----------------- Reset For the Module  --------------------
+  
   @always(clk.posedge)
   def stimulus():
     if elapsed_time == 40:
       reset.next = 0
 
+  #----------------------------------------------------------------
+  
+  #----------------- Input Data for the Modules  --------------------
+  
   INIT_DATA=20
   data_in=Signal(int(0))
+  
+
   @always_comb
   def transmit_data_process():
+    global line_nb
     if (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
-      pipe_inpA.data.next = data_in 
+      
+      #---- Splitting values in the line and assigning to float nbs----
+      
+      # Loading test data
+      with open(lr_test_file, 'r') as f:
+        d0=1.0        # Always first element is 1
+        d1,d2,y=(f.read().split('\n')[line_nb]).split(',')
+      line_nb+=1  
+      print d0,d1,d2
+      
+      #loading theta
+      with open(lr_theta_file, 'r') as f:
+        t0,t1,t2=(f.read().split('\n')[0]).split(',')
+      
+      print(t0,t1,t2)
+      #----------------------------------------------------------------
+
+      #pipe_inpA.data.next = intbv(int(float(d0))) 
+      pipe_inpA.data.next = round(float(d0))
+      print(pipe_inpA.data.next)
       pipe_inpA.valid.next = 1
-      pipe_inpB.data.next = data_in+1 
+      #pipe_inpB.data.next = intbv(int(float(d1))) 
+      pipe_inpB.data.next = round(float(t0))
+      print(pipe_inpB.data.next)
       pipe_inpB.valid.next = 1
     else: 
       pipe_inpA.valid.next = 0
       pipe_inpB.valid.next = 0
+  
+  #----------------------------------------------------------------
 
+  #----------------- Storing Transmitted Data  --------------------
+  
   #Dataout is just an increment (for next valid data)
   @always(clk.posedge, reset.posedge)
   def transmit_data_clk_process():
     global trans_data,nb1
     if reset==1:
-      data_in.next = int(INIT_DATA)
+      pass
     elif (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
       nb1+=1
       #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i 
-      trans_data.append(int(data_in))
-      data_in.next = data_in + 1
+      trans_data.append(pipe_inpA.data.next)
+      trans_data.append(pipe_inpB.data.next)
   
+  #----------------------------------------------------------------
+  
+  #----------------- Storing Received Data  -----------------------
   
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
+    exp=2.718
     if (pipe_out_mult.valid == 1):
       nb2+=1
       #print str(nb2) + ". Received data from multPipe:", ": ", int(pipe_out_mult.data)
+      acc_out.data.next = acc_out.data + pipe_out_mult.data
       recv_data.append(int(pipe_out_mult.data))
       sim_time_now=now()
       if (nb2 == MAX_NB_TRANSFERS):
+        print ". Accumulated Output: ", ": ", int(acc_out.data.next), " g(z) : ",  (1.0/(1+ (2**2)))#acc_out.data.next)))
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+  
+  #----------------------------------------------------------------
 
+  #----------------- Max Simulation Time Exit Condition -----------
+  
   @always(clk.posedge)
   def simulation_time_check():
     sim_time_now=now()
     if(sim_time_now>MAX_SIM_TIME):
         raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")  
 
+  #----------------------------------------------------------------
   return instances()
 
 

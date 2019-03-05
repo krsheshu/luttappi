@@ -44,7 +44,7 @@ class OperandPipeline():
     """ OperandPipeline block """
    
     stage = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
-   
+    float0=0.0 
 
     """ Output pipesrc instance """
     data_out_inst   = simple_wire_assign(pipest_src.data, io.stage_o[pars.NB_PIPELINE_STAGES-1].data)
