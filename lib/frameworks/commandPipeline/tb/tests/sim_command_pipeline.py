@@ -11,13 +11,18 @@ from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipeli
 #------------------ Globals ---------------
 
 MAX_SIM_TIME = 10000
-MAX_NB_TRANSFERS=4
-trans_data = []
+MAX_NB_TRANSFERS=500
+trans_dataA = []
+trans_dataB = []
 recv_data = []
-nb1=0 # A global currently inevitable
-nb2=0 # A global currently inevitable
+nbTA=0 # A global currently inevitable
+nbTB=0 # A global currently inevitable
+nbR=0 # A global currently inevitable
 
+DEF_ROUND     = 2
 line_nb=0
+LEN_THETA=3
+acc_out = 0.0# PipelineST(pars.DATAWIDTH)
 
 def sim_command_pipeline(pars_obj):
 
@@ -25,7 +30,6 @@ def sim_command_pipeline(pars_obj):
   
   NB_PIPELINE_STAGES  = 5
   DATAWIDTH           = 32
-   
   #-------------- Simulation Initialisations ---------------------
   
   reset = Signal(bool(1))
@@ -68,7 +72,7 @@ def sim_command_pipeline(pars_obj):
   ioMult(pars)
 
   # Accumulator Output
-  acc_out = PipelineST(pars.DATAWIDTH)
+  #acc_out = 0.0# PipelineST(pars.DATAWIDTH)
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -89,15 +93,46 @@ def sim_command_pipeline(pars_obj):
   lr_test_file="../tests/ex2data1.txt"
   lr_theta_file="../tests/theta1.txt"
 
+  #--- Loading Test and Theta Values 
+  
+  test_file_list=[]
+  theta_file_list=[]
+
+  # Loading test data
+  with open(lr_test_file, 'r') as f:
+    d0=1.0        # Always first element is 1
+    
+    for line in f:
+      #print line
+      d1,d2,y=line.split(',')
+      d0=round(float(d0),DEF_ROUND)
+      d1=round(float(d1),DEF_ROUND)
+      d2=round(float(d2),DEF_ROUND)
+      test_file_list.extend([d0,d1,d2])
+    
+      #loading theta
+      with open(lr_theta_file, 'r') as f:
+       t0,t1,t2=(f.read().split('\n')[0]).split(',')
+       t0=round(float(t0),DEF_ROUND) 
+       t1=round(float(t1),DEF_ROUND)
+       t2=round(float(t2),DEF_ROUND)
+       theta_file_list.extend([t0,t1,t2])
+  
+  #print test_file_list      
+  #print theta_file_list 
   #----------------------------------------------------------------
+  
   
 
   #----------------- Shift Enable for pipeData -------------------
   
   shiftEn_i = Signal(bool(0))
-  @always(clk.posedge)
+  @always(clk.posedge,reset.posedge)
   def shift_signal():
-    shiftEn_i.next = not shiftEn_i
+    if reset:
+      shiftEn_i.next = 1
+    else:
+      shiftEn_i.next = not shiftEn_i
   
   @always_comb
   def shiftOperand_signal():
@@ -124,32 +159,14 @@ def sim_command_pipeline(pars_obj):
   @always_comb
   def transmit_data_process():
     global line_nb
-    if (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
+    if (shiftEn_i == 1 and nbTA == nbTB and nbTA < MAX_NB_TRANSFERS):
       
-      #---- Splitting values in the line and assigning to float nbs----
-      
-      # Loading test data
-      with open(lr_test_file, 'r') as f:
-        d0=1.0        # Always first element is 1
-        d1,d2,y=(f.read().split('\n')[line_nb]).split(',')
-      line_nb+=1  
-      print d0,d1,d2
-      
-      #loading theta
-      with open(lr_theta_file, 'r') as f:
-        t0,t1,t2=(f.read().split('\n')[0]).split(',')
-      
-      print(t0,t1,t2)
-      #----------------------------------------------------------------
-
-      #pipe_inpA.data.next = intbv(int(float(d0))) 
-      pipe_inpA.data.next = round(float(d0))
-      print(pipe_inpA.data.next)
+      pipe_inpA.data.next = test_file_list[line_nb]
       pipe_inpA.valid.next = 1
-      #pipe_inpB.data.next = intbv(int(float(d1))) 
-      pipe_inpB.data.next = round(float(t0))
-      print(pipe_inpB.data.next)
+      pipe_inpB.data.next = theta_file_list[line_nb]
       pipe_inpB.valid.next = 1
+      line_nb+=1
+
     else: 
       pipe_inpA.valid.next = 0
       pipe_inpB.valid.next = 0
@@ -158,17 +175,23 @@ def sim_command_pipeline(pars_obj):
 
   #----------------- Storing Transmitted Data  --------------------
   
-  #Dataout is just an increment (for next valid data)
   @always(clk.posedge, reset.posedge)
-  def transmit_data_clk_process():
-    global trans_data,nb1
+  def trans_dataA_process():
+    global trans_dataA,trans_dataB,nbTA
     if reset==1:
       pass
-    elif (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
-      nb1+=1
-      #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i 
-      trans_data.append(pipe_inpA.data.next)
-      trans_data.append(pipe_inpB.data.next)
+    elif (pipe_inpA.valid == 1 and nbTA < MAX_NB_TRANSFERS):
+      nbTA+=1
+      trans_dataA.extend([pipe_inpA.data.next])
+  
+  @always(clk.posedge, reset.posedge)
+  def trans_dataB_process():
+    global trans_dataA,trans_dataB,nbTB
+    if reset==1:
+      pass
+    elif (pipe_inpB.valid == 1 and nbTB < MAX_NB_TRANSFERS):
+      nbTB+=1
+      trans_dataB.extend([pipe_inpB.data.next])
   
   #----------------------------------------------------------------
   
@@ -176,16 +199,20 @@ def sim_command_pipeline(pars_obj):
   
   @always(clk.posedge)
   def receive_data_process():
-    global recv_data,nb2
+    global recv_data,nbR,acc_out
     exp=2.718
     if (pipe_out_mult.valid == 1):
-      nb2+=1
+      nbR+=1
       #print str(nb2) + ". Received data from multPipe:", ": ", int(pipe_out_mult.data)
-      acc_out.data.next = acc_out.data + pipe_out_mult.data
-      recv_data.append(int(pipe_out_mult.data))
+      recv_data.extend([round(pipe_out_mult.data.next,DEF_ROUND)])
+      if (nbR%LEN_THETA!=0):
+        acc_out = acc_out + pipe_out_mult.data
+        #print("Accumulated Output: {:0.2f} ".format(acc_out))
+      else:  
+        print("Accumulated Output: {:0.2f} g(z): {:d}".format( acc_out,int( (1.0/(1+ (exp**acc_out))) ) )
+        acc_out= 0.0
       sim_time_now=now()
-      if (nb2 == MAX_NB_TRANSFERS):
-        print ". Accumulated Output: ", ": ", int(acc_out.data.next), " g(z) : ",  (1.0/(1+ (2**2)))#acc_out.data.next)))
+      if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
   
   #----------------------------------------------------------------
@@ -203,31 +230,40 @@ def sim_command_pipeline(pars_obj):
 
 
 def check_simulation_results(pars_obj):
-  global trans_data,recv_data
+  global trans_dataA, trans_dataB, recv_data
   err_cnt=0
   trans_l=0
   rest_l=0
   recv_l=0 
-  print "Transmitted data: ", str(trans_data)
-  print "Received data: ", str(recv_data)
-  trans_l=len(trans_data)
+  #print "Transmitted data A: ", str(trans_dataA)
+  #print "Transmitted data B: ", str(trans_dataB)
+  #print "Received data: ", str(recv_data)
+  trans_lA=len(trans_dataA)
+  trans_lB=len(trans_dataB)
+  if trans_lA != trans_lB :
+    print("ERR240: trans_lA does not match trans_lB. Quitting!")
+    sys.exit()  
   recv_l=len(recv_data)
-  rest_l=trans_l-recv_l
+  rest_l=(trans_lA+trans_lB)/2-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
     print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
     print "ERR124: Simulation unsuccessful!."
 
   else:
-    print "Total num transmitted data= %d" % trans_l  
+    print "Total num transmitted data A= %d" % trans_lA  
+    print "Total num transmitted data B= %d" % trans_lB  
     print "Total num received data= %d" % recv_l 
-    for i in range(0,len(trans_data)):
-      if (trans_data[i]*(trans_data[i]+1) != recv_data[i]):
-        print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
+    for i in range(0,trans_lA):
+      txA=round(trans_dataA[i],DEF_ROUND)
+      txB=round(trans_dataB[i],DEF_ROUND)
+      rx=round(recv_data[i],DEF_ROUND)
+      if (round(txA*txB,DEF_ROUND) != rx):
+        print "ERR131: Mult Mismatch! tx_dataA  {:0.2f} tx_dataB= {:0.2f} recv_data={:0.2f}".format(txA,txB,rx)
         err_cnt+=1
     if (err_cnt):
       print "ERR134: Results not Matched. Simulation unsuccessful!"
     else:
-      print "Receive and transmit data exactly matches..." 
+      print "Mult Pipeline exactly matches..." 
       print "Simulation Successful!"
 
 
