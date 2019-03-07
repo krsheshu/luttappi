@@ -120,4 +120,4 @@ class PipelineST():
         self.channel = Signal(intbv(0)[channel_width:])
          ## data bus input signal
         #self.data = Signal(intbv(0)[data_width:])
-        self.data = Signal(float(0))
+        self.data = Signal(float(0.0))
