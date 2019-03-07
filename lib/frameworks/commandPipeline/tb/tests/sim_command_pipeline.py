@@ -25,6 +25,8 @@ nbTA=0 # A global currently inevitable
 nbTB=0 # A global currently inevitable
 nbR=0 # A global currently inevitable
 
+y_val=[]
+prediction=[]
 
 def sim_command_pipeline(pars_obj):
 
@@ -111,6 +113,7 @@ def sim_command_pipeline(pars_obj):
       d1=round(float(d1),DEF_ROUND)
       d2=round(float(d2),DEF_ROUND)
       test_file_list.extend([d0,d1,d2])
+      y_val.extend([y])
     
       #loading theta
       with open(lr_theta_file, 'r') as f:
@@ -209,8 +212,10 @@ def sim_command_pipeline(pars_obj):
       recv_data.extend([round(pipe_out_mult.data.next,DEF_ROUND)])
       if (nbR%LEN_THETA ==0 ):
         acc_out = acc_out + pipe_out_mult.data
+        predict=int(round(1.0/(1+ (exp**(-1.0*acc_out) )),2))
+        prediction_res.extend([predict])
         #print("{:d} Acc: {:0.2f} g(z): {:0.2f}".format(nbR/LEN_THETA, acc_out,( (1.0/(1+ (exp**(-1.0*acc_out) ))) ) ) )
-        print("{:d} Acc: {:0.2f} g(z): {:d}".format(nbR/LEN_THETA, acc_out,( int(round(1.0/(1+ (exp**(-1.0*acc_out) )),2)) ) ) )
+        print("{:d} Acc: {:0.2f} g(z): {:d}".format(nbR/LEN_THETA, acc_out, predict) )
         acc_out= 0.0
       else:  
         acc_out = acc_out + pipe_out_mult.data
