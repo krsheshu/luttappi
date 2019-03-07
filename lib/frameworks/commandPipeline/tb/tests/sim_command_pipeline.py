@@ -26,7 +26,7 @@ nbTB=0 # A global currently inevitable
 nbR=0 # A global currently inevitable
 
 y_val=[]
-prediction=[]
+prediction_res=[]
 
 def sim_command_pipeline(pars_obj):
 
@@ -113,7 +113,7 @@ def sim_command_pipeline(pars_obj):
       d1=round(float(d1),DEF_ROUND)
       d2=round(float(d2),DEF_ROUND)
       test_file_list.extend([d0,d1,d2])
-      y_val.extend([y])
+      y_val.extend([int(y)])
     
       #loading theta
       with open(lr_theta_file, 'r') as f:
@@ -272,7 +272,15 @@ def check_simulation_results(pars_obj):
     if (err_cnt):
       print "ERR134: Results not Matched. Simulation unsuccessful!"
     else:
-      print "Mult Pipeline exactly matches..." 
+      print "Mult Pipeline exactly matches..."
+      nb_correct=0
+      for i in range(len(prediction_res)):
+        if(y_val[i] == prediction_res[i]):
+          nb_correct+=1
+      print y_val,prediction_res,nb_correct
+      tAcc=(100.0*nb_correct)/(len(prediction_res))   
+      print("Predicted examples: {:d}".format(len(prediction_res))) 
+      print("Expected Training Accuracy : {:0.2f} approx".format(tAcc)) 
       print "Simulation Successful!"
 
 
