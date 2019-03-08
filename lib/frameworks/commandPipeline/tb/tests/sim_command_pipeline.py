@@ -12,9 +12,11 @@ from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipeli
 
 #------------------ Globals ---------------
 
-DEF_ROUND     = 6
+DEF_ROUND     = 1
 line_nb=0
 LEN_THETA=3
+
+# Accumulator Output
 acc_out = 0.0# PipelineST(pars.DATAWIDTH)
 
 NB_TRAINING_DATA=100
@@ -77,8 +79,6 @@ def sim_command_pipeline(pars_obj):
   ioMult=CommandPipelineIo()
   ioMult(pars)
 
-  # Accumulator Output
-  #acc_out = 0.0# PipelineST(pars.DATAWIDTH)
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -208,22 +208,21 @@ def sim_command_pipeline(pars_obj):
   def receive_data_process():
     global recv_data,nbR,acc_out
     if (pipe_out_mult.valid == 1):
+      mult_out= (round(pipe_out_mult.data,DEF_ROUND))
       nbR+=1
-      #print str(nb2) + ". Received data from multPipe:", ": ", int(pipe_out_mult.data)
-      recv_data.extend([round(pipe_out_mult.data.next,DEF_ROUND)])
+      recv_data.extend([mult_out])
       if (nbR%LEN_THETA ==0 ):
-        acc_out = acc_out + pipe_out_mult.data
+        acc_out = acc_out + mult_out
         prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))
-        if(prob >= 0.5):
-          predict=1
-        else:
-          predict=0
+        predict = 1 if(prob >= 0.5) else 0
         prediction_res.extend([predict])
-        #print("{:d} Acc: {:0.2f} g(z): {:d} prob: {:0.6f}".format(nbR/LEN_THETA, acc_out, predict, prob) )
+        if __debug__:
+          print("{0:d} Acc: {1:0.2f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, acc_out, predict, prob,i=DEF_ROUND+1) )
         acc_out= 0.0
-      else:  
-        acc_out = acc_out + pipe_out_mult.data
-        #print("pipe_out_mult.data: {:0.6f} Accumulated Output: {:0.6f} ".format(float(pipe_out_mult.data), acc_out))
+      else: 
+        acc_out = acc_out + mult_out
+        if __debug__:
+          print("mult_out: {:0.{i}f} Accumulated Output: {:0.{i}f} ".format(mult_out, acc_out,i=DEF_ROUND+1))
       sim_time_now=now()
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
