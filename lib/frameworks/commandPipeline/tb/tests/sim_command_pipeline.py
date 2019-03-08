@@ -18,6 +18,7 @@ LEN_THETA=3
 
 # Accumulator Output
 acc_out = 0.0# PipelineST(pars.DATAWIDTH)
+acc_out_list=[]
 
 NB_TRAINING_DATA=100
 MAX_SIM_TIME = LEN_THETA*10000
@@ -213,16 +214,18 @@ def sim_command_pipeline(pars_obj):
       recv_data.extend([mult_out])
       if (nbR%LEN_THETA ==0 ):
         acc_out = acc_out + mult_out
-        prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))
+        acc_out_list.extend([round(acc_out,DEF_ROUND)])
+        prob = 1 if acc_out > 0 else 0
+        #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))
         predict = 1 if(prob >= 0.5) else 0
         prediction_res.extend([predict])
         if __debug__:
-          print("{0:d} Acc: {1:0.2f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, acc_out, predict, prob,i=DEF_ROUND+1) )
+          print("{0:d} Acc: {1:0.{i}f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, acc_out, predict, prob,i=DEF_ROUND) )
         acc_out= 0.0
       else: 
         acc_out = acc_out + mult_out
         if __debug__:
-          print("mult_out: {:0.{i}f} Accumulated Output: {:0.{i}f} ".format(mult_out, acc_out,i=DEF_ROUND+1))
+          print("mult_out: {:0.{i}f} Accumulated Output: {:0.{i}f} ".format(mult_out, acc_out,i=DEF_ROUND))
       sim_time_now=now()
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
@@ -284,6 +287,10 @@ def check_simulation_results(pars_obj):
       tAcc=(100.0*nb_correct)/(len(prediction_res))   
       print("Predicted examples: {:d}".format(len(prediction_res))) 
       print("Expected Training Accuracy : {:0.2f} approx".format(tAcc)) 
+      #print acc_out_list,max(acc_out_list),min(acc_out_list)
+      if __debug__:
+        print("Max acc_out_list: {:0.{i}f} Min acc_out_list: {:0.{i}f}" .format(max(acc_out_list),min(acc_out_list),i=2))
+        print acc_out_list
       print "Simulation Successful!"
 
 
