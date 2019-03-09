@@ -55,25 +55,27 @@ def sim_command_pipeline(pars_obj):
   pars=OperandPipelinePars()
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
+  pars.CHANNEL_WIDTH=1
+  pars.INIT_DATA=0.0 # requires floating point computation 
   
   # --- Initializing Pipeline A
-  pipe_inpA  = PipelineST(pars.DATAWIDTH) 
-  pipe_outA  = PipelineST(pars.DATAWIDTH) 
+  pipe_inpA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
+  pipe_outA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
 
   operand_a=OperandPipeline()
   ioA=OperandPipelineIo()
   ioA(pars)
 
   # --- Initializing Pipeline B
-  pipe_inpB  = PipelineST(pars.DATAWIDTH) 
-  pipe_outB  = PipelineST(pars.DATAWIDTH) 
+  pipe_inpB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
+  pipe_outB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
 
   operand_b=OperandPipeline()
   ioB=OperandPipelineIo()
   ioB(pars)
 
   # --- Initializing Command Pipeline
-  pipe_out_mult  = PipelineST(pars.DATAWIDTH)
+  pipe_out_mult  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   multcmdFile='../tests/mult_pipeline.list'
   multPipe=CommandPipeline()
   multCmdStr=multPipe.cmd_convert_to_string(pars,multcmdFile)

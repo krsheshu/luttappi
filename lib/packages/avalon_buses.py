@@ -108,7 +108,7 @@ class AvalonST_SRC_ARRAY():
 
 class PipelineST():
     """ class to access Pipeline Stream """
-    def __init__(self, data_width=8, channel_width=4):
+    def __init__(self, data_width=8, channel_width=4,init_data=0):
         """ Pipeline Stream Signals """
         ## start of packet output signal
         self.sop= Signal(bool(0))
@@ -119,5 +119,8 @@ class PipelineST():
          ## channel output signal, currently not used
         self.channel = Signal(intbv(0)[channel_width:])
          ## data bus input signal
-        #self.data = Signal(intbv(0)[data_width:])
-        self.data = Signal(float(0.0))
+        if (isinstance(init_data,float)):
+          self.data = Signal(float(0.0))
+        else:
+          self.data = Signal(intbv(0)[data_width:])
+        

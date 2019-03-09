@@ -10,25 +10,32 @@ class CommandPipelineIo():
   def __init__(self):
     """ Initialize CommandPipeline Ios """
     self.NB_PIPELINE_STAGES = 4
-    self.DATAWIDTH = 32
-    self.stage_o    = [PipelineST(self.DATAWIDTH) for i in range(self.NB_PIPELINE_STAGES)]
+    self.DATAWIDTH          = 32
+    self.CHANNEL_WIDTH      = 1
+    self.INIT_DATA          = 0
+
+    self.stage_o    = [PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA) for i in range(self.NB_PIPELINE_STAGES)]
  
   
   def __call__(self,pars):
     """ Overwrite CommandPipeline Ios """
-    self.stage_o    = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
+    self.stage_o    = [PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) for i in range(pars.NB_PIPELINE_STAGES)]
 
 #----Parameters for operationPipeline Class
 class CommandPipelinePars(): 
   def __init__(self):
     """ Initialize CommandPipeline parameters """
     self.NB_PIPELINE_STAGES = 4
-    self.DATAWIDTH          = 32 
+    self.DATAWIDTH          = 32
+    self.CHANNEL_WIDTH      = 1
+    self.INIT_DATA          = 0 
   
   def __call__(self,pars):
     """ Overwrite CommandPipeline parameters """
     self.NB_PIPELINE_STAGES = pars.NB_PIPELINE_STAGES
     self.DATAWIDTH          = pars.DATAWIDTH
+    self.CHANNEL_WIDTH      = pars.CHANNEL_WIDTH
+    self.INIT_DATA          = pars.INIT_DATA
 
 
 
@@ -93,8 +100,10 @@ class CommandPipeline():
   def block_connect(self, pars, reset, clk, cmdStringList, pipe_stageA, pipe_stageB, pipest_src, io):
     """ CommandPipeline block """
    
-    stage = [PipelineST(pars.DATAWIDTH) for i in range(pars.NB_PIPELINE_STAGES)]
+    stage = [PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) for i in range(pars.NB_PIPELINE_STAGES)]
    
+    # Reset value to incorporate float and intbv formats
+    reset_val = 0.0 if (isinstance(pars.INIT_DATA,float)) else 0
 
     """ Output pipesrc instance """
     data_out_inst   = simple_wire_assign(pipest_src.data, io.stage_o[pars.NB_PIPELINE_STAGES-1].data)
@@ -124,10 +133,10 @@ class CommandPipeline():
         index=i 
     reg_stage_inst.append(self.block_atomic_oper(pars, clk, cmdStringList[index], pipe_stageA.stage_o[index], pipe_stageB.stage_o[index], stage[0]))    
     for j in range(1,pars.NB_PIPELINE_STAGES):
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, 0, stage[j-1].data) )    
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, 0, stage[j-1].sop) )   
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, 0, stage[j-1].eop) )   
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, 0, stage[j-1].valid) )
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, reset_val, stage[j-1].data) )    
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, reset_val, stage[j-1].sop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, reset_val, stage[j-1].eop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, reset_val, stage[j-1].valid) )
       
     return instances() 
   
