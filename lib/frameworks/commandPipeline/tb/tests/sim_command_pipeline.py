@@ -9,6 +9,25 @@ import subprocess
 
 from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
 from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
+from accumulator import Accumulator, AccumulatorPars
+
+
+# Global Parameters-------------------------
+# These pars control the data format
+# floatDataBus = False for simulation in real scenario with intbv mult
+# floatDataBus = True for simulation with floating point mult
+floatDataBus=False
+
+# NB_TRAINING_DATA - Controls the number of training data to be verified 
+NB_TRAINING_DATA=100
+
+# Determins the decimal shift needed in the theta and training data parameters
+# For example, for training data 32.5, a shift of 1 will use value of 325 for intbv representation
+#              for theta value of -25.21, a shift of 2 will use -2521 for theta value 
+test_decimal_shift=1
+theta_decimal_shift=2
+
+#-------------------------------------------
 
 
 # Globals ----------------------------------
@@ -21,7 +40,6 @@ LEN_THETA=3
 
 # Transmit Receive Parameters---------------
 
-NB_TRAINING_DATA=100
 MAX_SIM_TIME = LEN_THETA*10000
 MAX_NB_TRANSFERS=LEN_THETA*NB_TRAINING_DATA
 trans_dataA = []
@@ -31,14 +49,7 @@ nbTA=0 # A global currently inevitable
 nbTB=0 # A global currently inevitable
 nbR=0 # A global currently inevitable
 
-
-#--------Decimal Shift for the Test as well as Theta Parameters----------------
-
-test_decimal_shift=1
-theta_decimal_shift=2
-
-#-------------------------------------------------------------------------------
-
+#-------------------------------------------
 
 # Global Accumulator Output ----------------
 
@@ -46,13 +57,14 @@ acc_out = 0.0# PipelineST(pars.DATAWIDTH)
 acc_out_list=[]
 
 #-------------------------------------------
+
 # Other Globals------------------------------
 
 label=[]
 prediction_res=[]
-floatDataBus=False
 
 #--------------------------------------------
+
 def sim_command_pipeline(pars_obj):
 
   global test_decimal_shift, theta_decimal_shift
@@ -101,13 +113,25 @@ def sim_command_pipeline(pars_obj):
   ioB(pars)
 
   # --- Initializing Command Pipeline
-  pipe_out_mult  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+  pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   multcmdFile='../tests/mult_pipeline.list'
   multPipe=CommandPipeline()
   multCmdStr=multPipe.cmd_convert_to_string(pars,multcmdFile)
   ioMult=CommandPipelineIo()
   ioMult(pars)
 
+  # ---- Initializing Accumulator Block
+  
+  pipe_out_acc = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+  parsAcc= AccumulatorPars()
+  parsAcc.DATAWIDTH= pars.DATAWIDTH
+  parsAcc.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
+  parsAcc.INIT_DATA = pars.INIT_DATA
+  global LEN_THETA
+  parsAcc.NB_ACCUMULATIONS = LEN_THETA  
+  accuPipe= Accumulator() 
+  accuPipe(parsAcc) 
+  
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -119,7 +143,13 @@ def sim_command_pipeline(pars_obj):
  
   #----------------- Connecting Command Pipeline -------------------
   # Mult Pipeline 
-  inst.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_out_mult, ioMult))   
+  inst.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_multRes, ioMult))   
+ 
+  #----------------------------------------------------------------
+  
+  #----------------- Connecting Accumulator  --------------
+  # Accu  
+  inst.append(accuPipe.block_connect(parsAcc, reset, clk, 0, pipe_multRes, pipe_out_acc))   
  
   #----------------------------------------------------------------
  
@@ -247,16 +277,17 @@ def sim_command_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nbR,acc_out
-    if (pipe_out_mult.valid == 1):
+    if (pipe_multRes.valid == 1):
       if (False == floatDataBus):
-        mult_out= pipe_out_mult.data
+        mult_out= pipe_multRes.data
       else:
-        mult_out= (round(pipe_out_mult.data,DEF_ROUND))
-      nbR+=1
+        mult_out= (round(pipe_multRes.data,DEF_ROUND))
       recv_data.extend([mult_out])
-      
+    
+    if(pipe_out_acc.valid == 1):  
+      nbR+=1
       if (nbR%LEN_THETA ==0 ):
-        acc_out = acc_out + mult_out
+        acc_out = pipe_out_acc.data
         prob = 1 if acc_out > 0 else 0              # Simple Step Function
         #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))  # Sigmoid activation Function
         predict = 1 if(prob >= 0.5) else 0
@@ -268,18 +299,9 @@ def sim_command_pipeline(pars_obj):
             print("{0:d} Acc: {1:0.{i}f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, acc_out, predict, prob,i=DEF_ROUND) )
         if (False == floatDataBus):
           acc_out_list.extend([acc_out])
-          acc_out=0  
         else:
           acc_out_list.extend([round(acc_out,DEF_ROUND)])
-          acc_out= 0.0
 
-      else: 
-        acc_out = acc_out + mult_out
-        if __debug__:
-          if (False == floatDataBus):
-            print("mult_out: {:d} Accumulated Output: {:d} ".format(int(mult_out), int(acc_out)))
-          else:
-            print("mult_out: {:0.{i}f} Accumulated Output: {:0.{i}f} ".format(mult_out, acc_out,i=DEF_ROUND))
       sim_time_now=now()
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  

@@ -32,6 +32,7 @@ def set_myhdl_lib_paths():
   print "setting the paths of the pipeline frameworks"
   sys.path.append(os.path.join(os.path.dirname(__file__), "../frameworks/commandPipeline/myhdl"))
   sys.path.append(os.path.join(os.path.dirname(__file__), "../frameworks/operandPipeline/myhdl"))
+  sys.path.append(os.path.join(os.path.dirname(__file__), "../frameworks/accumulator/myhdl"))
 
 if __name__ == "__main__":
   obj = set_myhdl_lib_paths()
