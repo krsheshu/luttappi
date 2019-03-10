@@ -17,7 +17,7 @@ from activation import Activation, ActivationPars
 # These pars control the data format
 # floatDataBus = False for simulation in real scenario with intbv mult
 # floatDataBus = True for simulation with floating point mult
-floatDataBus=True
+floatDataBus=False
 
 # NB_TRAINING_DATA - Controls the number of training data to be verified 
 NB_TRAINING_DATA=100
@@ -303,23 +303,6 @@ def sim_command_pipeline(pars_obj):
         mult_out= (round(pipe_multRes.data,DEF_ROUND))
       recv_data.extend([mult_out])
    
-    
-    # Collecting Accumulator Data 
-    if(pipe_out_acc.valid == 1):  
-      acc_out = pipe_out_acc.data
-      #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
-      if __debug__:
-        if (False == floatDataBus):
-          print("{0:d} Acc: {1:d} ".format(nbR/LEN_THETA, int(acc_out), i=DEF_ROUND)),
-        else:
-          print("{0:d} Acc: {1:0.{i}f}".format(nbR/LEN_THETA, float(acc_out), i=DEF_ROUND)),
-      if (False == floatDataBus):
-        acc_out_list.extend([int(acc_out)])
-      else:
-        acc_out_list.extend([round(acc_out,DEF_ROUND)])
-      #print "nbR:" + str(nbR) 
-      sim_time_now=now()
-
     # Collecting Activation Data 
     if(pipe_out_activ.valid == 1):  
       nbR+=LEN_THETA
@@ -329,6 +312,23 @@ def sim_command_pipeline(pars_obj):
           print(" prediction: {:d}".format(predict) )
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+
+    
+    # Collecting Accumulator Data 
+    if(pipe_out_acc.valid == 1):  
+      acc_out = pipe_out_acc.data
+      #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
+      if __debug__:
+        if (False == floatDataBus):
+          print("{0:d} Acc: {1:d} ".format(nbR/LEN_THETA+1, int(acc_out), i=DEF_ROUND)),
+        else:
+          print("{0:d} Acc: {1:0.{i}f}".format(nbR/LEN_THETA+1, float(acc_out), i=DEF_ROUND)),
+      if (False == floatDataBus):
+        acc_out_list.extend([int(acc_out)])
+      else:
+        acc_out_list.extend([round(acc_out,DEF_ROUND)])
+      #print "nbR:" + str(nbR) 
+      sim_time_now=now()
 
   
   #----------------------------------------------------------------
