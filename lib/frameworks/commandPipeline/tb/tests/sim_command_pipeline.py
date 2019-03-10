@@ -21,11 +21,12 @@ floatDataBus=False
 # NB_TRAINING_DATA - Controls the number of training data to be verified 
 NB_TRAINING_DATA=100
 
-# Determins the decimal shift needed in the theta and training data parameters
+# When using intbv for the data (not the floating point simulation),
+# determine the decimal shift needed in the theta and training data parameters
 # For example, for training data 32.5, a shift of 1 will use value of 325 for intbv representation
 #              for theta value of -25.21, a shift of 2 will use -2521 for theta value 
 test_decimal_shift=1
-theta_decimal_shift=2
+theta_decimal_shift=1
 
 #-------------------------------------------
 
@@ -296,9 +297,9 @@ def sim_command_pipeline(pars_obj):
           if (False == floatDataBus):
             print("{0:d} Acc: {1:d} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, int(acc_out), predict, prob,i=DEF_ROUND) )
           else:
-            print("{0:d} Acc: {1:0.{i}f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, acc_out, predict, prob,i=DEF_ROUND) )
+            print("{0:d} Acc: {1:0.{i}f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, float(acc_out), predict, prob,i=DEF_ROUND) )
         if (False == floatDataBus):
-          acc_out_list.extend([acc_out])
+          acc_out_list.extend([int(acc_out)])
         else:
           acc_out_list.extend([round(acc_out,DEF_ROUND)])
 
@@ -373,11 +374,14 @@ def check_simulation_results(pars_obj):
       #print label,prediction_res,nb_correct
       tAcc=(100.0*nb_correct)/(len(prediction_res))   
       print("Predicted examples: {:d}".format(len(prediction_res))) 
-      print("Expected Training Accuracy : {:0.2f} approx".format(tAcc)) 
+      print("Expected Training Accuracy: 89% Measured: {:0.2f}% approx".format(tAcc)) 
       #print acc_out_list,max(acc_out_list),min(acc_out_list)
-      if __debug__:
-        print("Max acc_out_list: {:0.{i}f} Min acc_out_list: {:0.{i}f}" .format(max(acc_out_list),min(acc_out_list),i=2))
-        print "Acc_out" + str(acc_out_list)
+      if __debug__: 
+        if (False == floatDataBus):
+          print("Max acc_out_list: {:d} Min acc_out_list: {:d}" .format(max(acc_out_list),min(acc_out_list)))
+        else:
+          print("Max acc_out_list: {:0.{i}f} Min acc_out_list: {:0.{i}f}" .format(max(acc_out_list),min(acc_out_list),i=2))
+        #print "Acc_out" + str(acc_out_list)
       print "Simulation Successful!"
 
 

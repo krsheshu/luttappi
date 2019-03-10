@@ -46,24 +46,30 @@ class Accumulator():
     reset_val = 0.0 if (isinstance(pars.INIT_DATA,float)) else 0
     
     acc_cnt=Signal(intbv(0)[CLogB2(pars.NB_ACCUMULATIONS):])
-
+    
+    # Counter to count nb accumulations 
     @always(clk.posedge, reset.posedge)
     def acc_cnt_process():
       if reset or reset_acc:  # Synchronous reset_acc
         acc_cnt.next = 0
-      elif (pipe_in.valid == 1  and acc_cnt < pars.NB_ACCUMULATIONS):
-        acc_cnt.next = acc_cnt + 1
-      else:
-        acc_cnt.next = 0
+      elif (pipe_in.valid == 1):
+        if(acc_cnt < (pars.NB_ACCUMULATIONS-1)):
+          acc_cnt.next = acc_cnt + 1
+        else:
+          acc_cnt.next = 0
  
+    # Accumulate data when valid data present till valid nb counts 
     @always(clk.posedge, reset.posedge)
     def accumulator_process():
       if reset or reset_acc:  # Synchronous reset_acc
         self.accu.data.next = reset_val
-      elif (pipe_in.valid == 1 and acc_cnt == 0):  # If valid, accumulate data
-        self.accu.data.next = pipe_in.data 
-      elif (pipe_in.valid == 1): 
-        self.accu.data.next = self.accu.data + pipe_in.data 
+      elif (pipe_in.valid == 1):
+        if (acc_cnt == 0):  # If valid, accumulate data
+          self.accu.data.next = pipe_in.data 
+        else: 
+          self.accu.data.next = self.accu.data + pipe_in.data
+        #print("INF65: acc_cnt: {:s} pipe_in.data: {:d} accu.data.next: {:d}".format(acc_cnt, int(pipe_in.data), int(self.accu.data)))
+       
         
 
     """ Output pipesrc instance """
