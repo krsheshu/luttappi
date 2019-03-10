@@ -10,13 +10,14 @@ import subprocess
 from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
 from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
 from accumulator import Accumulator, AccumulatorPars
+from activation import Activation, ActivationPars
 
 
 # Global Parameters-------------------------
 # These pars control the data format
 # floatDataBus = False for simulation in real scenario with intbv mult
 # floatDataBus = True for simulation with floating point mult
-floatDataBus=False
+floatDataBus=True
 
 # NB_TRAINING_DATA - Controls the number of training data to be verified 
 NB_TRAINING_DATA=100
@@ -42,7 +43,7 @@ LEN_THETA=3
 # Transmit Receive Parameters---------------
 
 MAX_SIM_TIME = LEN_THETA*10000
-MAX_NB_TRANSFERS=LEN_THETA*NB_TRAINING_DATA
+MAX_NB_TRANSFERS=NB_TRAINING_DATA*LEN_THETA
 trans_dataA = []
 trans_dataB = []
 recv_data = []
@@ -133,6 +134,15 @@ def sim_command_pipeline(pars_obj):
   accuPipe= Accumulator() 
   accuPipe(parsAcc) 
   
+  # ---- Initializing Activation Block
+  
+  parsActiv= ActivationPars()
+  parsActiv.DATAWIDTH= 3    # 0 or 1 for classification
+  parsActiv.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
+  parsActiv.INIT_DATA = pars.INIT_DATA
+  pipe_out_activ = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+  activPipe= Activation() 
+  activPipe(parsActiv) 
   #----------------------------------------------------------------
  
   #----------------- Connecting Pipeline Blocks -------------------
@@ -151,6 +161,12 @@ def sim_command_pipeline(pars_obj):
   #----------------- Connecting Accumulator  --------------
   # Accu  
   inst.append(accuPipe.block_connect(parsAcc, reset, clk, 0, pipe_multRes, pipe_out_acc))   
+ 
+  #----------------------------------------------------------------
+  
+  #----------------- Connecting Activation  --------------
+  # Simple Step Activation function  
+  inst.append(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
  
   #----------------------------------------------------------------
  
@@ -278,34 +294,42 @@ def sim_command_pipeline(pars_obj):
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nbR,acc_out
+    
+    # Collecting multiplier data
     if (pipe_multRes.valid == 1):
       if (False == floatDataBus):
         mult_out= pipe_multRes.data
       else:
         mult_out= (round(pipe_multRes.data,DEF_ROUND))
       recv_data.extend([mult_out])
+   
     
+    # Collecting Accumulator Data 
     if(pipe_out_acc.valid == 1):  
-      nbR+=1
-      if (nbR%LEN_THETA ==0 ):
-        acc_out = pipe_out_acc.data
-        prob = 1 if acc_out > 0 else 0              # Simple Step Function
-        #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))  # Sigmoid activation Function
-        predict = 1 if(prob >= 0.5) else 0
-        prediction_res.extend([predict])
-        if __debug__:
-          if (False == floatDataBus):
-            print("{0:d} Acc: {1:d} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, int(acc_out), predict, prob,i=DEF_ROUND) )
-          else:
-            print("{0:d} Acc: {1:0.{i}f} g(z): {2:d} prob: {3:0.{i}f}".format(nbR/LEN_THETA, float(acc_out), predict, prob,i=DEF_ROUND) )
+      acc_out = pipe_out_acc.data
+      #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
+      if __debug__:
         if (False == floatDataBus):
-          acc_out_list.extend([int(acc_out)])
+          print("{0:d} Acc: {1:d} ".format(nbR/LEN_THETA, int(acc_out), i=DEF_ROUND)),
         else:
-          acc_out_list.extend([round(acc_out,DEF_ROUND)])
-
+          print("{0:d} Acc: {1:0.{i}f}".format(nbR/LEN_THETA, float(acc_out), i=DEF_ROUND)),
+      if (False == floatDataBus):
+        acc_out_list.extend([int(acc_out)])
+      else:
+        acc_out_list.extend([round(acc_out,DEF_ROUND)])
+      #print "nbR:" + str(nbR) 
       sim_time_now=now()
+
+    # Collecting Activation Data 
+    if(pipe_out_activ.valid == 1):  
+      nbR+=LEN_THETA
+      predict = int(pipe_out_activ.data)                    
+      prediction_res.extend([predict])
+      if __debug__:
+          print(" prediction: {:d}".format(predict) )
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+
   
   #----------------------------------------------------------------
 
@@ -374,7 +398,7 @@ def check_simulation_results(pars_obj):
       #print label,prediction_res,nb_correct
       tAcc=(100.0*nb_correct)/(len(prediction_res))   
       print("Predicted examples: {:d}".format(len(prediction_res))) 
-      print("Expected Training Accuracy: 89% Measured: {:0.2f}% approx".format(tAcc)) 
+      print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc)) 
       #print acc_out_list,max(acc_out_list),min(acc_out_list)
       if __debug__: 
         if (False == floatDataBus):
