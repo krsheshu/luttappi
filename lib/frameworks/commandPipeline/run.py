@@ -22,7 +22,7 @@ inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
 from sim_command_pipeline import sim_command_pipeline, check_simulation_results
-#from command_pipeline_convert import command_pipeline_convert
+from command_pipeline_convert import command_pipeline_convert
 
 #------script parameters------#
 DEF_VALID_READY=0xffff
@@ -84,7 +84,7 @@ def myhdl_module_cli():
   nb_frames=1
   if args.convert:
     inst.convert_settings_defaults(inst.converted_hdl_dir)
-    #command_pipeline_convert()
+    command_pipeline_convert()
   if args.simulate:
     valid.pattern0 = DEF_VALID_READY
     valid.pattern1= DEF_VALID_READY 

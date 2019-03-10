@@ -58,7 +58,7 @@ class CommandPipeline():
     return cmdStr
 
   #@block 
-  def block_atomic_oper(self, pars, clk, cmdStr, stage_iA, stage_iB, stage_o):
+  def block_atomic_oper(self, pars, cmdStr, clk, stage_iA, stage_iB, stage_o):
     """ Atomic Command block """
 
     print(__name__)
@@ -131,7 +131,7 @@ class CommandPipeline():
     for i in range(len(cmdStringList)):
       if (cmdStringList[i] != "NOP"):
         index=i 
-    reg_stage_inst.append(self.block_atomic_oper(pars, clk, cmdStringList[index], pipe_stageA.stage_o[index], pipe_stageB.stage_o[index], stage[0]))    
+    reg_stage_inst.append(self.block_atomic_oper(pars, cmdStringList[index], clk, pipe_stageA.stage_o[index], pipe_stageB.stage_o[index], stage[0]))    
     for j in range(1,pars.NB_PIPELINE_STAGES):
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, reset_val, stage[j-1].data) )    
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, reset_val, stage[j-1].sop) )   

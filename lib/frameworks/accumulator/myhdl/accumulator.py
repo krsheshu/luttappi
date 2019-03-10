@@ -47,7 +47,7 @@ class Accumulator():
     
     acc_cnt=Signal(intbv(0)[CLogB2(pars.NB_ACCUMULATIONS):])
     acc_valid = Signal(bool(0))
- 
+    
     # Counter to count nb accumulations 
     @always(clk.posedge, reset.posedge)
     def acc_cnt_process():
