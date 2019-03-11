@@ -42,12 +42,10 @@ class CommandPipeline():
   def cmd_convert_to_string(self, pars, cmdFile):
     """ Convert cmfFile to a cmdStringList of Pipeline operators"""
     cmdStringList=None
-    try:
-      f=open(cmdFile)
-      cmdStringList=f.readlines()
-    except FileNotFoundError as fnfE:
-      print(fnfE)
+    f=open(cmdFile)
+    cmdStringList=f.readlines()
     cmdStr = [s.rstrip() for s in cmdStringList]
+    f.close() 
     return cmdStr
 
   #@block 
