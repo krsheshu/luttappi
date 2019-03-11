@@ -1,7 +1,7 @@
 #----operationPipeline Class 
 
 #----imports
-from myhdl import always, always_comb, Signal, instances, block
+from myhdl import always, always_comb, Signal, instances, block, intbv
 from avalon_buses import PipelineST
 from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign
 
@@ -28,14 +28,42 @@ class CommandPipelinePars():
     self.NB_PIPELINE_STAGES = 4
     self.DATAWIDTH          = 32
     self.CHANNEL_WIDTH      = 1
-    self.INIT_DATA          = 0 
+    self.INIT_DATA          = 0
+
+    self.STAGE_NB           = 2
+    self.OPCODE             = 0x00  # NOP by default
+    self.OPCODEBITS         = 8 
   
-  def __call__(self,pars):
+  def __call__(self,pars, cmdFile):
     """ Overwrite CommandPipeline parameters """
     self.NB_PIPELINE_STAGES = pars.NB_PIPELINE_STAGES
     self.DATAWIDTH          = pars.DATAWIDTH
     self.CHANNEL_WIDTH      = pars.CHANNEL_WIDTH
     self.INIT_DATA          = pars.INIT_DATA
+
+    self.STAGE_NB           = pars.STAGE_NB
+
+    """ Convert cmfFile to a cmdStringList of Pipeline operators"""
+    cmdStringList=None
+    f=open(cmdFile)
+    cmdStringList=f.readlines()
+    f.close()
+    cmdStr = [s.rstrip() for s in cmdStringList]
+    
+    for i in range(len(cmdStr)):
+      if (cmdStr[i] != "NOP"):
+        if ( cmdStr == "ADD"):     # A+B 
+          self.OPCODE             = 0x31 
+        elif ( cmdStr == "SUB"):   # A-B        
+          self.OPCODE             = 0x32 
+        elif ( cmdStr == "SUBR"):  # B-A          
+          self.OPCODE             = 0x33 
+        elif ( cmdStr == "MULT"):  # A*B          
+          self.OPCODE             = 0x34 
+        elif ( cmdStr == "NOP"):   # No Operation       
+          self.OPCODE             = 0x00
+        break 
+      
 
 
 
@@ -46,36 +74,20 @@ class CommandPipeline():
     """ CommandPipeline Init"""
 
   #@block 
-  def cmd_convert_to_string(self, pars, cmdFile):
-    """ Convert cmfFile to a cmdStringList of Pipeline operators"""
-    cmdStringList=None
-    try:
-      f=open(cmdFile)
-      cmdStringList=f.readlines()
-    except FileNotFoundError as fnfE:
-      print(fnfE)
-    cmdStr = [s.rstrip() for s in cmdStringList]
-    return cmdStr
-
-  #@block 
-  def block_atomic_oper(self, pars, cmdStr, clk, stage_iA, stage_iB, stage_o):
+  def block_atomic_oper(self, pars, reset, clk, cmd, stage_iA, stage_iB, stage_o):
     """ Atomic Command block """
 
-    print(__name__)
-    print(cmdStr) 
     @always(clk.posedge)
     def atomic_operation_assign_process():
-      if ( cmdStr == "ADD"):     # A+B 
+      if ( cmd == 0x31):     # A+B 
         stage_o.data.next = stage_iA.data + stage_iB.data
-      elif ( cmdStr == "SUB"):   # A-B        
+      elif ( cmd == 0x32):   # A-B        
         stage_o.data.next = stage_iA.data - stage_iB.data
-      elif ( cmdStr == "SUBR"):  # B-A          
+      elif ( cmd == 0x33):  # B-A          
         stage_o.data.next = stage_iB.data - stage_iA.data
-      elif ( cmdStr == "MULT"):  # A*B          
+      elif ( cmd == 0x34):  # A*B          
         stage_o.data.next = stage_iA.data * stage_iB.data
-      elif ( cmdStr == "ACC"):  # Accumulate          
-        stage_o.data.next =  stage_o.data + stage_iA.data + stage_iB.data
-      elif ( cmdStr == "NOP"):   # No Operation       
+      elif ( cmd == 0x00):   # No Operation       
         stage_o.data.next = stage_o.data
 
       if (stage_iA.valid == 1 and stage_iB.valid == 1):
@@ -97,7 +109,7 @@ class CommandPipeline():
 
 
   #@block 
-  def block_connect(self, pars, reset, clk, cmdStringList, pipe_stageA, pipe_stageB, pipest_src, io):
+  def block_connect(self, pars, reset, clk, pipe_stageA, pipe_stageB, pipest_src, io):
     """ CommandPipeline block """
    
     stage = [PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) for i in range(pars.NB_PIPELINE_STAGES)]
@@ -127,11 +139,8 @@ class CommandPipeline():
     """ Call block atomic operation on each stage """ 
     
     reg_stage_inst   = []
-   
-    for i in range(len(cmdStringList)):
-      if (cmdStringList[i] != "NOP"):
-        index=i 
-    reg_stage_inst.append(self.block_atomic_oper(pars, cmdStringList[index], clk, pipe_stageA.stage_o[index], pipe_stageB.stage_o[index], stage[0]))    
+    cmd=Signal(intbv(pars.OPCODE)[pars.OPCODEBITS:]) 
+    reg_stage_inst.append(self.block_atomic_oper(pars, reset, clk, cmd, pipe_stageA.stage_o[pars.STAGE_NB], pipe_stageB.stage_o[pars.STAGE_NB], stage[0]))    
     for j in range(1,pars.NB_PIPELINE_STAGES):
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, reset_val, stage[j-1].data) )    
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, reset_val, stage[j-1].sop) )   

@@ -117,8 +117,13 @@ def sim_command_pipeline(pars_obj):
   # --- Initializing Command Pipeline
   pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   multcmdFile='../tests/mult_pipeline.list'
+  parsMult= CommandPipelinePars()
+  parsMult.DATAWIDTH= pars.DATAWIDTH
+  parsMult.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
+  parsMult.INIT_DATA = pars.INIT_DATA
+  parsMult.STAGE_NB = 1
+  parsMult(parsMult,multcmdFile) 
   multPipe=CommandPipeline()
-  multCmdStr=multPipe.cmd_convert_to_string(pars,multcmdFile)
   ioMult=CommandPipelineIo()
   ioMult(pars)
 
@@ -154,7 +159,7 @@ def sim_command_pipeline(pars_obj):
  
   #----------------- Connecting Command Pipeline -------------------
   # Mult Pipeline 
-  inst.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_multRes, ioMult))   
+  inst.append(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
  
   #----------------------------------------------------------------
   
