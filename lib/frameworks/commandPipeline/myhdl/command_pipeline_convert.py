@@ -30,8 +30,13 @@ def lr_top(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
   # --- Initializing Command Pipeline
   pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   multcmdFile='tb/tests/mult_pipeline.list'
+  parsMult= CommandPipelinePars()
+  parsMult.DATAWIDTH= pars.DATAWIDTH
+  parsMult.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
+  parsMult.INIT_DATA = pars.INIT_DATA
+  parsMult.STAGE_NB = 1
+  parsMult(parsMult,multcmdFile) 
   multPipe=CommandPipeline()
-  multCmdStr=multPipe.cmd_convert_to_string(pars,multcmdFile)
   ioMult=CommandPipelineIo()
   ioMult(pars)
   
@@ -67,7 +72,7 @@ def lr_top(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
   #----------------- Connecting Command Pipeline -------------------
   # Mult Pipeline
   command_I=[] 
-  command_I.append(multPipe.block_connect(pars, reset, clk, multCmdStr, ioA, ioB, pipe_multRes, ioMult))   
+  command_I.append(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
   #----------------------------------------------------------------
   
   #----------------- Connecting Accumulator  --------------
