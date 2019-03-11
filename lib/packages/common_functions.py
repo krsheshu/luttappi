@@ -32,7 +32,7 @@ def simple_wire_assign(dout,din):
 def conditional_wire_assign(dout, condition, din1, din2):
   @always_comb
   def conditional_wire_assign_process():
-    dout.next = din1 if (condition == 1) else float(din2)
+    dout.next = din1 if (condition == 1) else din2
     if __debug__:   # to create a reg keyword in verilog 
       pass
   return conditional_wire_assign_process
@@ -50,9 +50,9 @@ def simple_reg_assign(reset, clk, dout, reset_val, din):
   @always(clk.posedge, reset.posedge)
   def simple_reg_assign_process():
     if(reset==1):
-      dout.next = float(reset_val)
+      dout.next = reset_val
     else:
-      dout.next = float(din)
+      dout.next = din
   return simple_reg_assign_process
 
 
@@ -60,10 +60,9 @@ def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
   @always(clk.posedge, reset.posedge)
   def conditional_reg_assign_process():
     if(reset==1):
-      dout.next = float(reset_val)
+      dout.next = reset_val
     elif (condition == 1):
-      dout.next = float(din)
-      print(din) 
+      dout.next = din
   return conditional_reg_assign_process
 
 def conditional_clocked_append(reset, clk, out, condition, inp):
