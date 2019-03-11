@@ -75,6 +75,7 @@ class CommandPipeline():
 
   #@block 
   def block_atomic_oper(self, pars, reset, clk, cmd, stage_iA, stage_iB, stage_o):
+    f.close() 
     """ Atomic Command block """
 
     @always(clk.posedge)
