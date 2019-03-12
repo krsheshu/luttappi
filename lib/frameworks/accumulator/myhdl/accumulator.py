@@ -83,10 +83,10 @@ class Accumulator():
 
     """ Output pipesrc instance """
     data_out_inst   = simple_wire_assign(pipe_out.data, self.accu.data)
-    sop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.sop, zero, pipe_in.valid, pipe_in.sop)
-    eop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.eop, zero, pipe_in.valid, pipe_in.eop)
+    sop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.sop, 0, pipe_in.valid, pipe_in.sop)
+    eop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.eop, 0, pipe_in.valid, pipe_in.eop)
     valid_out_inst  = simple_wire_assign(pipe_out.valid, acc_valid)
-    channel_out_inst  = conditional_reg_assign(reset, clk, pipe_out.channel, zero, pipe_in.valid, pipe_in.channel)
+    channel_out_inst  = conditional_reg_assign(reset, clk, pipe_out.channel, 0, pipe_in.valid, pipe_in.channel)
 
      
     return instances() 

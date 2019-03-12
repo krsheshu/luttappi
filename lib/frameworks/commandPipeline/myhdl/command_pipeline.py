@@ -145,10 +145,10 @@ class CommandPipeline():
     reg_stage_inst.append(self.block_atomic_oper(pars, reset, clk, cmd, pipe_stageA.stage_o[pars.STAGE_NB], pipe_stageB.stage_o[pars.STAGE_NB], stage[0]))    
     for j in range(1,pars.NB_PIPELINE_STAGES):
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].data, reset_val, stage[j-1].data) )    
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, reset_val, stage[j-1].sop) )   
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, reset_val, stage[j-1].eop) )   
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, reset_val, stage[j-1].valid) )
-      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].channel, reset_val, stage[j-1].channel) )
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, 0, stage[j-1].sop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, 0, stage[j-1].eop) )   
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, 0, stage[j-1].valid) )
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].channel, 0, stage[j-1].channel) )
       
     return instances() 
   

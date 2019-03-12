@@ -80,10 +80,10 @@ class OperandPipeline():
     """ Stage instance, has extra ready and valid lines """ 
     
     data=(conditional_wire_assign(stage[0].data, io.shiftEn_i, pipest_snk.data, reset_val)) 
-    sop=(conditional_wire_assign(stage[0].sop, io.shiftEn_i, pipest_snk.sop, reset_val)) 
-    eop=(conditional_wire_assign(stage[0].eop, io.shiftEn_i, pipest_snk.eop, reset_val)) 
-    valid=(conditional_wire_assign(stage[0].valid, io.shiftEn_i, pipest_snk.valid, reset_val)) 
-    channel=(conditional_wire_assign(stage[0].channel, io.shiftEn_i, pipest_snk.channel, reset_val)) 
+    sop=(conditional_wire_assign(stage[0].sop, io.shiftEn_i, pipest_snk.sop, 0)) 
+    eop=(conditional_wire_assign(stage[0].eop, io.shiftEn_i, pipest_snk.eop, 0)) 
+    valid=(conditional_wire_assign(stage[0].valid, io.shiftEn_i, pipest_snk.valid, 0)) 
+    channel=(conditional_wire_assign(stage[0].channel, io.shiftEn_i, pipest_snk.channel, 0)) 
     
     reg_stage_data_inst   = []
     reg_stage_sop_inst    = []
@@ -93,10 +93,10 @@ class OperandPipeline():
     
     for i in range(1,pars.NB_PIPELINE_STAGES):
       reg_stage_data_inst.append(simple_reg_assign(reset, clk, stage[i].data, reset_val, stage[i-1].data) )    
-      reg_stage_sop_inst.append(simple_reg_assign(reset, clk, stage[i].sop, reset_val, stage[i-1].sop) )   
-      reg_stage_eop_inst.append(simple_reg_assign(reset, clk, stage[i].eop, reset_val, stage[i-1].eop) )   
-      reg_stage_valid_inst.append(simple_reg_assign(reset, clk, stage[i].valid, reset_val, stage[i-1].valid) )
-      reg_stage_channel_inst.append(simple_reg_assign(reset, clk, stage[i].channel, reset_val, stage[i-1].channel) )
+      reg_stage_sop_inst.append(simple_reg_assign(reset, clk, stage[i].sop, 0 , stage[i-1].sop) )   
+      reg_stage_eop_inst.append(simple_reg_assign(reset, clk, stage[i].eop, 0 , stage[i-1].eop) )   
+      reg_stage_valid_inst.append(simple_reg_assign(reset, clk, stage[i].valid, 0, stage[i-1].valid) )
+      reg_stage_channel_inst.append(simple_reg_assign(reset, clk, stage[i].channel, 0 , stage[i-1].channel) )
 
     return instances() 
   

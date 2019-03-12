@@ -17,7 +17,7 @@ from activation import Activation, ActivationPars
 # These pars control the data format
 # floatDataBus = False for simulation in real scenario with intbv mult
 # floatDataBus = True for simulation with floating point mult
-floatDataBus=True
+floatDataBus=False
 
 # NB_TRAINING_DATA - Controls the number of training data to be verified 
 NB_TRAINING_DATA=100
@@ -91,7 +91,7 @@ def sim_command_pipeline(pars_obj):
   pars=OperandPipelinePars()
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
-  pars.CHANNEL_WIDTH=1
+  pars.CHANNEL_WIDTH=2
   global floatDataBus
   if (True == floatDataBus):  
     pars.INIT_DATA=0.0  # requires floating point computation 
