@@ -63,30 +63,25 @@ def lr_top(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
   
   #----------------- Connecting Pipeline Blocks -------------------
   
-  operand_a_I=[]
-  operand_a_I.append(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
-  operand_b_I=[]
-  operand_b_I.append(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
+  trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
+  theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
   #----------------------------------------------------------------
   
   #----------------- Connecting Command Pipeline -------------------
   # Mult Pipeline
-  command_I=[] 
-  command_I.append(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
+  command=(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
   #----------------------------------------------------------------
   
   #----------------- Connecting Accumulator  --------------
   # Accu
-  accumulator_I=[]   
   acc_reset=Signal(bool(0)) 
-  accumulator_I.append(accuPipe.block_connect(parsAcc, reset, clk, acc_reset, pipe_multRes, pipe_out_acc))   
+  accumulator=(accuPipe.block_connect(parsAcc, reset, clk, acc_reset, pipe_multRes, pipe_out_acc))   
   
   #----------------------------------------------------------------
   
   #----------------- Connecting Activation  --------------
   # Simple Step Activation function  
-  activation_I=[]
-  activation_I.append(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
+  activation=(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
  
   #----------------------------------------------------------------
 

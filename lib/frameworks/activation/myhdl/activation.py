@@ -56,10 +56,11 @@ class Activation():
        
 
     """ Output pipesrc instance """
-    data_out_inst   = simple_wire_assign(pipe_out.data, self.classifier.data)
-    sop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.sop, zero, pipe_in.valid, pipe_in.sop)
-    eop_out_inst    = conditional_reg_assign(reset, clk, pipe_out.eop, zero, pipe_in.valid, pipe_in.eop)
-    valid_out_inst  = simple_reg_assign(reset, clk, pipe_out.valid, zero, pipe_in.valid)
+    data= simple_wire_assign(pipe_out.data, self.classifier.data)
+    sop= conditional_reg_assign(reset, clk, pipe_out.sop, zero, pipe_in.valid, pipe_in.sop)
+    eop= conditional_reg_assign(reset, clk, pipe_out.eop, zero, pipe_in.valid, pipe_in.eop)
+    valid= simple_reg_assign(reset, clk, pipe_out.valid, zero, pipe_in.valid)
+    channel= simple_reg_assign(reset, clk, pipe_out.channel, zero, pipe_in.channel)
 
      
     return instances() 

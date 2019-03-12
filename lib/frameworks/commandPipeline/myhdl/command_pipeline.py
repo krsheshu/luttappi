@@ -52,18 +52,17 @@ class CommandPipelinePars():
     
     for i in range(len(cmdStr)):
       if (cmdStr[i] != "NOP"):
-        if ( cmdStr == "ADD"):     # A+B 
+        if ( cmdStr[i] == "ADD"):     # A+B 
           self.OPCODE             = 0x31 
-        elif ( cmdStr == "SUB"):   # A-B        
+        elif ( cmdStr[i] == "SUB"):   # A-B        
           self.OPCODE             = 0x32 
-        elif ( cmdStr == "SUBR"):  # B-A          
+        elif ( cmdStr[i] == "SUBR"):  # B-A          
           self.OPCODE             = 0x33 
-        elif ( cmdStr == "MULT"):  # A*B          
+        elif ( cmdStr[i] == "MULT"):  # A*B          
           self.OPCODE             = 0x34 
-        elif ( cmdStr == "NOP"):   # No Operation       
+        elif ( cmdStr[i] == "NOP"):   # No Operation       
           self.OPCODE             = 0x00
         break 
-      
 
 
 
@@ -122,12 +121,14 @@ class CommandPipeline():
     sop_out_inst    = simple_wire_assign(pipest_src.sop, io.stage_o[pars.NB_PIPELINE_STAGES-1].sop)
     eop_out_inst    = simple_wire_assign(pipest_src.eop, io.stage_o[pars.NB_PIPELINE_STAGES-1].eop)
     valid_out_inst  = simple_wire_assign(pipest_src.valid, io.stage_o[pars.NB_PIPELINE_STAGES-1].valid)
+    channel_out_inst  = simple_wire_assign(pipest_src.channel, io.stage_o[pars.NB_PIPELINE_STAGES-1].channel)
 
  
     wire_stage_data_inst   = []
     wire_stage_sop_inst    = []
     wire_stage_eop_inst    = []
     wire_stage_valid_inst  = []
+    wire_stage_channel_inst  = []
     
     for i in range(pars.NB_PIPELINE_STAGES):
       """ module outputs """
@@ -135,6 +136,7 @@ class CommandPipeline():
       wire_stage_sop_inst.append(simple_wire_assign(io.stage_o[i].sop, stage[i].sop)) 
       wire_stage_eop_inst.append(simple_wire_assign(io.stage_o[i].eop, stage[i].eop))
       wire_stage_valid_inst.append(simple_wire_assign(io.stage_o[i].valid, stage[i].valid)) 
+      wire_stage_channel_inst.append(simple_wire_assign(io.stage_o[i].channel, stage[i].channel)) 
 
     """ Call block atomic operation on each stage """ 
     
@@ -146,6 +148,7 @@ class CommandPipeline():
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].sop, reset_val, stage[j-1].sop) )   
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].eop, reset_val, stage[j-1].eop) )   
       reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].valid, reset_val, stage[j-1].valid) )
+      reg_stage_inst.append(simple_reg_assign(reset, clk, stage[j].channel, reset_val, stage[j-1].channel) )
       
     return instances() 
   

@@ -60,12 +60,14 @@ class OperandPipeline():
     sop_out_inst    = simple_wire_assign(pipest_src.sop, io.stage_o[pars.NB_PIPELINE_STAGES-1].sop)
     eop_out_inst    = simple_wire_assign(pipest_src.eop, io.stage_o[pars.NB_PIPELINE_STAGES-1].eop)
     valid_out_inst  = simple_wire_assign(pipest_src.valid, io.stage_o[pars.NB_PIPELINE_STAGES-1].valid)
+    channel_out_inst  = simple_wire_assign(pipest_src.channel, io.stage_o[pars.NB_PIPELINE_STAGES-1].channel)
 
  
     wire_stage_data_inst   = []
     wire_stage_sop_inst    = []
     wire_stage_eop_inst    = []
     wire_stage_valid_inst  = []
+    wire_stage_channel_inst  = []
     
     for i in range(pars.NB_PIPELINE_STAGES):
       """ module outputs """
@@ -73,24 +75,28 @@ class OperandPipeline():
       wire_stage_sop_inst.append(simple_wire_assign(io.stage_o[i].sop, stage[i].sop) )
       wire_stage_eop_inst.append(simple_wire_assign(io.stage_o[i].eop, stage[i].eop) )
       wire_stage_valid_inst.append(simple_wire_assign(io.stage_o[i].valid, stage[i].valid)) 
+      wire_stage_channel_inst.append(simple_wire_assign(io.stage_o[i].channel, stage[i].channel)) 
 
     """ Stage instance, has extra ready and valid lines """ 
+    
+    data=(conditional_wire_assign(stage[0].data, io.shiftEn_i, pipest_snk.data, reset_val)) 
+    sop=(conditional_wire_assign(stage[0].sop, io.shiftEn_i, pipest_snk.sop, reset_val)) 
+    eop=(conditional_wire_assign(stage[0].eop, io.shiftEn_i, pipest_snk.eop, reset_val)) 
+    valid=(conditional_wire_assign(stage[0].valid, io.shiftEn_i, pipest_snk.valid, reset_val)) 
+    channel=(conditional_wire_assign(stage[0].channel, io.shiftEn_i, pipest_snk.channel, reset_val)) 
     
     reg_stage_data_inst   = []
     reg_stage_sop_inst    = []
     reg_stage_eop_inst    = []
     reg_stage_valid_inst  = []
-    
-    reg_stage_data_inst.append(conditional_wire_assign(stage[0].data, io.shiftEn_i, pipest_snk.data, reset_val)) 
-    reg_stage_sop_inst.append(conditional_wire_assign(stage[0].sop, io.shiftEn_i, pipest_snk.sop, reset_val)) 
-    reg_stage_eop_inst.append(conditional_wire_assign(stage[0].eop, io.shiftEn_i, pipest_snk.eop, reset_val)) 
-    reg_stage_valid_inst.append(conditional_wire_assign(stage[0].valid, io.shiftEn_i, pipest_snk.valid, reset_val)) 
+    reg_stage_channel_inst  = []
     
     for i in range(1,pars.NB_PIPELINE_STAGES):
       reg_stage_data_inst.append(simple_reg_assign(reset, clk, stage[i].data, reset_val, stage[i-1].data) )    
       reg_stage_sop_inst.append(simple_reg_assign(reset, clk, stage[i].sop, reset_val, stage[i-1].sop) )   
       reg_stage_eop_inst.append(simple_reg_assign(reset, clk, stage[i].eop, reset_val, stage[i-1].eop) )   
       reg_stage_valid_inst.append(simple_reg_assign(reset, clk, stage[i].valid, reset_val, stage[i-1].valid) )
+      reg_stage_channel_inst.append(simple_reg_assign(reset, clk, stage[i].channel, reset_val, stage[i-1].channel) )
 
     return instances() 
   

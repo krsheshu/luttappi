@@ -17,7 +17,7 @@ from activation import Activation, ActivationPars
 # These pars control the data format
 # floatDataBus = False for simulation in real scenario with intbv mult
 # floatDataBus = True for simulation with floating point mult
-floatDataBus=False
+floatDataBus=True
 
 # NB_TRAINING_DATA - Controls the number of training data to be verified 
 NB_TRAINING_DATA=100
