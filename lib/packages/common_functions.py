@@ -63,6 +63,9 @@ def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
       dout.next = reset_val
     elif (condition == 1):
       dout.next = din
+    else:
+      dout.next = dout
+  
   return conditional_reg_assign_process
 
 def conditional_clocked_append(reset, clk, out, condition, inp):

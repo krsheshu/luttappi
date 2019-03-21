@@ -51,29 +51,39 @@ class Accumulator():
     # Counter to count nb accumulations 
     @always(clk.posedge, reset.posedge)
     def acc_cnt_process():
-      if reset or reset_acc:  # Synchronous reset_acc
+      if reset:  # Synchronous reset_acc
+        acc_cnt.next = 0
+      elif reset_acc: 
         acc_cnt.next = 0
       elif (pipe_in.valid == 1):
         if(acc_cnt == (pars.NB_ACCUMULATIONS-1)):
           acc_cnt.next = 0
         else:
           acc_cnt.next = acc_cnt + 1
+      else:
+        acc_cnt.next = acc_cnt
  
     # Accumulate data when valid data present till valid nb counts 
     @always(clk.posedge, reset.posedge)
     def accumulator_process():
-      if reset or reset_acc:  # Synchronous reset_acc
+      if reset:  # Synchronous reset_acc
+        self.accu.data.next = zero
+      elif reset_acc: 
         self.accu.data.next = zero
       elif (pipe_in.valid == 1):
         if (acc_cnt == 0):  # If valid, accumulate data
           self.accu.data.next = pipe_in.data 
         else: 
           self.accu.data.next = self.accu.data + pipe_in.data
+      else:
+          self.accu.data.next = self.accu.data 
       
     # Accumulate Valid Signal
     @always(clk.posedge, reset.posedge)
     def acc_valid_process():
-      if reset or reset_acc:
+      if reset:
+        acc_valid.next = 0
+      elif reset_acc:
         acc_valid.next = 0
       elif (pipe_in.valid == 1 and acc_cnt == pars.NB_ACCUMULATIONS-1):
           acc_valid.next = 1

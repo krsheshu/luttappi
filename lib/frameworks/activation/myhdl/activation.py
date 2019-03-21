@@ -53,6 +53,8 @@ class Activation():
       elif (pipe_in.valid == 1):
         # if data > 0, prob= 1 else 0
         self.classifier.data.next = one if (pipe_in.data > zero) else zero
+      else:
+        self.classifier.data.next = self.classifier.data
        
 
     """ Output pipesrc instance """

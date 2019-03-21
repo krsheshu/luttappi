@@ -4,7 +4,7 @@ import sys
 from myhdl import traceSignals
 import shutil
 from subprocess import call
-from myhdl import toVerilog
+from myhdl import toVerilog, toVHDL
 from myhdl.conversion import analyze
 
 
@@ -58,6 +58,7 @@ class MyhdlBridgeLib(RelPaths,AbsPaths):
   def convert_settings_defaults(self,converted_hdl_dir_abs):
     toVerilog.directory = converted_hdl_dir_abs
     toVerilog.no_testbench = True
+    toVHDL.directory = converted_hdl_dir_abs
     analyze.simulator = "vlog"
     analyze._analyzeOnly = True
 

@@ -1,5 +1,5 @@
 
-from myhdl import Signal, intbv, toVerilog, instances
+from myhdl import Signal, intbv, toVerilog, toVHDL, instances
 
 from avalon_buses import PipelineST
 
@@ -114,3 +114,4 @@ def command_pipeline_convert():
   pipe_out_activ = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   
   toVerilog(lr_top, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ)
+  toVHDL(lr_top, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ)
