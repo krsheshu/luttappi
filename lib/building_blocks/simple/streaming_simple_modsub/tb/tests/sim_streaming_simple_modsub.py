@@ -52,9 +52,9 @@ def sim_streaming_simple_modsub(pars_obj):
   snk_bfm_inst = snk_bfm(reset, clk, pars_obj.ready, av_snk_bfm, src_bfm_o)
 
 
-  print "Ready Pattern: ", str(hex(pars_obj.ready))
-  print "Valid Pattern0: ", str(hex(pars_obj.valid.pattern0))
-  print "Valid Pattern1: ", str(hex(pars_obj.valid.pattern1))
+  print("Ready Pattern: ", str(hex(pars_obj.ready)))
+  print("Valid Pattern0: ", str(hex(pars_obj.valid.pattern0)))
+  print("Valid Pattern1: ", str(hex(pars_obj.valid.pattern1)))
   @always_comb
   def beh_comb_logic():
     # Streaming Input Interface
@@ -131,29 +131,29 @@ def check_simulation_results(pars_obj):
   trans_l=0
   rest_l=0
   recv_l=0 
-  print "Transmitted data: ", str(trans_data)
-  print "Received data: ", str(recv_data)
-  print "Num ready pulses: ", str(ready_pulses)
-  print "Operation intended: Mod Subtraction"
+  print("Transmitted data: ", str(trans_data))
+  print("Received data: ", str(recv_data))
+  print("Num ready pulses: ", str(ready_pulses))
+  print("Operation intended: Mod Subtraction")
   trans_l=len(trans_data)
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
-    print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
-    print "ERR124: Simulation unsuccessful!."
+    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)) 
+    print("ERR124: Simulation unsuccessful!.")
 
   else:
-    print "Total num transmitted data= %d" % trans_l  
-    print "Total num received data= %d" % recv_l 
+    print("Total num transmitted data= %d" % trans_l)  
+    print("Total num received data= %d" % recv_l) 
     for i in range(0,len(trans_data)):
       if ( abs(trans_data[i] - trans_data[i]+1)  != recv_data[i]):
-        print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
+        print("ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i]))
         err_cnt+=1
     if (err_cnt):
-      print "ERR134: Results not Matched. Simulation unsuccessful!"
+      print("ERR134: Results not Matched. Simulation unsuccessful!")
     else:
-      print "Receive and transmit data exactly matches for mod subtraction..." 
-      print "Simulation Successful!"
+      print("Receive and transmit data exactly matches for mod subtraction...") 
+      print("Simulation Successful!")
 
 
 

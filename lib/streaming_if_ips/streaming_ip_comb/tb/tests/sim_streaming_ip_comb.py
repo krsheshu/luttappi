@@ -40,8 +40,8 @@ def sim_streaming_ip_comb(pars_obj):
   snk_bfm_inst = snk_bfm(reset, clk, pars_obj.ready, asi_snk_bfm, src_bfm_o)
 
 
-  print "Ready Pattern: ", str(hex(pars_obj.ready))
-  print "Valid Pattern: ", str(hex(pars_obj.valid))
+  print("Ready Pattern: ", str(hex(pars_obj.ready)))
+  print("Valid Pattern: ", str(hex(pars_obj.valid)))
   @always_comb
   def beh_comb_logic():
     # Streaming Input Interface
@@ -117,28 +117,28 @@ def check_simulation_results(pars_obj):
   trans_l=0
   rest_l=0
   recv_l=0 
-  print "Transmitted data: ", str(trans_data)
-  print "Received data: ", str(recv_data)
-  print "Num ready pulses: ", str(ready_pulses)
+  print("Transmitted data: ", str(trans_data))
+  print("Received data: ", str(recv_data))
+  print("Num ready pulses: ", str(ready_pulses))
   trans_l=len(trans_data)
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
-    print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
-    print "ERR124: Simulation unsuccessful!."
+    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)) 
+    print("ERR124: Simulation unsuccessful!.")
 
   else:
-    print "Total num transmitted data= %d" % trans_l  
-    print "Total num received data= %d" % recv_l 
+    print("Total num transmitted data= %d" % trans_l)  
+    print("Total num received data= %d" % recv_l) 
     for i in range(0,len(trans_data)):
       if (trans_data[i] != recv_data[i]):
-        print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
+        print("ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i]))
         err_cnt+=1
     if (err_cnt):
-      print "ERR134: Results not Matched. Simulation unsuccessful!"
+      print("ERR134: Results not Matched. Simulation unsuccessful!")
     else:
-      print "Receive and transmit data exactly matches..." 
-      print "Simulation Successful!"
+      print("Receive and transmit data exactly matches...") 
+      print("Simulation Successful!")
 
 
 

@@ -63,20 +63,20 @@ class MyhdlBridgeLib(RelPaths,AbsPaths):
     analyze._analyzeOnly = True
 
   def wave(self,vcd_file_path,sav_file_path):
-    print "Open the signal waveform"
+    print("Open the signal waveform")
     call(['gtkwave', "{:s}".format(vcd_file_path), "{:s}".format(sav_file_path)])
 
   def synthesize(self,qpf_file):
-    print "Open the synthesis project"
+    print("Open the synthesis project")
     call(['quartus', "{:s}".format(qpf_file )])
 
   def sim_hdl(self,filename):
-    print "Run the systemverilog test"
-    print filename
+    print("Run the systemverilog test")
+    print(filename)
     call(["{:s}".format(filename)])
 
   def test_image_generate(self, script_path,file_path, testbench_dir_path):
-    print "Generate the test image"
+    print("Generate the test image")
     call(['sh', "{:s}".format(script_path), "{:s}".format(file_path)])
     call(['mv', "gen_img.txt", "{:s}".format(testbench_dir_path)])
 

@@ -49,7 +49,7 @@ def sim_src_bfm():
     if aso_src.ready_i==1 and  aso_src.valid_o == 1:
       src_bfm_i.data_i.next = src_bfm_i.data_i + 1
       num_counter.nb+=1
-      print str(num_counter.nb) + ". Prepared data:", hex(src_bfm_i.data_i), ": ",src_bfm_i.data_i 
+      print(str(num_counter.nb) + ". Prepared data:", hex(src_bfm_i.data_i), ": ",src_bfm_i.data_i) 
   
   return src_bfm_inst, clkgen, stimulus, data_increment
 

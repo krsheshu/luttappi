@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python3 
 #
 import os
 import sys
@@ -14,10 +14,10 @@ current_dir=os.getcwd()
 myhdl_base=os.path.join(current_dir,"..")     #path to myhdl_base
 sys.path.append(myhdl_base)
 #import myhdl library
-from scr_myhdl_lib_paths import set_myhdl_lib_paths 
+from scr.set_myhdl_lib_paths import set_myhdl_lib_paths 
 # setup paths in myhdl lib
 set_myhdl_lib_paths()
-from testbench_parameters import testbench_parameters, pass_testbench
+from testbench_parameters import pass_testbench, Valid
 from myhdl_design_flow_libs import myhdl_module
 
 #---Creating a myhdl module instance with all dir and set path information to all files----#
@@ -46,7 +46,7 @@ sv_sim_scr="{:s}/{:s}/{:s}".format(inst.sim_hdl_dirname, inst.sim_hdl_scr_dirnam
 
 #------Local specific functions------#
 def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_frames,sim_time=None):
-  print "Start Myhdl Simulation...................................."
+  print("Start Myhdl Simulation....................................")
   cwd=os.getcwd()
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
@@ -57,8 +57,8 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
     sim.run()
   else:
     sim.run(sim_time)
-  print "Simulation finished................................."
-  print "Checking Simulation results................................."
+  print("Simulation finished.................................")
+  print("Checking Simulation results.................................")
   check_simulation_results(pars_obj)
   os.chdir(cwd)
 
@@ -98,18 +98,18 @@ def myhdl_module_cli():
       ready_pattern = int(args.ready,16)
     if args.sim_time:
       sim_time = int(args.sim_time)
-      print "Valid pattern: ", str(hex(valid_pattern))
-      print "Ready pattern: ", str(hex(ready_pattern))
-      print "Simulation Time: ", str(sim_time)+" clocks"
+      print("Valid pattern: ", str(hex(valid_pattern)))
+      print("Ready pattern: ", str(hex(ready_pattern)))
+      print("Simulation Time: ", str(sim_time)+" clocks")
     simulate(inst.sim_temp_dir, inst.sim_pattern_dirname, valid_pattern, ready_pattern, nb_frames, None)
   if args.wave:
     inst.wave(vcd_file,sav_file)
-    print " Wave not yet ready"
+    print(" Wave not yet ready")
   if args.synthesize:
     inst.synthesize(qpf_file)
-    print " Synthesis not yet ready"
+    print(" Synthesis not yet ready")
   if args.simulatehdl:
-    print sv_sim_scr
+    print(sv_sim_scr)
     inst.sim_hdl(sv_sim_scr)
   
   return effective_args

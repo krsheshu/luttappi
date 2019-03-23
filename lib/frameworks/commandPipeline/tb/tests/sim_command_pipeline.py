@@ -168,7 +168,7 @@ def sim_command_pipeline(pars_obj):
   inst.append(accuPipe.block_connect(parsAcc, reset, clk, 0, pipe_multRes, pipe_out_acc))   
  
   #----------------------------------------------------------------
-  
+ 
   #----------------- Connecting Activation  --------------
   # Simple Step Activation function  
   inst.append(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
@@ -274,10 +274,7 @@ def sim_command_pipeline(pars_obj):
       pass
     elif (pipe_inpA.valid == 1 and nbTA < MAX_NB_TRANSFERS):
       nbTA+=1
-      if (False == floatDataBus):
-        trans_dataA.extend([pipe_inpA.data])
-      else:
-        trans_dataA.extend([pipe_inpA.data.next])
+      trans_dataA.extend([pipe_inpA.data])
 
   
   @always(clk.posedge, reset.posedge)
@@ -287,10 +284,7 @@ def sim_command_pipeline(pars_obj):
       pass
     elif (pipe_inpB.valid == 1 and nbTB < MAX_NB_TRANSFERS):
       nbTB+=1
-      if (False == floatDataBus):
-        trans_dataB.extend([pipe_inpB.data])
-      else:
-        trans_dataB.extend([pipe_inpB.data.next])
+      trans_dataB.extend([pipe_inpB.data])
   
   #----------------------------------------------------------------
   
@@ -325,9 +319,9 @@ def sim_command_pipeline(pars_obj):
       #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
       if __debug__:
         if (False == floatDataBus):
-          print("{0:d} Acc: {1:d} ".format(nbR/LEN_THETA+1, int(acc_out), i=DEF_ROUND)),
+          print("{0:d} Acc: {1:d} ".format(int(nbR/LEN_THETA+1), int(acc_out), i=DEF_ROUND), end=' ')
         else:
-          print("{0:d} Acc: {1:0.{i}f}".format(nbR/LEN_THETA+1, float(acc_out), i=DEF_ROUND)),
+          print("{0:d} Acc: {1:0.{i}f}".format(int(nbR/LEN_THETA+1), float(acc_out), i=DEF_ROUND), end=' ')
       if (False == floatDataBus):
         acc_out_list.extend([int(acc_out)])
       else:
@@ -367,13 +361,13 @@ def check_simulation_results(pars_obj):
   recv_l=len(recv_data)
   rest_l=(trans_lA+trans_lB)/2-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
-    print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
-    print "ERR124: Simulation unsuccessful!."
+    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)) 
+    print("ERR124: Simulation unsuccessful!.")
 
   else:
-    print "Total num transmitted data A= %d" % trans_lA  
-    print "Total num transmitted data B= %d" % trans_lB  
-    print "Total num received data= %d" % recv_l 
+    print("Total num transmitted data A= %d" % trans_lA)  
+    print("Total num transmitted data B= %d" % trans_lB)  
+    print("Total num received data= %d" % recv_l) 
     for i in range(0,trans_lA):
       mismatch = True 
       if (False == floatDataBus):
@@ -382,7 +376,7 @@ def check_simulation_results(pars_obj):
         rx=recv_data[i]
         mismatch=True if (txA*txB != rx) else False
         if (True == mismatch):
-          print "ERR309: i:{:d} Mult Mismatch! tx_dataA  {:d} tx_dataB= {:d} recv_data={:d}".format(i,int(txA),int(txB),int(rx))
+          print("ERR309: i:{:d} Mult Mismatch! tx_dataA  {:d} tx_dataB= {:d} recv_data={:d}".format(i,int(txA),int(txB),int(rx)))
           err_cnt+=1
       else:
         txA=round(trans_dataA[i],DEF_ROUND)
@@ -390,20 +384,20 @@ def check_simulation_results(pars_obj):
         rx=round(recv_data[i],DEF_ROUND)
         mismatch=True if (round(txA*txB,DEF_ROUND) != rx) else False
         if (True == mismatch):
-          print "ERR131: i:{:d} Mult Mismatch! tx_dataA  {:0.2f} tx_dataB= {:0.2f} recv_data={:0.2f}".format(i,txA,txB,rx)
+          print("ERR131: i:{:d} Mult Mismatch! tx_dataA  {:0.2f} tx_dataB= {:0.2f} recv_data={:0.2f}".format(i,txA,txB,rx))
           err_cnt+=1
     if (err_cnt):
-      print "ERR134: Results not Matched. Simulation unsuccessful!"
+      print("ERR134: Results not Matched. Simulation unsuccessful!")
     else:
-      print "Mult Pipeline exactly matches..."
+      print("Mult Pipeline exactly matches...")
       nb_correct=0
       for i in range(len(prediction_res)):
         if(label[i] == prediction_res[i]):
           nb_correct+=1
       #print label,prediction_res,nb_correct
       tAcc=(100.0*nb_correct)/(len(prediction_res))   
-      print("Predicted examples: {:d}".format(len(prediction_res))) 
-      print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc)) 
+      print("Predicted examples: {:d}".format(len(prediction_res)))
+      print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc))
       #print acc_out_list,max(acc_out_list),min(acc_out_list)
       if __debug__: 
         if (False == floatDataBus):
@@ -411,7 +405,7 @@ def check_simulation_results(pars_obj):
         else:
           print("Max acc_out_list: {:0.{i}f} Min acc_out_list: {:0.{i}f}" .format(max(acc_out_list),min(acc_out_list),i=2))
         #print "Acc_out" + str(acc_out_list)
-      print "Simulation Successful!"
+      print("Simulation Successful!")
 
 
 

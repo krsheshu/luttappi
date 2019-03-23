@@ -46,7 +46,7 @@ def sim_snk_bfm():
     global recv_data
     if (src_bfm_o.valid_o == 1):
       nb2+=1
-      print str(nb2) + ". Received data:", ": ", src_bfm_o.data_o
+      print(str(nb2) + ". Received data:", ": ", src_bfm_o.data_o)
       recv_data.append(int(src_bfm_o.data_o))
 
   return snk_bfm_inst, clkgen, stimulus,receive_data_process 
