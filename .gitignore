@@ -5,3 +5,4 @@ converted_hdl/
 *.pyc
 myhdl_work/
 *.pyo
+*.bak
