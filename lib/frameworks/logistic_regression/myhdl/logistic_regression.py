@@ -1,5 +1,5 @@
 #----logisticRegression Class 
-from myhdl import Signal, intbv, toVerilog, toVHDL, instances
+from myhdl import Signal, intbv, toVerilog, toVHDL, instances, always_comb
 
 from avalon_buses import PipelineST
 
@@ -58,7 +58,7 @@ class LogisticRegression():
     """ LogisticRegression Init"""
 
 
-  def block_connect(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
+  def block_connect(self, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
  
     #----------------- Initializing Pipeline Streams ----------------
     
@@ -68,8 +68,6 @@ class LogisticRegression():
     operand_a=OperandPipeline()
     ioA=OperandPipelineIo()
     ioA(pars)
-    #block_connect.ioA=ioA 
-    #block_connect.ioB=ioB 
     # --- Initializing Pipeline B
     pipe_outB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
     
@@ -111,7 +109,15 @@ class LogisticRegression():
     #----------------------------------------------------------------
     
     #----------------- Connecting Pipeline Blocks -------------------
-   
+    sigHigh=Signal(bool(1))
+    @always_comb
+    def shiftOperand_signal():
+      """ Enabling shift by default always 
+          The input pipeline control is done through 
+          valid data through pipe_inpA & pipe_outB """
+      ioB.shiftEn_i.next = sigHigh 
+      ioA.shiftEn_i.next = sigHigh 
+
     trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
     theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
     #----------------------------------------------------------------

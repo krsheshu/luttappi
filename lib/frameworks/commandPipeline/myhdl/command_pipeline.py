@@ -41,9 +41,8 @@ class CommandPipelinePars():
     self.CHANNEL_WIDTH      = pars.CHANNEL_WIDTH
     self.INIT_DATA          = pars.INIT_DATA
 
-    self.STAGE_NB           = pars.STAGE_NB
 
-    """ Convert cmfFile to a cmdStringList of Pipeline operators"""
+    """ Convert cmdFile to a cmdStringList of Pipeline operators"""
     cmdStringList=None
     f=open(cmdFile)
     cmdStringList=f.readlines()
@@ -62,6 +61,7 @@ class CommandPipelinePars():
           self.OPCODE             = 0x34 
         elif ( cmdStr[i] == "NOP"):   # No Operation       
           self.OPCODE             = 0x00
+        self.STAGE_NB             = i
         break 
 
 

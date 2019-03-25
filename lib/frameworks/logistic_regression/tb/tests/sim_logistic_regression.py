@@ -7,10 +7,7 @@ from clk_driver import clk_driver
 
 import subprocess
 
-from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
-from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
-from accumulator import Accumulator, AccumulatorPars
-from activation import Activation, ActivationPars
+from logistic_regression import LogisticRegression, LogisticRegressionIo, LogisticRegressionPars
 
 
 # Global Parameters-------------------------
@@ -67,7 +64,7 @@ prediction_res=[]
 
 #--------------------------------------------
 
-def sim_command_pipeline(pars_obj):
+def sim_logistic_regression(pars_obj):
 
   global test_decimal_shift, theta_decimal_shift
 
@@ -88,7 +85,7 @@ def sim_command_pipeline(pars_obj):
   #----------------- Initializing Pipeline Streams ----------------
   
   # --- Pipeline Pars
-  pars=OperandPipelinePars()
+  pars=LogisticRegressionPars()
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
   pars.CHANNEL_WIDTH=2
@@ -97,81 +94,27 @@ def sim_command_pipeline(pars_obj):
     pars.INIT_DATA=0.0  # requires floating point computation 
   else:
     pars.INIT_DATA=0    # requires intbv computation 
- 
+
+  pars.CMD_FILE =  '../tests/mult_pipeline.list'
+  pars.LEN_THETA  = LEN_THETA
+
+  ioLR = LogisticRegressionIo()
+  ioLR(pars)
+  moduleLR=LogisticRegression()
+
   # --- Initializing Pipeline A
-  pipe_inpA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
-  pipe_outA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
-
-  operand_a=OperandPipeline()
-  ioA=OperandPipelineIo()
-  ioA(pars)
-
+  pipe_inpA  = ioLR.pipe_inpA 
+  
   # --- Initializing Pipeline B
-  pipe_inpB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
-  pipe_outB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA) 
+  pipe_inpB  = ioLR.pipe_inpB
+  
+  # --- Initializing Activation Out 
+  pipe_out_activ = ioLR.pipe_out_activ
 
-  operand_b=OperandPipeline()
-  ioB=OperandPipelineIo()
-  ioB(pars)
-
-  # --- Initializing Command Pipeline
-  pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-  multcmdFile='../tests/mult_pipeline.list'
-  parsMult= CommandPipelinePars()
-  parsMult.DATAWIDTH= pars.DATAWIDTH
-  parsMult.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-  parsMult.INIT_DATA = pars.INIT_DATA
-  parsMult.STAGE_NB = 1
-  parsMult(parsMult,multcmdFile) 
-  multPipe=CommandPipeline()
-  ioMult=CommandPipelineIo()
-  ioMult(pars)
-
-  # ---- Initializing Accumulator Block
-  
-  pipe_out_acc = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-  parsAcc= AccumulatorPars()
-  parsAcc.DATAWIDTH= pars.DATAWIDTH
-  parsAcc.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-  parsAcc.INIT_DATA = pars.INIT_DATA
-  global LEN_THETA
-  parsAcc.NB_ACCUMULATIONS = LEN_THETA  
-  accuPipe= Accumulator() 
-  accuPipe(parsAcc) 
-  
-  # ---- Initializing Activation Block
-  
-  parsActiv= ActivationPars()
-  parsActiv.DATAWIDTH= 3    # 0 or 1 for classification
-  parsActiv.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-  parsActiv.INIT_DATA = pars.INIT_DATA
-  pipe_out_activ = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-  activPipe= Activation() 
-  activPipe(parsActiv) 
-  #----------------------------------------------------------------
- 
-  #----------------- Connecting Pipeline Blocks -------------------
-  
-  inst=[]
-  inst.append(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
-  inst.append(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
-  #----------------------------------------------------------------
- 
-  #----------------- Connecting Command Pipeline -------------------
-  # Mult Pipeline 
-  inst.append(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
- 
-  #----------------------------------------------------------------
-  
-  #----------------- Connecting Accumulator  --------------
-  # Accu  
-  inst.append(accuPipe.block_connect(parsAcc, reset, clk, 0, pipe_multRes, pipe_out_acc))   
- 
-  #----------------------------------------------------------------
- 
-  #----------------- Connecting Activation  --------------
+  inst=[] 
+  #----------------- Connecting Logistic Regression Block--------------
   # Simple Step Activation function  
-  inst.append(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
+  inst.append(moduleLR.block_connect(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ ))   
  
   #----------------------------------------------------------------
  
@@ -218,11 +161,9 @@ def sim_command_pipeline(pars_obj):
   #print theta_file_list
   #----------------------------------------------------------------
   
-  
-
   #----------------- Shift Enable for pipeData -------------------
   
-  shiftEn_i = Signal(bool(0))
+  shiftEn_i = Signal(bool(1))
   @always(clk.posedge,reset.posedge)
   def shift_signal():
     if reset:
@@ -230,11 +171,6 @@ def sim_command_pipeline(pars_obj):
     else:
       shiftEn_i.next = not shiftEn_i
   
-  @always_comb
-  def shiftOperand_signal():
-    ioB.shiftEn_i.next = shiftEn_i
-    ioA.shiftEn_i.next = shiftEn_i
- 
   #----------------------------------------------------------------
   
   #----------------- Reset For the Module  --------------------
@@ -294,13 +230,13 @@ def sim_command_pipeline(pars_obj):
   def receive_data_process():
     global recv_data,nbR,acc_out
     
-    # Collecting multiplier data
-    if (pipe_multRes.valid == 1):
-      if (False == floatDataBus):
-        mult_out= pipe_multRes.data
-      else:
-        mult_out= (round(pipe_multRes.data,DEF_ROUND))
-      recv_data.extend([mult_out])
+    ## Collecting multiplier data
+    #if (pipe_multRes.valid == 1):
+    #  if (False == floatDataBus):
+    #    mult_out= pipe_multRes.data
+    #  else:
+    #    mult_out= (round(pipe_multRes.data,DEF_ROUND))
+    #  recv_data.extend([mult_out])
    
     # Collecting Activation Data 
     if(pipe_out_activ.valid == 1):  
@@ -314,20 +250,20 @@ def sim_command_pipeline(pars_obj):
 
     
     # Collecting Accumulator Data 
-    if(pipe_out_acc.valid == 1):  
-      acc_out = pipe_out_acc.data
-      #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
-      if __debug__:
-        if (False == floatDataBus):
-          print("{0:d} Acc: {1:d} ".format(int(nbR/LEN_THETA+1), int(acc_out), i=DEF_ROUND), end=' ')
-        else:
-          print("{0:d} Acc: {1:0.{i}f}".format(int(nbR/LEN_THETA+1), float(acc_out), i=DEF_ROUND), end=' ')
-      if (False == floatDataBus):
-        acc_out_list.extend([int(acc_out)])
-      else:
-        acc_out_list.extend([round(acc_out,DEF_ROUND)])
-      #print "nbR:" + str(nbR) 
-      sim_time_now=now()
+    #if(pipe_out_acc.valid == 1):  
+    #  acc_out = pipe_out_acc.data
+    #  #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
+    #  if __debug__:
+    #    if (False == floatDataBus):
+    #      print("{0:d} Acc: {1:d} ".format(int(nbR/LEN_THETA+1), int(acc_out), i=DEF_ROUND), end=' ')
+    #    else:
+    #      print("{0:d} Acc: {1:0.{i}f}".format(int(nbR/LEN_THETA+1), float(acc_out), i=DEF_ROUND), end=' ')
+    #  if (False == floatDataBus):
+    #    acc_out_list.extend([int(acc_out)])
+    #  else:
+    #    acc_out_list.extend([round(acc_out,DEF_ROUND)])
+    #  #print "nbR:" + str(nbR) 
+    #  sim_time_now=now()
 
   
   #----------------------------------------------------------------

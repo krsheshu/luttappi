@@ -21,13 +21,13 @@ from myhdl_bridge_lib import MyhdlBridgeLib
 inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
-from sim_command_pipeline import sim_command_pipeline, check_simulation_results
-from command_pipeline_convert import command_pipeline_convert
+from sim_logistic_regression import sim_logistic_regression, check_simulation_results
+from logistic_regression_convert import logistic_regression_convert
 
 #------script parameters------#
 DEF_VALID_READY=0xffff
 DEFAULT_SIM_TIME=2000
-TB_NAME = 'sim_command_pipeline'           # test file
+TB_NAME = 'sim_logistic_regression'           # test file
 SYNTHESIS_TOP = 'syn_command_pipeline_top' # synthesis top level
 
 #-------- systemverilog testbench script name.........#
@@ -47,7 +47,7 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
   pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames,None)
-  tb=traceSignals(sim_command_pipeline,pars_obj)
+  tb=traceSignals(sim_logistic_regression,pars_obj)
   sim=Simulation(tb)
   if (sim_time is None):
     sim.run()
@@ -84,7 +84,7 @@ def myhdl_module_cli():
   nb_frames=1
   if args.convert:
     inst.convert_settings_defaults(inst.converted_hdl_dir)
-    command_pipeline_convert()
+    logistic_regression_convert()
   if args.simulate:
     valid.pattern0 = DEF_VALID_READY
     valid.pattern1= DEF_VALID_READY 
