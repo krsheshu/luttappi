@@ -34,6 +34,7 @@ def lr_top(pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
   parsMult.DATAWIDTH= pars.DATAWIDTH
   parsMult.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
   parsMult.INIT_DATA = pars.INIT_DATA
+  parsMult.STAGE_NB = 1
   parsMult(parsMult,multcmdFile) 
   multPipe=CommandPipeline()
   ioMult=CommandPipelineIo()
