@@ -230,42 +230,21 @@ def sim_logistic_regression(pars_obj):
   def receive_data_process():
     global recv_data,nbR,acc_out
     
-    ## Collecting multiplier data
-    #if (pipe_multRes.valid == 1):
-    #  if (False == floatDataBus):
-    #    mult_out= pipe_multRes.data
-    #  else:
-    #    mult_out= (round(pipe_multRes.data,DEF_ROUND))
-    #  recv_data.extend([mult_out])
-   
-    # Collecting Activation Data 
+    # Collecting Activation Data
     if(pipe_out_activ.valid == 1):  
       nbR+=LEN_THETA
       predict = int(pipe_out_activ.data)                    
-      prediction_res.extend([predict])
+      recv_data.extend([predict])
+      fp=open("predict_op.log",'a')
+      fp.write("{:d}\n".format(predict))
+      fp.close()
       if __debug__:
           print(" prediction: {:d}".format(predict) )
+     
       if (nbR == MAX_NB_TRANSFERS):
-        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")  
 
     
-    # Collecting Accumulator Data 
-    #if(pipe_out_acc.valid == 1):  
-    #  acc_out = pipe_out_acc.data
-    #  #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
-    #  if __debug__:
-    #    if (False == floatDataBus):
-    #      print("{0:d} Acc: {1:d} ".format(int(nbR/LEN_THETA+1), int(acc_out), i=DEF_ROUND), end=' ')
-    #    else:
-    #      print("{0:d} Acc: {1:0.{i}f}".format(int(nbR/LEN_THETA+1), float(acc_out), i=DEF_ROUND), end=' ')
-    #  if (False == floatDataBus):
-    #    acc_out_list.extend([int(acc_out)])
-    #  else:
-    #    acc_out_list.extend([round(acc_out,DEF_ROUND)])
-    #  #print "nbR:" + str(nbR) 
-    #  sim_time_now=now()
-
-  
   #----------------------------------------------------------------
 
   #----------------- Max Simulation Time Exit Condition -----------
@@ -296,52 +275,25 @@ def check_simulation_results(pars_obj):
     sys.exit()  
   recv_l=len(recv_data)
   rest_l=(trans_lA+trans_lB)/2-recv_l
-  if (len(recv_data) < MAX_NB_TRANSFERS):
-    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)) 
+  nb_training_examples=(MAX_NB_TRANSFERS/LEN_THETA)
+  if (len(recv_data) < nb_training_examples):
+    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),nb_training_examples)) 
     print("ERR124: Simulation unsuccessful!.")
 
   else:
     print("Total num transmitted data A= %d" % trans_lA)  
     print("Total num transmitted data B= %d" % trans_lB)  
-    print("Total num received data= %d" % recv_l) 
-    for i in range(0,trans_lA):
-      mismatch = True 
-      if (False == floatDataBus):
-        txA=trans_dataA[i]
-        txB=trans_dataB[i]
-        rx=recv_data[i]
-        mismatch=True if (txA*txB != rx) else False
-        if (True == mismatch):
-          print("ERR309: i:{:d} Mult Mismatch! tx_dataA  {:d} tx_dataB= {:d} recv_data={:d}".format(i,int(txA),int(txB),int(rx)))
-          err_cnt+=1
-      else:
-        txA=round(trans_dataA[i],DEF_ROUND)
-        txB=round(trans_dataB[i],DEF_ROUND)
-        rx=round(recv_data[i],DEF_ROUND)
-        mismatch=True if (round(txA*txB,DEF_ROUND) != rx) else False
-        if (True == mismatch):
-          print("ERR131: i:{:d} Mult Mismatch! tx_dataA  {:0.2f} tx_dataB= {:0.2f} recv_data={:0.2f}".format(i,txA,txB,rx))
-          err_cnt+=1
-    if (err_cnt):
-      print("ERR134: Results not Matched. Simulation unsuccessful!")
-    else:
-      print("Mult Pipeline exactly matches...")
-      nb_correct=0
-      for i in range(len(prediction_res)):
-        if(label[i] == prediction_res[i]):
-          nb_correct+=1
-      #print label,prediction_res,nb_correct
-      tAcc=(100.0*nb_correct)/(len(prediction_res))   
-      print("Predicted examples: {:d}".format(len(prediction_res)))
-      print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc))
-      #print acc_out_list,max(acc_out_list),min(acc_out_list)
-      if __debug__: 
-        if (False == floatDataBus):
-          print("Max acc_out_list: {:d} Min acc_out_list: {:d}" .format(max(acc_out_list),min(acc_out_list)))
-        else:
-          print("Max acc_out_list: {:0.{i}f} Min acc_out_list: {:0.{i}f}" .format(max(acc_out_list),min(acc_out_list),i=2))
-        #print "Acc_out" + str(acc_out_list)
-      print("Simulation Successful!")
+    print("Total num received data= {:d}, Length of one Training example = {:d}".format(recv_l,LEN_THETA)) 
+    prediction_res=recv_data
+    nb_correct=0
+    for i in range(len(prediction_res)):
+      if(label[i] == prediction_res[i]):
+        nb_correct+=1
+    #print label,prediction_res,nb_correct
+    tAcc=(100.0*nb_correct)/(len(prediction_res))   
+    print("Predicted examples: {:d}".format(len(prediction_res)))
+    print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc))
+    print("Simulation Successful!")
 
 
 

@@ -115,8 +115,8 @@ class LogisticRegression():
       """ Enabling shift by default always 
           The input pipeline control is done through 
           valid data through pipe_inpA & pipe_outB """
-      ioB.shiftEn_i.next = sigHigh 
-      ioA.shiftEn_i.next = sigHigh 
+      ioB.shiftEn_i.next = 1 if  (pipe_inpA.valid == 1 and pipe_inpB.valid == 1) else 0
+      ioA.shiftEn_i.next = 1 if  (pipe_inpA.valid == 1 and pipe_inpB.valid == 1) else 0
 
     trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
     theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
