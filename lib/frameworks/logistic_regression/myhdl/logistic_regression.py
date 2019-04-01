@@ -1,5 +1,5 @@
 #----logisticRegression Class 
-from myhdl import Signal, intbv, toVerilog, toVHDL, instances, always_comb
+from myhdl import Signal, intbv, toVerilog, toVHDL, instances, always_comb, block
 
 from avalon_buses import PipelineST
 
@@ -110,7 +110,6 @@ class LogisticRegression():
     #----------------------------------------------------------------
     
     #----------------- Connecting Pipeline Blocks -------------------
-    sigHigh=Signal(bool(1))
     @always_comb
     def shiftOperand_signal():
       """ Enabling shift by default always 
