@@ -327,7 +327,6 @@ def sim_command_pipeline(pars_obj):
       else:
         acc_out_list.extend([round(acc_out,DEF_ROUND)])
       #print "nbR:" + str(nbR) 
-      sim_time_now=now()
 
   
   #----------------------------------------------------------------

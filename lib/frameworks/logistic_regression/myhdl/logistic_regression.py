@@ -56,7 +56,8 @@ class LogisticRegression():
   
   def __init__(self):
     """ LogisticRegression Init"""
-
+    self.mult_out=None
+    self.accu_out=None
 
   def block_connect(self, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
  
@@ -125,12 +126,14 @@ class LogisticRegression():
     #----------------- Connecting Command Pipeline -------------------
     # Mult Pipeline
     command=(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))   
+    self.mult_out=pipe_multRes
     #----------------------------------------------------------------
     
     #----------------- Connecting Accumulator  --------------
     # Accu
     acc_reset=Signal(bool(0)) 
     accumulator=(accuPipe.block_connect(parsAcc, reset, clk, acc_reset, pipe_multRes, pipe_out_acc))   
+    self.accu_out=pipe_out_acc
     
     #----------------------------------------------------------------
     

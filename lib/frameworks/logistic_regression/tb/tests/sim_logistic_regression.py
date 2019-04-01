@@ -44,6 +44,8 @@ MAX_NB_TRANSFERS=NB_TRAINING_DATA*LEN_THETA
 trans_dataA = []
 trans_dataB = []
 recv_data = []
+tap_mult = []
+tap_data_accu = []
 nbTA=0 # A global currently inevitable
 nbTB=0 # A global currently inevitable
 nbR=0 # A global currently inevitable
@@ -53,7 +55,7 @@ nbR=0 # A global currently inevitable
 # Global Accumulator Output ----------------
 
 acc_out = 0.0# PipelineST(pars.DATAWIDTH)
-acc_out_list=[]
+tap_accu=[]
 
 #-------------------------------------------
 
@@ -228,8 +230,31 @@ def sim_logistic_regression(pars_obj):
   
   @always(clk.posedge)
   def receive_data_process():
-    global recv_data,nbR,acc_out
+    global recv_data,tap_data_mmult,nbR,acc_out
     
+    # Collecting multiplier data
+    if (moduleLR.mult_out.valid == 1):
+      if (False == floatDataBus):
+        mult_out= moduleLR.mult_out.data
+      else:
+        mult_out= (round(float(moduleLR.mult_out.data),DEF_ROUND))
+      tap_mult.extend([mult_out])
+    
+    # Collecting Accumulator Data 
+    if(moduleLR.accu_out.valid == 1):  
+      acc_out = moduleLR.accu_out.data
+      #prob=(1.0/(1+ (math.exp(-1.0*acc_out) )))        # Sigmoid activation Function
+      if __debug__:
+        if (False == floatDataBus):
+          print("{0:d} acc_out: {1:d} ".format(int(nbR/LEN_THETA+1), int(acc_out), i=DEF_ROUND))
+        else:
+          print("{0:d} acc_out: {1:0.{i}f}".format(int(nbR/LEN_THETA+1), float(acc_out), i=DEF_ROUND))
+      if (False == floatDataBus):
+        tap_accu.extend([int(acc_out)])
+      else:
+        tap_accu.extend([round(float(acc_out),DEF_ROUND)])
+
+
     # Collecting Activation Data
     if(pipe_out_activ.valid == 1):  
       nbR+=LEN_THETA
@@ -239,7 +264,7 @@ def sim_logistic_regression(pars_obj):
       fp.write("{:d}\n".format(predict))
       fp.close()
       if __debug__:
-          print(" prediction: {:d}".format(predict) )
+          print("Prediction: {:d}".format(predict) )
      
       if (nbR == MAX_NB_TRANSFERS):
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")  
@@ -293,6 +318,11 @@ def check_simulation_results(pars_obj):
     tAcc=(100.0*nb_correct)/(len(prediction_res))   
     print("Predicted examples: {:d}".format(len(prediction_res)))
     print("Expected Training Accuracy: 89.00% Measured: {:0.2f}% approx".format(tAcc))
+    if __debug__: 
+      if (False == floatDataBus):
+        print("Max tap_accu: {:d} Min tap_accu: {:d}" .format(max(tap_accu),min(tap_accu)))
+      else:
+        print("Max tap_accu: {:0.{i}f} Min tap_accu: {:0.{i}f}" .format(max(tap_accu),min(tap_accu),i=2))
     print("Simulation Successful!")
 
 
