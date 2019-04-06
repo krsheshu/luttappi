@@ -20,16 +20,34 @@ Now one should be able to run the simulations
 
 Ubuntu 16.04 or higher
 
-# Other Dependencies
+# Virtual Environment 
 
-Install the following packages
+This repo recommends python3 to be installed in PC
 
-> sudo apt install python-pip -y
+> sudo apt install python3
 
-> sudo apt install python-yaml -y
+It is better to install virtualenv package for a smooth functioning
 
-> sudo apt install python-pil -y
+> pip3 install virtualenv
 
-> sudo apt install gtkwave -y
+> virtualenv mypython
 
-> pip install myhdl 
+To activate virtualenv:
+
+> source mypython/bin/activate
+
+# Install myhdl package
+
+> pip install myhdl
+
+To deactivate virtualenv:
+
+> deactivate
+
+# To Simulate Run a Logistic regression Example from Coursera
+
+> cd lib/frameworks/logistic_regression/
+ 
+> ./run.py -s  
+
+  
