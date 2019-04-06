@@ -12,7 +12,7 @@ add to ~/.bashrc the following lines
 
 export PYTHONPATH=/home/user/shakti/lib
 
-Now one should be able to run the simulations
+Now one should be able to continue with simulations
 
 # Installation Prerequisities
 
@@ -44,10 +44,10 @@ To deactivate virtualenv:
 
 > deactivate
 
-# To Simulate Run a Logistic regression Example from Coursera
+# To Simulate a Logistic regression Example from Coursera
 
 > cd lib/frameworks/logistic_regression/
  
-> ./run.py -s  
+> ./run.py -s 
 
   
