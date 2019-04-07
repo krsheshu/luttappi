@@ -3,7 +3,7 @@
 myhdl_env_name="myhdl_env"
 
 function usage {
-    echo "usage: $1 [-cadrh] "
+    echo "usage: $1 [-crh] "
     echo "  -c      Create python3 virtual environment for myhdl"
     echo "  -r      Remove virtual environment for myhdl"
     echo "  -h      display help"
