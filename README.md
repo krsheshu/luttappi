@@ -20,29 +20,18 @@ Now one should be able to continue with simulations
 
 Ubuntu 16.04 or higher
 
-# Virtual Environment 
+# Getting Started
 
-This repo recommends python3 to be installed in PC
+1) Create a virtualenvironment for myhdl like below
 
-> sudo apt install python3
-
-It is better to install virtualenv package for a smooth functioning
-
-> pip3 install virtualenv
-
-> virtualenv mypython
+> cd shakti
+> ./run_venv.sh -c
+  Now a virtual environment is created with all required packages installed
 
 To activate virtualenv:
 
-> source mypython/bin/activate
+> source myhdl_env/bin/activate
 
-# Install myhdl package
-
-> pip install myhdl
-
-To deactivate virtualenv:
-
-> deactivate
 
 # To Simulate a Logistic regression Example from Coursera
 
@@ -51,3 +40,6 @@ To deactivate virtualenv:
 > ./run.py -s 
 
   
+To deactivate virtualenv:
+
+> deactivate
