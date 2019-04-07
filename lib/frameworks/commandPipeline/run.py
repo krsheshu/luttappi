@@ -3,8 +3,6 @@
 import os
 import sys
 import argparse
-from myhdl import toVerilog, traceSignals, Simulation
-from myhdl.conversion import analyze
 from subprocess import call
 
 
@@ -47,12 +45,11 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
   pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames,None)
-  tb=traceSignals(sim_command_pipeline,pars_obj)
-  sim=Simulation(tb)
+  sim=sim_command_pipeline(pars_obj)
   if (sim_time is None):
-    sim.run()
+    sim.run_sim()
   else:
-    sim.run(sim_time)
+    sim.run_sim(sim_time)
   print("Simulation finished.................................")
   print("Checking Simulation results.................................")
   check_simulation_results(pars_obj)

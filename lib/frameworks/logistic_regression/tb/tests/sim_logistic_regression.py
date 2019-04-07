@@ -1,7 +1,7 @@
 import sys
 import math
 
-from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation
+from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation, block
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 
@@ -66,6 +66,7 @@ prediction_res=[]
 
 #--------------------------------------------
 
+@block
 def sim_logistic_regression(pars_obj):
 
   global test_decimal_shift, theta_decimal_shift
@@ -283,7 +284,7 @@ def sim_logistic_regression(pars_obj):
   #----------------------------------------------------------------
   return instances()
 
-
+#@block
 def check_simulation_results(pars_obj):
   global trans_dataA, trans_dataB, recv_data,floatDataBus
   err_cnt=0
@@ -324,6 +325,4 @@ def check_simulation_results(pars_obj):
       else:
         print("Max tap_accu: {:0.{i}f} Min tap_accu: {:0.{i}f}" .format(max(tap_accu),min(tap_accu),i=2))
     print("Simulation Successful!")
-
-
 

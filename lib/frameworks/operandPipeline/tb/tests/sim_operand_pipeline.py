@@ -1,5 +1,5 @@
 import sys
-from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation
+from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation, block
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 from operand_pipeline import OperandPipeline 
@@ -15,6 +15,7 @@ ready_pulses=intbv(0)
 nb1=0 # A global currently inevitable
 nb2=0 # A global currently inevitable
 
+@block
 def sim_operand_pipeline(pars_obj):
   NB_PIPELINE_STAGES  = 10 
   DATAWIDTH           = 32

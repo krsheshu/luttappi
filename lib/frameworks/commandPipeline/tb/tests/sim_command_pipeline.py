@@ -1,7 +1,7 @@
 import sys
 import math
 
-from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation
+from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSignals, instances, intbv,StopSimulation, block
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 
@@ -67,6 +67,7 @@ prediction_res=[]
 
 #--------------------------------------------
 
+@block
 def sim_command_pipeline(pars_obj):
 
   global test_decimal_shift, theta_decimal_shift

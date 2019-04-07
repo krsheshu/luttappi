@@ -1,5 +1,6 @@
-from myhdl import Signal, delay, instance, always, always_comb
+from myhdl import Signal, delay, instance, always, always_comb, block
 
+@block
 def clk_driver(elapsed_time,clk, period=20):
 
   cycle_count=Signal(0)
