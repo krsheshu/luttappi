@@ -23,9 +23,9 @@ function create_env {
     python3 -m venv $myhdl_env_name
     echo "Activating new environment"
     activate_env 
+    pip install wheel
     echo "Installing myhdl"
     pip install myhdl
-    pip install wheel
     echo "Installing myhdl_lib"
     pip install myhdl_lib
     echo "All requirements installed!"
