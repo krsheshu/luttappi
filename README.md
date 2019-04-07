@@ -26,7 +26,8 @@ Ubuntu 16.04 or higher
 
 > cd shakti
 > ./run_venv.sh -c
-  Now a virtual environment is created with all required packages installed
+
+Now a virtual environment is created with all required packages installed
 
 To activate virtualenv:
 
