@@ -32,9 +32,7 @@ def logistic_regression_convert():
   lRIO(pars)
    
   lRModule=LogisticRegression()
+  lRInst=lRModule.block_connect(pars, reset, clk, lRIO.pipe_inpA, lRIO.pipe_inpB, lRIO.pipe_out_activ )
 
-  filename= "lr_top"
-  toVerilog.name= filename 
-  toVerilog(lRModule.block_connect, pars, reset, clk, lRIO.pipe_inpA, lRIO.pipe_inpB, lRIO.pipe_out_activ)
-  toVHDL.name= filename 
-  toVHDL(lRModule.block_connect, pars, reset, clk, lRIO.pipe_inpA, lRIO.pipe_inpB, lRIO.pipe_out_activ)
+  lRInst.convert(hdl='Verilog', path = "converted_hdl", name="logistic_regression")
+  lRInst.convert(hdl='VHDL', path = "converted_hdl", name="logistic_regression")

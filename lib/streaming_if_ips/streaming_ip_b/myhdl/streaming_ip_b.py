@@ -1,6 +1,7 @@
-from myhdl import always, always_comb, Signal, intbv, instances
+from myhdl import always, always_comb, Signal, intbv, instances,block
 
 
+@block
 def streaming_ip_b( reset, clk, av_snk, av_src ):
 
   ready_reg = Signal(bool(0))

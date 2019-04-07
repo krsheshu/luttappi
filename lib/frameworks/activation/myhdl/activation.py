@@ -37,7 +37,7 @@ class Activation():
     self.classifier= PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   
   # Use simple step activation function. if x <= 0, prob=0 else prob=1
-  #@block 
+  @block 
   def block_step_connect(self, pars, reset, clk, pipe_in, pipe_out):
     """ Activation block """
    

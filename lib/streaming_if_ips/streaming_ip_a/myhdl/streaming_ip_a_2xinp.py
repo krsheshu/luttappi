@@ -1,5 +1,6 @@
-from myhdl import always, always_comb, Signal, instances
+from myhdl import always, always_comb, Signal, instances, block
 
+@block
 def streaming_ip_a_2xinp(reset, clk, av_snk0, av_snk1, av_src, data_enable_o):
 
   src_valid = Signal(bool(0)) 
