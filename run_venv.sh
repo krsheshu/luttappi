@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Quit if any error!
+set -e
+
 myhdl_env_name="myhdl_env"
 
 function usage {
@@ -22,7 +25,7 @@ function create_env {
     echo "Creating python 3 virtual environment"
     python3 -m venv $myhdl_env_name
     echo "Activating new environment"
-    activate_env 
+    activate_env
     pip install wheel
     echo "Installing myhdl"
     pip install myhdl
@@ -30,28 +33,28 @@ function create_env {
     pip install myhdl_lib
     echo "All requirements installed!"
     echo "Deactivating environment! "
-    deactivate_env 
+    deactivate_env
     echo "To activate the newly created environemt run:  source $myhdl_env_name/bin/activate "
-  
+
 }
 
 function remove_env {
     echo "Removing myhdl virtual environment"
-    rm -rf $myhdl_env_name 
+    rm -rf $myhdl_env_name
 }
 
-#Using bash builtin getopts option 
+#Using bash builtin getopts option
 while getopts ":cadrh" opt; do
   case $opt in
     c)  create_env $0
         ;;
- 
+
     r)  remove_env $0
         ;;
-    
-    h)  usage $0 
+
+    h)  usage $0
         ;;
-    
+
     *)  echo "Invalid option: -$OPTARG" >&2
         usage $0
         ;;
