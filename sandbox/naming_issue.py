@@ -1,7 +1,8 @@
 #!/usr/bin/python3 
 
-from myhdl import Signal, intbv, toVerilog, instances, always_comb
+from myhdl import Signal, intbv, toVerilog, instances, always_comb, block
 
+@block
 def conditional_wire_assign(dout, condition, din1, din2):
   @always_comb
   def conditional_wire_assign_process():
@@ -14,6 +15,7 @@ class stimulus():
     self.valid  = Signal(bool(0))
           
 class mainblk():
+  @block  
   def block_connect(self,reset,clk,inpa):
     shift2=Signal(bool(1)) 
     op=stimulus() 
@@ -24,6 +26,7 @@ class mainblk():
     return instances()
 
 class testblk():
+  @block  
   def test_top(self,reset,clk,inpa):
     shift1=Signal(bool(0))  
     
@@ -42,4 +45,6 @@ if __name__ == "__main__":
   stim=stimulus()
   testMod=testblk()
   
-  toVerilog(testMod.test_top,reset,clk,stim)
+  inst=testMod.test_top(reset,clk,stim)
+  inst.convert(hdl='Verilog') 
+  inst.convert(hdl='VHDL') 
