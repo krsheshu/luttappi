@@ -25,6 +25,7 @@ Ubuntu 16.04 or higher
 1) Create a virtualenvironment for myhdl like below
 
 > cd shakti
+
 > ./run_venv.sh -c
 
 Now a virtual environment is created with all required packages installed
@@ -37,10 +38,10 @@ To activate virtualenv:
 # To Simulate a Logistic regression Example from Coursera
 
 > cd lib/frameworks/logistic_regression/
- 
+
 > ./run.py -s 
 
-  
+
 To deactivate virtualenv:
 
 > deactivate
