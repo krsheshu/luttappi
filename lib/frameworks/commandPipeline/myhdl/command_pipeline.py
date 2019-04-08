@@ -72,7 +72,7 @@ class CommandPipeline():
   def __init__(self):
     """ CommandPipeline Init"""
 
-  #@block 
+  @block 
   def block_atomic_oper(self, pars, reset, clk, cmd, stage_iA, stage_iB, stage_o):
     """ Atomic Command block """
 
@@ -107,7 +107,7 @@ class CommandPipeline():
     return instances()
 
 
-  #@block 
+  @block 
   def block_connect(self, pars, reset, clk, pipe_stageA, pipe_stageB, pipest_src, io):
     """ CommandPipeline block """
    

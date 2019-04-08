@@ -38,7 +38,7 @@ class Accumulator():
     """ Overwrite Accumulator Ios """
     self.accu= PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
   
-  #@block 
+  @block 
   def block_connect(self, pars, reset, clk, reset_acc, pipe_in, pipe_out):
     """ Accumulator block """
    

@@ -1,5 +1,6 @@
-from myhdl import always_comb
+from myhdl import always_comb, block
 
+@block
 def streaming_ip_comb( reset, clk, av_snk, av_src, data_enable ):
 
   @always_comb

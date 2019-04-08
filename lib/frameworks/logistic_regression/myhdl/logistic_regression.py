@@ -59,8 +59,35 @@ class LogisticRegression():
     self.mult_out=None
     self.accu_out=None
 
+  @block
   def block_connect(self, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
+
+    #------ Wrapping the interfaces due to conversion issues!
+    pipe_inpA_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    pipe_inpB_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    pipe_out_active_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
  
+    @always_comb 
+    def interface_wrap_process():
+      pipe_inpA_if.valid.next = pipe_inpA.valid
+      pipe_inpA_if.data.next  = pipe_inpA.data
+      pipe_inpA_if.sop.next   = pipe_inpA.sop
+      pipe_inpA_if.eop.next   = pipe_inpA.eop
+      pipe_inpA_if.channel.next = pipe_inpA.channel
+
+      pipe_inpB_if.valid.next = pipe_inpB.valid
+      pipe_inpB_if.data.next  = pipe_inpB.data
+      pipe_inpB_if.sop.next   = pipe_inpB.sop
+      pipe_inpB_if.eop.next   = pipe_inpB.eop
+      pipe_inpB_if.channel.next = pipe_inpB.channel
+
+      pipe_out_activ.valid.next = pipe_out_active_if.valid
+      pipe_out_activ.data.next  = pipe_out_active_if.data
+      pipe_out_activ.sop.next   = pipe_out_active_if.sop
+      pipe_out_activ.eop.next   = pipe_out_active_if.eop
+      pipe_out_activ.channel.next = pipe_out_active_if.channel
+
+       
     #----------------- Initializing Pipeline Streams ----------------
     
     # --- Initializing Pipeline A
@@ -115,11 +142,11 @@ class LogisticRegression():
       """ Enabling shift by default always 
           The input pipeline control is done through 
           valid data through pipe_inpA & pipe_outB """
-      ioB.shiftEn_i.next = 1 if  (pipe_inpA.valid == 1 and pipe_inpB.valid == 1) else 0
-      ioA.shiftEn_i.next = 1 if  (pipe_inpA.valid == 1 and pipe_inpB.valid == 1) else 0
+      ioB.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
+      ioA.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
 
-    trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
-    theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
+    trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA_if, pipe_outA, ioA))
+    theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB_if, pipe_outB, ioB))
     #----------------------------------------------------------------
     
     #----------------- Connecting Command Pipeline -------------------
@@ -138,7 +165,7 @@ class LogisticRegression():
     
     #----------------- Connecting Activation  --------------
     # Simple Step Activation function  
-    activation=(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_activ ))   
+    activation=(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_active_if ))   
    
     #----------------------------------------------------------------
   

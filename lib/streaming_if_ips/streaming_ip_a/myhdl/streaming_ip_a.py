@@ -1,5 +1,6 @@
-from myhdl import always, always_comb, Signal, instances
+from myhdl import always, always_comb, Signal, instances, block
 
+@block
 def streaming_ip_a(reset, clk, av_snk, av_src, data_enable_o):
 
   src_valid,snk_ready = [Signal(bool(0)) for i in range(2)]
@@ -44,6 +45,7 @@ def streaming_ip_a(reset, clk, av_snk, av_src, data_enable_o):
 
 from avalon_buses import AvalonST_SNK, AvalonST_SRC
 
+@block
 def streaming_ip_a_top(reset, clk, av_snk, av_src):
  
   data_enable_o=Signal(bool(0))

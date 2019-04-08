@@ -1,7 +1,8 @@
-from myhdl import always_comb, instances
+from myhdl import always_comb, instances, block
 from avalon_buses import AvalonST_SNK, AvalonST_SRC
 
 
+@block
 def streaming_ip_wire( reset, clk, av_snk, av_src ):
 
   @always_comb

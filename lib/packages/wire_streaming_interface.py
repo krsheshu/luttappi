@@ -1,6 +1,7 @@
-from myhdl import always_comb
+from myhdl import always_comb, block
 
 # wire streaming source interface to streaming sink interface
+@block
 def streaming_src_to_snk_wire(aso_src, asi_snk):
 
   @always_comb

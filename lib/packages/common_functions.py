@@ -1,4 +1,4 @@
-from myhdl import always_comb,always, Signal
+from myhdl import always_comb,always, Signal, block
 import random
 
 class Reset():
@@ -12,6 +12,7 @@ def CLogB2(x):
   return 1 + CLogB2(x/2)
 
 # convert vector into array(list)
+@block
 def vector_to_array(data_width, index, input_vector, output_array):
 
   @always_comb
@@ -20,6 +21,7 @@ def vector_to_array(data_width, index, input_vector, output_array):
 
   return vector_to_array_process
 
+@block
 def simple_wire_assign(dout,din):
   @always_comb
   def simple_wire_assign_process():
@@ -29,6 +31,16 @@ def simple_wire_assign(dout,din):
   return simple_wire_assign_process
 
 
+@block
+def simple_wire_assign(dout,din):
+  @always_comb
+  def simple_wire_assign_process():
+    dout.next = din
+    if __debug__:   # to create a reg keyword in verilog 
+      pass
+  return simple_wire_assign_process
+
+@block
 def conditional_wire_assign(dout, condition, din1, din2):
   @always_comb
   def conditional_wire_assign_process():
@@ -37,6 +49,7 @@ def conditional_wire_assign(dout, condition, din1, din2):
       pass
   return conditional_wire_assign_process
 
+@block
 def conditional_wire_assign_lt(dout, op1, op2, din1, din2):
   """ Conditional wire assign where dout = din1 when op1<op2 else din2"""
   @always_comb
@@ -46,6 +59,7 @@ def conditional_wire_assign_lt(dout, op1, op2, din1, din2):
       pass
   return conditional_wire_assign_lt_process
 
+@block
 def simple_reg_assign(reset, clk, dout, reset_val, din):
   @always(clk.posedge, reset.posedge)
   def simple_reg_assign_process():
@@ -56,6 +70,7 @@ def simple_reg_assign(reset, clk, dout, reset_val, din):
   return simple_reg_assign_process
 
 
+@block
 def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
   @always(clk.posedge, reset.posedge)
   def conditional_reg_assign_process():
@@ -68,6 +83,7 @@ def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
   
   return conditional_reg_assign_process
 
+@block
 def conditional_clocked_append(reset, clk, out, condition, inp):
   @always(clk.posedge, reset.posedge)
   def conditional_clocked_append_process():
@@ -78,6 +94,7 @@ def conditional_clocked_append(reset, clk, out, condition, inp):
       print(out)
   return conditional_clocked_append_process
 
+@block
 def conditional_reg_counter(reset, clk, counter, reset_val, condition):
   @always(clk.posedge, reset.posedge)
   def conditional_reg_counter_process():
@@ -87,6 +104,7 @@ def conditional_reg_counter(reset, clk, counter, reset_val, condition):
       counter.next = counter + 1
   return conditional_reg_counter_process
 
+@block
 def conditional_random_generator(reset, clk, out, reset_val, condition, randrange):
   @always(clk.posedge, reset.posedge)
   def conditional_random_generator_process():
@@ -96,6 +114,7 @@ def conditional_random_generator(reset, clk, out, reset_val, condition, randrang
       out.next = random.randint(0,randrange)
   return conditional_random_generator_process
 
+@block
 def conditional_clocked_appendfile(reset, clk, condition, inp, filename):
   @always(clk.posedge, reset.posedge)
   def conditional_clocked_appendfile_process():

@@ -12,7 +12,7 @@ add to ~/.bashrc the following lines
 
 export PYTHONPATH=/home/user/shakti/lib
 
-Now one should be able to run the simulations
+Now one should be able to continue with simulations
 
 # Installation Prerequisities
 
@@ -20,16 +20,27 @@ Now one should be able to run the simulations
 
 Ubuntu 16.04 or higher
 
-# Other Dependencies
+# Getting Started
 
-Install the following packages
+1) Create a virtualenvironment for myhdl like below
 
-> sudo apt install python-pip -y
+> cd shakti
+> ./run_venv.sh -c
 
-> sudo apt install python-yaml -y
+Now a virtual environment is created with all required packages installed
 
-> sudo apt install python-pil -y
+To activate virtualenv:
 
-> sudo apt install gtkwave -y
+> source myhdl_env/bin/activate
 
-> pip install myhdl 
+
+# To Simulate a Logistic regression Example from Coursera
+
+> cd lib/frameworks/logistic_regression/
+ 
+> ./run.py -s 
+
+  
+To deactivate virtualenv:
+
+> deactivate

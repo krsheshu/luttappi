@@ -1,4 +1,4 @@
-from myhdl import Signal, intbv,always
+from myhdl import Signal, intbv,always, block
 
 class AvalonMM():
     """ class to access Altera's avalon memory-mapped interface """
@@ -19,6 +19,7 @@ class AvalonMM():
         ## read data bus
         self.readdata_o = Signal(intbv(0)[data_width:])
 
+@block
 def avalon_access(clk, avs_mm, address, read_data, write_data, read_enable, write_enable):
     """ function to support both read and write accesses over avalon memory-mapped interface """
     @always(clk.posedge)

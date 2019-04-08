@@ -46,7 +46,7 @@ class OperandPipeline():
   def __init__(self):
     """ OperandPipeline Init"""
 
-  #@block 
+  @block 
   def block_connect(self, pars, reset, clk, pipest_snk, pipest_src, io):
     """ OperandPipeline block """
 

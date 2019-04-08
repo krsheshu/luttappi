@@ -1,5 +1,6 @@
-from myhdl import always_comb
+from myhdl import always_comb, block
 
+@block
 def rst_driver(elapsed_time,reset_duration, reset_high, reset_low):
 
   @always_comb
