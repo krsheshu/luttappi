@@ -1,4 +1,8 @@
-# shakti
+
+![Luttappi NN](docs/luttappi.jpg)
+
+
+# Luttappi NN
 A project for fpga implementation of neural networks
 
 # Usage
