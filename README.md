@@ -7,14 +7,14 @@ A project for fpga implementation of neural networks
 
 # Usage
 
-Add the luttappi project path to the PYTHONPATH environment variable like below
-> export PYTHONPATH=path/to/luttappi/lib
+Add the shakti project path to the PYTHONPATH environment variable like below
+> export PYTHONPATH=path/to/shakti/lib
 
-Ex: if the luttappi project is in /home/user/luttappi
+Ex: if the shakti project is in /home/user/shakti
 
 add to ~/.bashrc the following lines
 
-export PYTHONPATH=/home/user/luttappi/lib
+export PYTHONPATH=/home/user/shakti/lib
 
 Now one should be able to continue with simulations
 
@@ -28,7 +28,7 @@ Ubuntu 16.04 or higher
 
 1) Create a virtualenvironment for myhdl like below
 
-> cd luttappi
+> cd shakti
 
 > ./run_venv.sh -c
 
