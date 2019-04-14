@@ -7,7 +7,38 @@ from clk_driver import clk_driver
 
 import subprocess
 
+
 from logistic_regression import LogisticRegression, LogisticRegressionIo, LogisticRegressionPars
+
+
+import scipy.io as sio
+import cv2
+import numpy as np
+import random as rnd
+import os
+
+imgW=20
+imgH=20
+
+nbImages=5000
+nbImages1Row=10
+nbImages1Col=10
+
+print(os.getcwd())
+pattern = sio.loadmat('ex3data1.mat')
+weights = sio.loadmat('ex3weights.mat')
+img=pattern['X']
+
+img100=np.zeros((imgH*nbImages1Col, imgW*nbImages1Row))
+
+for i in range(10):
+  for j in range(10):
+    tmp=np.reshape(img[(rnd.randint(0,5000)),:], (20,20))
+    tmp=np.transpose(tmp)
+    img100[i*imgH:i*imgH+20,j*imgW:j*imgW+20]=tmp
+
+cv2.imwrite("img100.tif",img100)
+  
 
 
 # Global Parameters-------------------------

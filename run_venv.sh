@@ -31,6 +31,10 @@ function create_env {
     pip install myhdl
     echo "Installing myhdl_lib"
     pip install myhdl_lib
+    echo "Installing scipy"
+    pip install scipy
+    echo "Installing python-opencv"
+    pip install opencv-python
     echo "All requirements installed!"
     echo "Deactivating environment! "
     deactivate_env
