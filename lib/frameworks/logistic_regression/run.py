@@ -20,6 +20,7 @@ inst=MyhdlBridgeLib(current_dir)
 valid=Valid()
 #----------Project Specific Module Imports------------#
 from sim_logistic_regression import sim_logistic_regression, check_simulation_results
+from sim_logistic_regression_2 import sim_logistic_regression_2, check_simulation_results_2
 from logistic_regression_convert import logistic_regression_convert
 
 
@@ -46,14 +47,14 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
   os.chdir(sim_temp_dir)
   inst.sim_defaults(sim_temp_dir)
   pars_obj=pass_testbench(sim_temp_dir,sim_pattern_dir,valid_pattern, ready_pattern, nb_frames,None)
-  sim=sim_logistic_regression(pars_obj)
+  sim=sim_logistic_regression_2(pars_obj)
   if (sim_time is None):
     sim.run_sim()
   else:
     sim.run_sim(sim_time)
   print("Simulation finished.................................")
   print("Checking Simulation results.................................")
-  check_simulation_results(pars_obj)
+  check_simulation_results_2(pars_obj)
   os.chdir(cwd)
 
 #----------cli---------------#

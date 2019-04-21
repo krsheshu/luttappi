@@ -6,12 +6,16 @@ import numpy as np
 import random as rnd
 import os
 
+
 imgW=20
 imgH=20
 
 nbImages=5000
 
-print(os.getcwd())
+origDir=os.getcwd()
+
+os.chdir(os.path.dirname(__file__))
+
 pattern = sio.loadmat('ex3data1.mat')
 img=pattern['X']    # A numpy array 
 label=pattern['y'][:,0]   # A numpy array
@@ -48,4 +52,4 @@ tAcc=(100.0*nb_correct)/(len(prediction))
 print("Predicted examples: {:d}".format(len(prediction)))
 print("Expected Training Accuracy: 94.90% Measured: {:0.2f}% approx".format(tAcc))
 
-
+os.chdir(origDir)
