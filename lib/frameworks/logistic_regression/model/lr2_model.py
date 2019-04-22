@@ -42,27 +42,27 @@ class LogisticRegression1vsAllModel():
             Nil
 
         Returns:
-            imgArray: Required number of images in an array with offset of 1 included
-            label:  Corresponding labels for the respective classify images  
+            sampleImgArray: Required number of images in an array with offset of 1 included
+            sampleLabel:  Corresponding labels for the respective classify images  
         '''
 
         nbClassifyImages=len(rowNb)
  
-        imgArray=np.zeros((nbClassifyImages,self.imgW*self.imgH))
-        label=np.zeros(nbClassifyImages)
+        sampleImgArray=np.zeros((nbClassifyImages,self.imgW*self.imgH))
+        sampleLabel=np.zeros(nbClassifyImages)
 
         for i in range(nbClassifyImages):
 
-          imgArray[i,:]=img[rowNb[i],:]     
-          label[i]= labelY[rowNb[i]]  
+          sampleImgArray[i,:]=img[rowNb[i],:]     
+          sampleLabel[i]= labelY[rowNb[i]]  
         
         # Insert column of 1's for the input data for prediction / LR calculation
-        imgArray=np.insert(imgArray,0,1,axis=1)     # Selected array to return to the user
+        sampleImgArray=np.insert(sampleImgArray,0,1,axis=1)     # Selected array to return to the user
         
-        return imgArray, label
+        return sampleImgArray, sampleLabel
 
 
-    def get(self,nbClassifyImages=10):
+    def get(self,nbClassifyImages=10, display=False):
 
         '''
         Returns nbClassifyImages number of images and the corresponding labels 
@@ -76,8 +76,10 @@ class LogisticRegression1vsAllModel():
             AssertionError: If nbClassifyImages not power of 2 
 
         Returns:
-            imgArray: nbClassifyImages number of images in an array with offset of 1 included
-            label:  Corresponding labels for the respective classify images  
+            sampleImgArray(numpy array):  nbClassifyImages number of images in an array with offset of 1 included
+            sampleLabel   (numpy array):  Corresponding labels for the respective classify images  
+            theta         (numpy array):  Learned Weights for the logistic regression calculation    
+            modelPredict  (numpy array):  Prediction results for the samples by the model 
         '''
 
         assert (math.sqrt(nbClassifyImages)%1 == 0),"ERR016: nb Classify images not power of 2!"
@@ -107,18 +109,41 @@ class LogisticRegression1vsAllModel():
             tmp=np.transpose(tmp)
             testImgs[i*self.imgH:i*self.imgH+self.imgH,j*self.imgW:j*self.imgW+self.imgW]=tmp
          
-        imageName="testImages.tif"
-        cv2.imwrite(imageName,testImgs)
-        print("Test image saved as {}".format(imageName))
+        sampleImgName="sampleImages.tif"
+        cv2.imwrite(sampleImgName,testImgs)
+        print("Test image saved as {}".format(sampleImgName))
        
-        imgArray, label = self.samplesArray_get(rowNb, img, labelY) 
+        sampleImgArray, sampleLabel = self.samplesArray_get(rowNb, img, labelY) 
 
         imgRev=np.insert(img,0,1,axis=1)            # Array for prediction calculation
         
         thetaTp=np.transpose(theta)
         resY=np.matmul(imgRev,thetaTp)
         prediction=np.argmax(resY,axis=1) + 1 # +1 to correct indexing due to speciality of the example. See docs ex3.pdf 
+
+        modelPredict=np.zeros(nbClassifyImages,np.uint8)
+        for i in range(nbClassifyImages):
+          modelPredict[i] = 0 if prediction[rowNb[i]] == 10 else int(prediction[rowNb[i]])
+                
+        # Prediction image
+        self.imgH=self.imgW=64
+          
+        predictFullImg = np.zeros((self.imgH*nbImages1Col,self.imgW*nbImages1Row), np.uint8)
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        k=0
+        for i in range(nbImages1Col):
+          for j in range(nbImages1Row):
+            predictImg = np.zeros((self.imgH,self.imgW), np.uint8)
+            predictStr= str(modelPredict[k])
+            cv2.putText(predictImg,predictStr,(self.imgW>>2,self.imgH>>1), font, 1,(255,255,255),2,cv2.LINE_AA)
+            k += 1
+            predictFullImg[i*self.imgH:i*self.imgH+self.imgH,j*self.imgW:j*self.imgW+self.imgW]=predictImg
+ 
+        predictImgName="modelPrediction.tif"
+        cv2.imwrite(predictImgName,predictFullImg)
+        print("Prediction image saved as {}".format(predictImgName))
         
+
         nb_correct=0
         #print(label,label.shape,prediction,prediction.shape,nb_correct)
         for i in range(len(prediction)):
@@ -129,10 +154,16 @@ class LogisticRegression1vsAllModel():
         print("Expected Training Accuracy: 94.90% Measured: {:0.2f}% approx".format(tAcc))
         
         os.chdir(origDir)
-       
-        return imgArray, label 
+      
+        if display==True:   
+            cv2.imshow(sampleImgName,testImgs)
+            cv2.imshow(predictImgName,predictFullImg)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+           
+        return sampleImgArray, sampleLabel, theta, modelPredict 
 
 if __name__ == "__main__": 
     model=LogisticRegression1vsAllModel()
-    imgArray,label = model.get(16)
-    #print(imgArray, label)
+    sampleImgArray, sampleLabel, theta, modelPredict = model.get(nbClassifyImages=16,display=True)
+    #print(sampleImgArray, sampleLabel)
