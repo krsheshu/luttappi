@@ -165,5 +165,6 @@ class LogisticRegression1vsAllModel():
 
 if __name__ == "__main__": 
     model=LogisticRegression1vsAllModel()
-    sampleImgArray, sampleLabel, theta, modelPredict = model.get(nbClassifyImages=16,display=True)
+    sampleImgArray, sampleLabel, theta, modelPredict = model.get(nbClassifyImages=100,display=True)
+    #sampleImgArray, sampleLabel, theta, modelPredict = model.get(nbClassifyImages=100)
     #print(sampleImgArray, sampleLabel)
