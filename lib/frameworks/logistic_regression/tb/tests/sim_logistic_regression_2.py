@@ -12,10 +12,8 @@ from logistic_regression import LogisticRegression, LogisticRegressionIo, Logist
 
 from lr2_model import LogisticRegression1vsAllModel
 
-import scipy.io as sio
 import cv2
 import numpy as np
-import random as rnd
 import os
 
 # Global Parameters-------------------------
@@ -24,8 +22,8 @@ import os
 # floatDataBus = True for simulation with floating point mult
 floatDataBus=True
 
-# NB_TRAINING_DATA - Controls the number of training data to be verified 
-NB_TRAINING_DATA=5
+# NB_TRAINING_SAMPLES - Controls the number of training data to be verified 
+NB_TRAINING_SAMPLES=4
 
 # When using intbv for the data (not the floating point simulation),
 # determine the decimal shift needed in the theta and training data parameters
@@ -48,7 +46,7 @@ LEN_THETA=401
 # Transmit Receive Parameters---------------
 
 MAX_SIM_TIME = LEN_THETA*10000
-MAX_NB_TRANSFERS=NB_TRAINING_DATA*LEN_THETA
+MAX_NB_TRANSFERS=NB_TRAINING_SAMPLES*LEN_THETA
 trans_dataA = []
 trans_dataB = []
 recv_data = []
@@ -69,13 +67,13 @@ tap_accu=[]
 
 # Other Globals------------------------------
 
-label=np.zeros(NB_TRAINING_DATA)
-prediction_res=np.zeros(NB_TRAINING_DATA)
+label=np.zeros(NB_TRAINING_SAMPLES,np.uint8)
+prediction_res=np.zeros(NB_TRAINING_SAMPLES,np.uint8)
 
 #--------------------------------------------
 NB_CLASSIFIERS=10
 
-resY=np.zeros((NB_TRAINING_DATA,NB_CLASSIFIERS))
+resY=np.zeros((NB_TRAINING_SAMPLES,NB_CLASSIFIERS))
 def displayAccOut(nbR,accu_in,i):
     # Collecting Accumulator Data 
     if(accu_in.valid == 1):  
@@ -198,18 +196,12 @@ def sim_logistic_regression_2(pars_obj):
   lr_test_file="../../model/ex3data1.mat"
   lr_theta_file="../../model/lR_weights.mat"
 
-  pattern = sio.loadmat(lr_test_file)
-  img=pattern['X']    # A numpy array 
-  label=pattern['y'][:,0]   # A numpy array
-  # Insert column of 1's for the input data for prediction / LR calculation
-  imgRev=np.insert(img,0,1,axis=1)
-
-  weights = sio.loadmat(lr_theta_file)   
-  theta=weights['all_theta']      # A numpy array
+  model=LogisticRegression1vsAllModel()
+  imgArray, label, theta, modelPredict = model.get(nbClassifyImages=NB_TRAINING_SAMPLES)
   
   #--- Loading Test and Theta Values 
   
-  test_file_list=imgRev.flatten()  # Flattenning all the rows for pipelines operation
+  test_file_list=imgArray.flatten()  # Flattenning all the rows for pipelines operation
   
   # exp10 shifts done for theta and test data as per requirements when intbv used 
   if (False == floatDataBus):
@@ -228,7 +220,7 @@ def sim_logistic_regression_2(pars_obj):
   theta_file7_list=[]
   theta_file8_list=[]
   theta_file9_list=[]
-  for i in range(NB_TRAINING_DATA):
+  for i in range(NB_TRAINING_SAMPLES):
     theta_file0_list.extend(theta[0,:])
     theta_file1_list.extend(theta[1,:])
     theta_file2_list.extend(theta[2,:])
@@ -339,7 +331,7 @@ def sim_logistic_regression_2(pars_obj):
   
   @always(clk.posedge)
   def receive_data_process():
-    global recv_data,tap_data_mmult,nbR,acc_out
+    global recv_data,tap_data_mmult,nbR,acc_out,prediction_res
     
     # Collecting multiplier data
     if (moduleLR0.mult_out.valid == 1):
@@ -362,9 +354,9 @@ def sim_logistic_regression_2(pars_obj):
 
     if (moduleLR9.accu_out.valid == 1):  
       nbR += 1
-      if (nbR == NB_TRAINING_DATA):
+      if (nbR == NB_TRAINING_SAMPLES):
         prediction_res=np.argmax(resY,axis=1) + 1 # +1 to correct indexing due to speciality of the example. See docs ex3.pdf 
-        print(label,prediction_res)
+        print("label: {} prediction: {}".format(label,prediction_res))
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")  
 
     
@@ -382,14 +374,35 @@ def sim_logistic_regression_2(pars_obj):
   return instances()
 
 #@block
-def check_simulation_results_2(pars_obj):
+def check_simulation_results_2(pars_obj, display=False):
+  global prediction_res; 
+
+  assert (math.sqrt(NB_TRAINING_SAMPLES)%1 == 0),"ERR377: nb Classify images not power of 2!"
+  nbImages1Row=int(math.sqrt(NB_TRAINING_SAMPLES))
+  nbImages1Col=int(math.sqrt(NB_TRAINING_SAMPLES))
+  print(prediction_res)
+  fpgaPredictImgName="fpgaPrediction.tif"
+  predictFullImg=LogisticRegression1vsAllModel.nbArray2Image_convert(None,prediction_res, nbImages1Col, nbImages1Row, fpgaPredictImgName) 
+  print("FPGA Prediction image saved as {}".format(fpgaPredictImgName))
+  
   nb_correct=0
   for i in range(len(prediction_res)):
     if(label[i] == prediction_res[i]):
       nb_correct+=1
-  print(label,prediction_res,nb_correct)
+  #print(label,prediction_res,nb_correct)
   tAcc=(100.0*nb_correct)/(len(prediction_res))   
   print("Predicted examples: {:d}".format(len(prediction_res)))
-  print("Expected Training Accuracy: 94.90% Measured: {:0.2f}% approx".format(tAcc))
+  print("Expected Training Accuracy: 94.90% Measured: {:0.2f}% approx. nb_samples: {}".format(tAcc, len(prediction_res)))
   print("Simulation Successful!")
+  
+  if display==True:
+      sampleI=cv2.imread('../../model/sampleImages.tif',0)
+      modelPredictI=cv2.imread('../../model/modelPrediction.tif',0)
+      fpgaPredictI=cv2.imread('../myhdl_work/fpgaPrediction.tif',0)
+      cv2.imshow("Sample Images",sampleI)
+      cv2.imshow("Predicted Model",modelPredictI)
+      cv2.imshow("FPGA Prediction Result",fpgaPredictI)
+      cv2.waitKey(0)
+      cv2.destroyAllWindows()
+
 

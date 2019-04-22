@@ -62,6 +62,43 @@ class LogisticRegression1vsAllModel():
         return sampleImgArray, sampleLabel
 
 
+
+    def nbArray2Image_convert(self, numberArray, nbImages1Col, nbImages1Row,  filename="modelPrediction.tif"):
+
+        '''
+        Returns an image array comprising of the input numbers. 
+
+        Args:
+            numberArray   (numpy array):  A 1D array of numbers to be converted to an image
+            nbImages1Col          (int):  expected number of images in one column
+            nbImages1Row          (int):  expected number of images in one row 
+            filename              (str):  File to be saved to
+
+        Raises:
+            Nil
+
+        Returns:
+            fullImgArray  (numpy array):  The resulting image manufactured from the input number array
+        '''
+
+        # Single image size
+        imgH=imgW=64
+        fullImgArray = np.zeros((imgH*nbImages1Col,imgW*nbImages1Row), np.uint8)
+        font = cv2.FONT_HERSHEY_SIMPLEX 
+        k=0
+        for i in range(nbImages1Col):
+          for j in range(nbImages1Row):
+            img = np.zeros((imgH,imgW), np.uint8)
+            nbStr= str(numberArray[k])
+            cv2.putText(img,nbStr,(imgW>>2,imgH>>1), font, 1,(255,255,255),2,cv2.LINE_AA)
+            k += 1
+            fullImgArray[i*imgH:i*imgH+imgH,j*imgW:j*imgW+imgW]=img
+ 
+        cv2.imwrite(filename,fullImgArray)
+       
+        return fullImgArray 
+
+
     def get(self,nbClassifyImages=10, display=False):
 
         '''
@@ -124,25 +161,10 @@ class LogisticRegression1vsAllModel():
         modelPredict=np.zeros(nbClassifyImages,np.uint8)
         for i in range(nbClassifyImages):
           modelPredict[i] = 0 if prediction[rowNb[i]] == 10 else int(prediction[rowNb[i]])
-                
-        # Prediction image
-        self.imgH=self.imgW=64
-          
-        predictFullImg = np.zeros((self.imgH*nbImages1Col,self.imgW*nbImages1Row), np.uint8)
-        font = cv2.FONT_HERSHEY_SIMPLEX 
-        k=0
-        for i in range(nbImages1Col):
-          for j in range(nbImages1Row):
-            predictImg = np.zeros((self.imgH,self.imgW), np.uint8)
-            predictStr= str(modelPredict[k])
-            cv2.putText(predictImg,predictStr,(self.imgW>>2,self.imgH>>1), font, 1,(255,255,255),2,cv2.LINE_AA)
-            k += 1
-            predictFullImg[i*self.imgH:i*self.imgH+self.imgH,j*self.imgW:j*self.imgW+self.imgW]=predictImg
- 
-        predictImgName="modelPrediction.tif"
-        cv2.imwrite(predictImgName,predictFullImg)
-        print("Prediction image saved as {}".format(predictImgName))
         
+        predictImgName="modelPrediction.tif"
+        predictFullImg=self.nbArray2Image_convert(modelPredict,nbImages1Col, nbImages1Row, predictImgName) 
+        print("Prediction image saved as {}".format(predictImgName))
 
         nb_correct=0
         #print(label,label.shape,prediction,prediction.shape,nb_correct)

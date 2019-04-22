@@ -54,7 +54,7 @@ def simulate(sim_temp_dir, sim_pattern_dir, valid_pattern, ready_pattern, nb_fra
     sim.run_sim(sim_time)
   print("Simulation finished.................................")
   print("Checking Simulation results.................................")
-  check_simulation_results_2(pars_obj)
+  check_simulation_results_2(pars_obj,True)
   os.chdir(cwd)
 
 #----------cli---------------#
