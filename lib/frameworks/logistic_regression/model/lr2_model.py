@@ -54,7 +54,7 @@ class LogisticRegression1vsAllModel():
         for i in range(nbClassifyImages):
 
           sampleImgArray[i,:]=img[rowNb[i],:]     
-          sampleLabel[i]= labelY[rowNb[i]]  
+          sampleLabel[i]= 0 if labelY[rowNb[i]] == 10 else labelY[rowNb[i]]  
         
         # Insert column of 1's for the input data for prediction / LR calculation
         sampleImgArray=np.insert(sampleImgArray,0,1,axis=1)     # Selected array to return to the user

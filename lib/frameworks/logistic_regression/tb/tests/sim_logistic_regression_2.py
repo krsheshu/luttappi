@@ -23,7 +23,7 @@ import os
 floatDataBus=True
 
 # NB_TRAINING_SAMPLES - Controls the number of training data to be verified 
-NB_TRAINING_SAMPLES=4
+NB_TRAINING_SAMPLES=16
 
 # When using intbv for the data (not the floating point simulation),
 # determine the decimal shift needed in the theta and training data parameters
@@ -355,7 +355,9 @@ def sim_logistic_regression_2(pars_obj):
     if (moduleLR9.accu_out.valid == 1):  
       nbR += 1
       if (nbR == NB_TRAINING_SAMPLES):
-        prediction_res=np.argmax(resY,axis=1) + 1 # +1 to correct indexing due to speciality of the example. See docs ex3.pdf 
+        prediction_res=np.argmax(resY,axis=1) + 1 # +1 to correct indexing due to speciality of the example. See docs ex3.pdf
+        for i in range(len(prediction_res)):
+            prediction_res[i]=0 if prediction_res[i]==10 else prediction_res[i]    
         print("label: {} prediction: {}".format(label,prediction_res))
         raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")  
 
