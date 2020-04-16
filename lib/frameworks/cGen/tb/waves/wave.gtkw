@@ -1,0 +1,30 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Nov 17 14:14:15 2019
+[*]
+[dumpfile] "/home/skr/seed/Projects/meta_bbb/luttappi/lib/frameworks/cGen/tb/myhdl_work/sim_command_pipeline.vcd"
+[dumpfile_mtime] "Sun Nov 17 14:12:10 2019"
+[dumpfile_size] 602664
+[savefile] "/home/skr/seed/Projects/meta_bbb/luttappi/lib/frameworks/cGen/tb/waves/wave.gtkw"
+[timestart] 0
+[size] 1299 713
+[pos] -37 -37
+*-8.199339 130 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sim_command_pipeline.
+[sst_width] 223
+[signals_width] 214
+[sst_expanded] 1
+[sst_vpaned_height] 192
+@28
+sim_command_pipeline.clk
+@24
+sim_command_pipeline.pipe_inpA_valid
+sim_command_pipeline.pipe_inpA_data[31:0]
+sim_command_pipeline.pipe_inpB_valid
+sim_command_pipeline.pipe_inpB_data[31:0]
+@25
+sim_command_pipeline.pipe_multRes_valid
+@24
+sim_command_pipeline.pipe_multRes_data[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
