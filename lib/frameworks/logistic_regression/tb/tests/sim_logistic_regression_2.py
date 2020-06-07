@@ -22,13 +22,13 @@ import os
 # floatDataBus = True for simulation with floating point mult
 floatDataBus=True
 
-# NB_TRAINING_SAMPLES - Controls the number of training data to be verified 
-NB_TRAINING_SAMPLES=16
+# NB_TRAINING_SAMPLES - Controls the number of training data to be verified
+NB_TRAINING_SAMPLES=4
 
 # When using intbv for the data (not the floating point simulation),
 # determine the decimal shift needed in the theta and training data parameters
 # For example, for training data 32.5, a shift of 1 will use value of 325 for intbv representation
-#              for theta value of -25.21, a shift of 2 will use -2521 for theta value 
+#              for theta value of -25.21, a shift of 2 will use -2521 for theta value
 test_decimal_shift=1
 theta_decimal_shift=1
 
@@ -75,12 +75,12 @@ NB_CLASSIFIERS=10
 
 resY=np.zeros((NB_TRAINING_SAMPLES,NB_CLASSIFIERS))
 def displayAccOut(nbR,accu_in,i):
-    # Collecting Accumulator Data 
-    if(accu_in.valid == 1):  
+    # Collecting Accumulator Data
+    if(accu_in.valid == 1):
       print("{}: nb:{}: accu_out{}: {} ".format(now(), nbR, i,accu_in.data))
       resY[nbR,i]=accu_in.data
-      
-  
+
+
 
 @block
 def sim_logistic_regression_2(pars_obj):
@@ -88,31 +88,31 @@ def sim_logistic_regression_2(pars_obj):
   global test_decimal_shift, theta_decimal_shift
 
   #------------------ Initializing Pipeline depths ---------------
-  
+
   NB_PIPELINE_STAGES  = 5
   DATAWIDTH           = 32
   #-------------- Simulation Initialisations ---------------------
-  
+
   reset = Signal(bool(1))
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
-  
+
   clkgen=clk_driver(elapsed_time,clk,period=20)
-  
+
   #----------------------------------------------------------------
- 
+
   #----------------- Initializing Pipeline Streams ----------------
-  
+
   # --- Pipeline Pars
   pars=LogisticRegressionPars()
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
   pars.CHANNEL_WIDTH=2
   global floatDataBus
-  if (True == floatDataBus):  
-    pars.INIT_DATA=0.0  # requires floating point computation 
+  if (True == floatDataBus):
+    pars.INIT_DATA=0.0  # requires floating point computation
   else:
-    pars.INIT_DATA=0    # requires intbv computation 
+    pars.INIT_DATA=0    # requires intbv computation
 
   pars.CMD_FILE =  '../tests/mult_pipeline.list'
   pars.LEN_THETA  = LEN_THETA
@@ -150,8 +150,8 @@ def sim_logistic_regression_2(pars_obj):
   moduleLR9=LogisticRegression()
 
   # --- Initializing Pipeline A
-  pipe_inpA  = ioLR0.pipe_inpA 
-  
+  pipe_inpA  = ioLR0.pipe_inpA
+
   # --- Initializing Pipeline B
   pipe_theta0  = ioLR0.pipe_inpB
   pipe_theta1  = ioLR1.pipe_inpB
@@ -163,8 +163,8 @@ def sim_logistic_regression_2(pars_obj):
   pipe_theta7  = ioLR7.pipe_inpB
   pipe_theta8  = ioLR8.pipe_inpB
   pipe_theta9  = ioLR9.pipe_inpB
-  
-  # --- Initializing Activation Out 
+
+  # --- Initializing Activation Out
   pipe_out_activ0 = ioLR0.pipe_out_activ
   pipe_out_activ1 = ioLR1.pipe_out_activ
   pipe_out_activ2 = ioLR2.pipe_out_activ
@@ -177,39 +177,39 @@ def sim_logistic_regression_2(pars_obj):
   pipe_out_activ9 = ioLR9.pipe_out_activ
 
   #----------------- Connecting Logistic Regression Block--------------
-  # Simple Step Activation function  
-  inst0=(moduleLR0.block_connect(pars, reset, clk, pipe_inpA, pipe_theta0, pipe_out_activ0 ))   
-  inst1=(moduleLR1.block_connect(pars, reset, clk, pipe_inpA, pipe_theta1, pipe_out_activ1 ))   
-  inst2=(moduleLR2.block_connect(pars, reset, clk, pipe_inpA, pipe_theta2, pipe_out_activ2 ))   
-  inst3=(moduleLR3.block_connect(pars, reset, clk, pipe_inpA, pipe_theta3, pipe_out_activ3 ))   
-  inst4=(moduleLR4.block_connect(pars, reset, clk, pipe_inpA, pipe_theta4, pipe_out_activ4 ))   
-  inst5=(moduleLR5.block_connect(pars, reset, clk, pipe_inpA, pipe_theta5, pipe_out_activ5 ))   
-  inst6=(moduleLR6.block_connect(pars, reset, clk, pipe_inpA, pipe_theta6, pipe_out_activ6 ))   
-  inst7=(moduleLR7.block_connect(pars, reset, clk, pipe_inpA, pipe_theta7, pipe_out_activ7 ))   
-  inst8=(moduleLR8.block_connect(pars, reset, clk, pipe_inpA, pipe_theta8, pipe_out_activ8 ))   
-  inst9=(moduleLR9.block_connect(pars, reset, clk, pipe_inpA, pipe_theta9, pipe_out_activ9 ))   
- 
+  # Simple Step Activation function
+  inst0=(moduleLR0.block_connect(pars, reset, clk, pipe_inpA, pipe_theta0, pipe_out_activ0 ))
+  inst1=(moduleLR1.block_connect(pars, reset, clk, pipe_inpA, pipe_theta1, pipe_out_activ1 ))
+  inst2=(moduleLR2.block_connect(pars, reset, clk, pipe_inpA, pipe_theta2, pipe_out_activ2 ))
+  inst3=(moduleLR3.block_connect(pars, reset, clk, pipe_inpA, pipe_theta3, pipe_out_activ3 ))
+  inst4=(moduleLR4.block_connect(pars, reset, clk, pipe_inpA, pipe_theta4, pipe_out_activ4 ))
+  inst5=(moduleLR5.block_connect(pars, reset, clk, pipe_inpA, pipe_theta5, pipe_out_activ5 ))
+  inst6=(moduleLR6.block_connect(pars, reset, clk, pipe_inpA, pipe_theta6, pipe_out_activ6 ))
+  inst7=(moduleLR7.block_connect(pars, reset, clk, pipe_inpA, pipe_theta7, pipe_out_activ7 ))
+  inst8=(moduleLR8.block_connect(pars, reset, clk, pipe_inpA, pipe_theta8, pipe_out_activ8 ))
+  inst9=(moduleLR9.block_connect(pars, reset, clk, pipe_inpA, pipe_theta9, pipe_out_activ9 ))
+
   #----------------------------------------------------------------
- 
+
   #----------------- Logistic Regression Test File -------------------
-  
+
   lr_test_file="../../model/ex3data1.mat"
   lr_theta_file="../../model/lR_weights.mat"
 
   model=LogisticRegression1vsAllModel()
   imgArray, label, theta, modelPredict = model.get(nbClassifyImages=NB_TRAINING_SAMPLES)
-  
-  #--- Loading Test and Theta Values 
-  
+
+  #--- Loading Test and Theta Values
+
   test_file_list=imgArray.flatten()  # Flattenning all the rows for pipelines operation
-  
-  # exp10 shifts done for theta and test data as per requirements when intbv used 
+
+  # exp10 shifts done for theta and test data as per requirements when intbv used
   if (False == floatDataBus):
     test_file_list *= (10**test_decimal_shift)
     theta *= (10**theta_decimal_shift)
     test_file_list=test_file_list.astype(int)
     theta=theta.astype(int)
-  
+
   theta_file0_list=[]
   theta_file1_list=[]
   theta_file2_list=[]
@@ -232,13 +232,13 @@ def sim_logistic_regression_2(pars_obj):
     theta_file8_list.extend(theta[8,:])
     theta_file9_list.extend(theta[9,:])
 
-  
-  #print test_file_list      
+
+  #print test_file_list
   #print theta_file_list
   #----------------------------------------------------------------
-  
+
   #----------------- Shift Enable for pipeData -------------------
-  
+
   shiftEn_i = Signal(bool(1))
   @always(clk.posedge,reset.posedge)
   def shift_signal():
@@ -246,25 +246,25 @@ def sim_logistic_regression_2(pars_obj):
       shiftEn_i.next = 1
     else:
       shiftEn_i.next = not shiftEn_i
-  
+
   #----------------------------------------------------------------
-  
+
   #----------------- Reset For the Module  --------------------
-  
+
   @always(clk.posedge)
   def stimulus():
     if elapsed_time == 40:
       reset.next = 0
 
   #----------------------------------------------------------------
-  
+
   #----------------- Input Data for the Modules  --------------------
-  
+
   @always_comb
   def transmit_data_process():
     global line_nb
     if (shiftEn_i == 1 and nbTA == nbTB and nbTA < MAX_NB_TRANSFERS):
-      
+
       pipe_inpA.data.next = (test_file_list[line_nb])
       pipe_inpA.valid.next = 1
       pipe_theta0.data.next = (theta_file0_list[line_nb])
@@ -289,7 +289,7 @@ def sim_logistic_regression_2(pars_obj):
       pipe_theta9.valid.next = 1
       line_nb+=1
 
-    else: 
+    else:
       pipe_inpA.valid.next = 0
       pipe_theta0.valid.next = 0
       pipe_theta1.valid.next = 0
@@ -301,11 +301,11 @@ def sim_logistic_regression_2(pars_obj):
       pipe_theta7.valid.next = 0
       pipe_theta8.valid.next = 0
       pipe_theta9.valid.next = 0
-  
+
   #----------------------------------------------------------------
 
   #----------------- Storing Transmitted Data  --------------------
-  
+
   @always(clk.posedge, reset.posedge)
   def trans_dataA_process():
     global trans_dataA,trans_dataB,nbTA
@@ -315,7 +315,7 @@ def sim_logistic_regression_2(pars_obj):
       nbTA+=1
       trans_dataA.extend([pipe_inpA.data])
 
-  
+
   @always(clk.posedge, reset.posedge)
   def trans_dataB_process():
     global trans_dataA,trans_dataB,nbTB
@@ -324,15 +324,15 @@ def sim_logistic_regression_2(pars_obj):
     elif (pipe_theta0.valid == 1 and nbTB < MAX_NB_TRANSFERS):
       nbTB+=1
       trans_dataB.extend([pipe_theta0.data])
-  
+
   #----------------------------------------------------------------
-  
+
   #----------------- Storing Received Data  -----------------------
-  
+
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,tap_data_mmult,nbR,acc_out,prediction_res
-    
+
     # Collecting multiplier data
     if (moduleLR0.mult_out.valid == 1):
       if (False == floatDataBus):
@@ -352,55 +352,55 @@ def sim_logistic_regression_2(pars_obj):
     displayAccOut(nbR,moduleLR8.accu_out,8)
     displayAccOut(nbR,moduleLR9.accu_out,9)
 
-    if (moduleLR9.accu_out.valid == 1):  
+    if (moduleLR9.accu_out.valid == 1):
       nbR += 1
       if (nbR == NB_TRAINING_SAMPLES):
         prediction_res=np.argmax(resY,axis=1) + 1 # +1 to correct indexing due to speciality of the example. See docs ex3.pdf
         for i in range(len(prediction_res)):
-            prediction_res[i]=0 if prediction_res[i]==10 else prediction_res[i]    
+            prediction_res[i]=0 if prediction_res[i]==10 else prediction_res[i]
         print("label: {} prediction: {}".format(label,prediction_res))
-        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")  
+        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words transfered")
 
-    
+
   #----------------------------------------------------------------
 
   #----------------- Max Simulation Time Exit Condition -----------
-  
+
   @always(clk.posedge)
   def simulation_time_check():
     sim_time_now=now()
     if(sim_time_now>MAX_SIM_TIME):
-        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")  
+        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")
 
   #----------------------------------------------------------------
   return instances()
 
 #@block
 def check_simulation_results_2(pars_obj, display=False):
-  global prediction_res; 
+  global prediction_res;
 
   assert (math.sqrt(NB_TRAINING_SAMPLES)%1 == 0),"ERR377: nb Classify images not power of 2!"
   nbImages1Row=int(math.sqrt(NB_TRAINING_SAMPLES))
   nbImages1Col=int(math.sqrt(NB_TRAINING_SAMPLES))
   print(prediction_res)
-  fpgaPredictImgName="fpgaPrediction.tif"
-  predictFullImg=LogisticRegression1vsAllModel.nbArray2Image_convert(None,prediction_res, nbImages1Col, nbImages1Row, fpgaPredictImgName) 
+  fpgaPredictImgName="fpgaPrediction.png"
+  predictFullImg=LogisticRegression1vsAllModel.nbArray2Image_convert(None,prediction_res, nbImages1Col, nbImages1Row, fpgaPredictImgName)
   print("FPGA Prediction image saved as {}".format(fpgaPredictImgName))
-  
+
   nb_correct=0
   for i in range(len(prediction_res)):
     if(label[i] == prediction_res[i]):
       nb_correct+=1
   #print(label,prediction_res,nb_correct)
-  tAcc=(100.0*nb_correct)/(len(prediction_res))   
+  tAcc=(100.0*nb_correct)/(len(prediction_res))
   print("Predicted examples: {:d}".format(len(prediction_res)))
   print("Expected Training Accuracy: 94.90% Measured: {:0.2f}% approx. nb_samples: {}".format(tAcc, len(prediction_res)))
   print("Simulation Successful!")
-  
+
   if display==True:
-      sampleI=cv2.imread('../../model/sampleImages.tif',0)
-      modelPredictI=cv2.imread('../../model/modelPrediction.tif',0)
-      fpgaPredictI=cv2.imread('../myhdl_work/fpgaPrediction.tif',0)
+      fpgaPredictI=cv2.imread('../myhdl_work/fpgaPrediction.png',cv2.IMREAD_UNCHANGED)
+      sampleI=cv2.imread('../../model/sampleImages.tif',cv2.IMREAD_UNCHANGED)
+      modelPredictI=cv2.imread('../../model/modelPrediction.tif',cv2.IMREAD_UNCHANGED)
       cv2.imshow("Sample Images",sampleI)
       cv2.imshow("Predicted Model",modelPredictI)
       cv2.imshow("FPGA Prediction Result",fpgaPredictI)
