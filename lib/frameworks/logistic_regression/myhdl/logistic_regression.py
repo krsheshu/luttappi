@@ -1,5 +1,6 @@
 #----logisticRegression Class
-from myhdl import Signal, intbv, toVerilog, toVHDL, instances, always_comb, block
+
+import myhdl
 
 from avalon_buses       import PipelineST
 
@@ -8,66 +9,54 @@ from command_pipeline   import CommandPipeline
 from accumulator        import Accumulator
 from activation         import Activation
 
-#---- Class LogisticRegressionIo
 class LogisticRegressionIo():
-  def __init__(self):
-    """ Initialize LogisticRegression Ios """
-    self.DATAWIDTH          = 32
-    self.CHANNEL_WIDTH      = 1
-    self.INIT_DATA          = 0 #(0 for intbv)
+  def __init__( self                    ,
+                DATAWIDTH          =  32,
+                CHANNEL_WIDTH      =   1,
+                INIT_DATA          =   0):
 
-    # --- Initializing Pipeline A
-    self.pipe_inpA  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-    # --- Initializing Pipeline B
-    self.pipe_inpB  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-    # --- Initializing Activation Out
-    self.pipe_out_activ = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-
-  def __call__(self,pars):
-    """ Overwrite LogisticRegression Ios """
-    self.pipe_inpA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    self.pipe_inpB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    self.pipe_out_activ = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    self.pipe_inpA      = PipelineST    ( DATAWIDTH, CHANNEL_WIDTH , INIT_DATA )
+    self.pipe_inpB      = PipelineST    ( DATAWIDTH, CHANNEL_WIDTH , INIT_DATA )
+    self.pipe_out_activ = PipelineST    ( DATAWIDTH, CHANNEL_WIDTH , INIT_DATA )
 
 
-#----Parameters for LogisticRegression Class
-class LogisticRegressionPars():
-  def __init__(self):
-    """ Initialize CommandPipeline parameters """
-    self.NB_PIPELINE_STAGES = 4
-    self.DATAWIDTH          = 32
-    self.CHANNEL_WIDTH      = 1
-    self.INIT_DATA          = 0 #(0 for intbv)
-    self.LEN_THETA          = 3
-    self.CMD_FILE           = ""
-
-  def __call__(self,pars):
-    """ Overwrite CommandPipeline parameters """
-    self.NB_PIPELINE_STAGES = pars.NB_PIPELINE_STAGES
-    self.DATAWIDTH          = pars.DATAWIDTH
-    self.CHANNEL_WIDTH      = pars.CHANNEL_WIDTH
-    self.INIT_DATA          = pars.INIT_DATA  #(0 for intbv)
-    self.LEN_THETA          = pars.LEN_THETA
-    self.CMD_FILE           = pars.CMD_FILE
-
-
-#-----Class LogisticRegression
 class LogisticRegression():
 
-  def __init__(self):
-    """ LogisticRegression Init"""
-    self.mult_out=None
-    self.accu_out=None
+  def __init__( self                    ,
+                NB_PIPELINE_STAGES =   4,
+                DATAWIDTH          =  32,
+                CHANNEL_WIDTH      =   1,
+                INIT_DATA          =   0,
+                LEN_THETA          =   3,
+                CMD_FILE           =  ""):
 
-  @block
-  def block_connect(self, pars, reset, clk, pipe_inpA, pipe_inpB, pipe_out_activ):
+    self.NB_PIPELINE_STAGES = NB_PIPELINE_STAGES
+    self.DATAWIDTH          = DATAWIDTH
+    self.CHANNEL_WIDTH      = CHANNEL_WIDTH
+    self.INIT_DATA          = INIT_DATA
+    self.LEN_THETA          = LEN_THETA
+    self.CMD_FILE           = CMD_FILE
+
+    self.Io                 = LogisticRegressionIo ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA)
+
+    # Internal Signals
+    self.pipe_multRes       = PipelineST(   self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    self.pipe_out_acc       = PipelineST(   self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+
+  @myhdl.block
+  def top(  self            ,
+            reset           ,
+            clk             ,
+            pipe_inpA       ,
+            pipe_inpB       ,
+            pipe_out_activ  ):
 
     #------ Wrapping the interfaces due to conversion issues!
-    pipe_inpA_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    pipe_inpB_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    pipe_out_active_if = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    pipe_inpA_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
+    pipe_inpB_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
+    pipe_out_active_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
 
-    @always_comb
+    @myhdl.always_comb
     def interface_wrap_process():
       pipe_inpA_if.valid.next = pipe_inpA.valid
       pipe_inpA_if.data.next  = pipe_inpA.data
@@ -91,37 +80,35 @@ class LogisticRegression():
     #----------------- Initializing Pipeline Streams ----------------
 
     # --- Initializing Pipeline A
-    pipe_outA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    pipe_outA  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
 
-    operand_a=OperandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
+    operand_a=OperandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
     ioA=operand_a.Io
 
     # --- Initializing Pipeline B
-    pipe_outB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
+    pipe_outB  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
 
-    operand_b=OperandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
+    operand_b=OperandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
     ioB=operand_b.Io
 
     # --- Initializing Command Pipeline
-    pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    multPipe=CommandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA, pars.CMD_FILE )
+    multPipe=CommandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA, self.CMD_FILE )
     ioMult=multPipe.Io
 
     # ---- Initializing Accumulator Block
 
-    pipe_out_acc = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    accuPipe= Accumulator( pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA, pars.LEN_THETA )
+    accuPipe= Accumulator( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA, self.LEN_THETA )
 
     # ---- Initializing Activation Block
 
     ACT_DATAWIDTH= 3    # 0 or 1 for classification
-    activPipe= Activation(  ACT_DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
+    activPipe= Activation(  ACT_DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
     #----------------------------------------------------------------
 
     #----------------- Connecting Pipeline Blocks -------------------
-    @always_comb
-    def shiftOperand_signal():
-      """ Enabling shift by default always
+    @myhdl.always_comb
+    def shiftOperand_Signal():
+      """ Enabling shift by default myhdl.always
           The input pipeline control is done through
           valid data through pipe_inpA & pipe_outB """
       ioB.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
@@ -133,22 +120,20 @@ class LogisticRegression():
 
     #----------------- Connecting Command Pipeline -------------------
     # Mult Pipeline
-    command     =   ( multPipe.top ( reset, clk, ioA, ioB, pipe_multRes, ioMult ) )
-    self.mult_out=pipe_multRes
+    command     =   ( multPipe.top ( reset, clk, ioA, ioB, self.pipe_multRes, ioMult ) )
     #----------------------------------------------------------------
 
     #----------------- Connecting Accumulator  --------------
     # Accu
-    acc_reset=Signal(bool(0))
-    accumulator=    ( accuPipe.top ( reset, clk, acc_reset, pipe_multRes, pipe_out_acc ) )
-    self.accu_out=pipe_out_acc
+    acc_reset=myhdl.Signal(bool(0))
+    accumulator=    ( accuPipe.top ( reset, clk, acc_reset, self.pipe_multRes, self.pipe_out_acc ) )
 
     #----------------------------------------------------------------
 
     #----------------- Connecting Activation  --------------
     # Simple Step Activation function
-    activation  =   ( activPipe.top ( reset, clk, pipe_out_acc, pipe_out_active_if ) )
+    activation  =   ( activPipe.top ( reset, clk, self.pipe_out_acc, pipe_out_active_if ) )
 
     #----------------------------------------------------------------
 
-    return instances()
+    return myhdl.instances()

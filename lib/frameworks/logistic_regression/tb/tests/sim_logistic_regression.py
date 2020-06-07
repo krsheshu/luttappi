@@ -7,7 +7,7 @@ from clk_driver import clk_driver
 
 import subprocess
 
-from logistic_regression import LogisticRegression, LogisticRegressionIo, LogisticRegressionPars
+from logistic_regression import LogisticRegression
 
 
 # Global Parameters-------------------------
@@ -88,9 +88,6 @@ def sim_logistic_regression(pars_obj):
   #----------------- Initializing Pipeline Streams ----------------
 
   # --- Pipeline Pars
-  pars=LogisticRegressionPars()
-  pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
-  pars.DATAWIDTH=DATAWIDTH
   pars.CHANNEL_WIDTH=2
   global floatDataBus
   if (True == floatDataBus):
@@ -101,9 +98,8 @@ def sim_logistic_regression(pars_obj):
   pars.CMD_FILE =  '../tests/mult_pipeline.list'
   pars.LEN_THETA  = LEN_THETA
 
-  ioLR = LogisticRegressionIo()
-  ioLR(pars)
-  moduleLR=LogisticRegression()
+  moduleLR = LogisticRegression ( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA, LEN_THETA, CMD_FILE  )
+  ioLR  = moduleLR0.Io
 
   # --- Initializing Pipeline A
   pipe_inpA  = ioLR.pipe_inpA

@@ -1,5 +1,4 @@
-
-from myhdl import Signal, intbv, toVerilog, toVHDL, instances, block
+import myhdl
 
 from avalon_buses           import PipelineST
 
@@ -7,17 +6,17 @@ from operand_pipeline       import OperandPipeline
 from command_pipeline       import CommandPipeline
 from accumulator            import Accumulator
 from activation             import Activation
-from logistic_regression    import LogisticRegression, LogisticRegressionPars, LogisticRegressionIo
+from logistic_regression    import LogisticRegression
 
 def logistic_regression_convert():
 
-  reset = Signal(bool(0))
-  clk = Signal(bool(0))
+  reset = myhdl.Signal(bool(0))
+  clk   = myhdl.Signal(bool(0))
   LEN_THETA=3
   NB_PIPELINE_STAGES = 5
   DATAWIDTH=32
   CHANNEL_WIDTH=1
-  INIT_DATA=0 #(0 for intbv)
+  INIT_DATA=0 #(0 for myhdl.intbv)
 
   # --- Pipeline Pars
   pars=LogisticRegressionPars()
