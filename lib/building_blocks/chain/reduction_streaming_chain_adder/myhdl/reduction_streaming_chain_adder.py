@@ -1,7 +1,7 @@
 from myhdl import always, always_comb, Signal, instances
 from avalon_buses import AvalonST_SNK, AvalonST_SRC
 from streaming_simple_adder import StreamingSimpleAdderPars, StreamingSimpleAdder
-from common_functions import simple_wire_assign, simple_reg_assign 
+from common_functions import simple_wire_assign, simple_reg_assign
 
 class StreamingChainAdderPars():
   def __init__(self):
@@ -32,11 +32,11 @@ class StreamingChainAdder():
 
 
     add_pars = StreamingSimpleAdderPars()
-    add_pars.SNK0_DATAWIDTH = pars.SNK0_DATAWIDTH 
-    add_pars.SNK1_DATAWIDTH = pars.SNK1_DATAWIDTH 
+    add_pars.SNK0_DATAWIDTH = pars.SNK0_DATAWIDTH
+    add_pars.SNK1_DATAWIDTH = pars.SNK1_DATAWIDTH
     add_pars.SRC_DATAWIDTH  = pars.SRC_DATAWIDTH
 
-    
+
     snk0_valid_inst = [None for i in range(pars.NB_CHAIN_ADDERS)]
     snk0_data_inst  = [None for i in range(pars.NB_CHAIN_ADDERS)]
     snk0_ready_inst = [None for i in range(pars.NB_CHAIN_ADDERS)]
@@ -60,11 +60,11 @@ class StreamingChainAdder():
       src_data_inst[i]    = simple_wire_assign(av_src[i].data_o , av_src_if[i].data_o)
       src_ready_inst[i]   = simple_wire_assign(av_src_if[i].ready_i , av_src[i].ready_i)
 
-  
+
     chain_inst=[None for i in range(pars.NB_CHAIN_ADDERS)]
     add_inst=[None for i in range(pars.NB_CHAIN_ADDERS)]
     for i in range(pars.NB_CHAIN_ADDERS):
       add_inst[i]   = StreamingSimpleAdder()
       chain_inst[i] = add_inst[i].block_connect(add_pars, reset, clk, av_snk0_if[i],  av_snk1_if[i], av_src_if[i])
-   
-    return instances() 
+
+    return instances()

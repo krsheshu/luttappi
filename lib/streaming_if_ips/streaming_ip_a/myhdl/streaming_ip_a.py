@@ -8,15 +8,15 @@ def streaming_ip_a(reset, clk, av_snk, av_src, data_enable_o):
   @always_comb
   def output_gen_wires():
     av_src.valid_o.next = src_valid
-    av_snk.ready_o.next = snk_ready 
-    
+    av_snk.ready_o.next = snk_ready
+
   @always_comb
   def snk_ready_process():
     if (src_valid == 1 and av_src.ready_i == 0):
-      snk_ready.next = 0 
+      snk_ready.next = 0
     else:
-      snk_ready.next = 1 
-  
+      snk_ready.next = 1
+
   #Registering valid
   @always(clk.posedge, reset.posedge)
   def src_valid_reg_process():
@@ -28,7 +28,7 @@ def streaming_ip_a(reset, clk, av_snk, av_src, data_enable_o):
       src_valid.next = 0
     elif av_snk.valid_i == 1 and av_src.ready_i == 0 and src_valid == 0:
       src_valid.next = 1
-  
+
 
   #Dataenable as output
   @always_comb
@@ -47,7 +47,7 @@ from avalon_buses import AvalonST_SNK, AvalonST_SRC
 
 @block
 def streaming_ip_a_top(reset, clk, av_snk, av_src):
- 
+
   data_enable_o=Signal(bool(0))
 
   av_snk_if = AvalonST_SNK(len(av_snk.data_i))
@@ -76,7 +76,7 @@ def streaming_ip_a_top(reset, clk, av_snk, av_src):
       av_src.channel_o.next = av_snk.channel_i
 
   return instances()
-      
-    
-    
+
+
+
 

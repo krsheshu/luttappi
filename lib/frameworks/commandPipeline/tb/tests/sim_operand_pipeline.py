@@ -3,8 +3,8 @@ from myhdl import Signal, delay, always,always_comb, now, Simulation, traceSigna
 from avalon_buses import PipelineST
 from clk_driver import clk_driver
 
-from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
-from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
+from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo
+from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo
 
 #------------------ Globals ---------------
 
@@ -20,63 +20,63 @@ nb2=0 # A global currently inevitable
 def sim_command_pipeline(pars_obj):
 
   #------------------ Initializing Pipeline depths ---------------
-  
+
   NB_PIPELINE_STAGES  = 5
   DATAWIDTH           = 32
-   
+
   #------------------------- Initialisations ---------------------
-  
+
   reset = Signal(bool(1))
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
-  
+
   clkgen=clk_driver(elapsed_time,clk,period=20)
-  
+
   #----------------------------------------------------------------
- 
+
   #----------------- Initializing Pipeline Streams ----------------
-  
+
   # --- Pipeline Pars
   pars=OperandPipelinePars()
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
-  
+
   # --- Initializing Pipeline A
-  pipe_inpA  = PipelineST(DATAWIDTH) 
-  pipe_outA  = PipelineST(DATAWIDTH) 
+  pipe_inpA  = PipelineST(DATAWIDTH)
+  pipe_outA  = PipelineST(DATAWIDTH)
 
   operand_a=OperandPipeline()
   ioA=OperandPipelineIo(pars)
 
   # --- Initializing Pipeline B
-  pipe_inpB  = PipelineST(DATAWIDTH) 
-  pipe_outB  = PipelineST(DATAWIDTH) 
+  pipe_inpB  = PipelineST(DATAWIDTH)
+  pipe_outB  = PipelineST(DATAWIDTH)
 
   operand_b=OperandPipeline()
   ioB=OperandPipelineIo(pars)
 
   # --- Initializing Command Pipeline
-  pipe_outC  = PipelineST(DATAWIDTH) 
+  pipe_outC  = PipelineST(DATAWIDTH)
   cmdFile='cmd_pipeline.list'
   cmdPipe=CommandPipeline()
   cmdStr=cmdPipe.cmd_convert_to_string(pars,cmdFile)
   ioC=CommandPipelineIo(pars)
 
   #----------------------------------------------------------------
- 
+
   #----------------- Connecting Pipeline Blocks -------------------
-  
+
   inst=[]
   inst.append(operand_a.block_connect(pars, reset, clk, pipe_inpA, pipe_outA, ioA))
   inst.append(operand_b.block_connect(pars, reset, clk, pipe_inpB, pipe_outB, ioB))
   #----------------------------------------------------------------
- 
+
   #----------------- Connecting Command Pipeline -------------------
-  
-  inst.append(cmdPipe.block_connect(pars, reset, clk, cmdStr, ioA, ioB, pipe_outC, ioC)   
- 
+
+  inst.append(cmdPipe.block_connect(pars, reset, clk, cmdStr, ioA, ioB, pipe_outC, ioC)
+
   #----------------------------------------------------------------
-  
+
 
 
   mult = Signal(intbv(DATAWIDTH+DATAWIDTH))
@@ -86,18 +86,18 @@ def sim_command_pipeline(pars_obj):
       mult.next = intbv(0)
     elif (ioA.stage_o[5].valid == 1 and ioB.stage_o[5].valid == 1):
       mult.next = mult + ioA.stage_o[5].data * ioB.stage_o[5].data
-      print int(mult.next) 
+      print int(mult.next)
 
   shiftEn_i = Signal(bool(0))
   @always(clk.posedge)
   def shift_signal():
     shiftEn_i.next = not shiftEn_i
-  
+
   @always_comb
   def shiftOperand_signal():
     ioB.shiftEn_i.next = shiftEn_i
     ioA.shiftEn_i.next = shiftEn_i
- 
+
   @always(clk.posedge)
   def stimulus():
     if elapsed_time == 40:
@@ -108,11 +108,11 @@ def sim_command_pipeline(pars_obj):
   @always_comb
   def transmit_data_process():
     if (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
-      pipe_inpA.data.next = data_in 
+      pipe_inpA.data.next = data_in
       pipe_inpA.valid.next = 1
-      pipe_inpB.data.next = data_in+1 
+      pipe_inpB.data.next = data_in+1
       pipe_inpB.valid.next = 1
-    else: 
+    else:
       pipe_inpA.valid.next = 0
       pipe_inpB.valid.next = 0
 
@@ -124,11 +124,11 @@ def sim_command_pipeline(pars_obj):
       data_in.next = int(INIT_DATA)
     elif (shiftEn_i == 1 and nb1 < MAX_NB_TRANSFERS):
       nb1+=1
-      #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i 
+      #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i
       trans_data.append(int(data_in))
       data_in.next = data_in + 1
-  
-  
+
+
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
@@ -138,13 +138,13 @@ def sim_command_pipeline(pars_obj):
       recv_data.append(int(pipe_outC.data))
       sim_time_now=now()
       if (nb2 == MAX_NB_TRANSFERS + NB_PIPELINE_STAGES):
-        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")
 
   @always(clk.posedge)
   def simulation_time_check():
     sim_time_now=now()
     if(sim_time_now>MAX_SIM_TIME):
-        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")  
+        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")
 
   return instances()
 
@@ -154,7 +154,7 @@ def check_simulation_results(pars_obj):
   err_cnt=0
   trans_l=0
   rest_l=0
-  recv_l=0 
+  recv_l=0
   print "Transmitted data: ", str(trans_data)
   print "Received data: ", str(recv_data)
   print "Num ready pulses: ", str(ready_pulses)
@@ -162,12 +162,12 @@ def check_simulation_results(pars_obj):
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
-    print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS) 
+    print "ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)
     print "ERR124: Simulation unsuccessful!."
 
   else:
-    print "Total num transmitted data= %d" % trans_l  
-    print "Total num received data= %d" % recv_l 
+    print "Total num transmitted data= %d" % trans_l
+    print "Total num received data= %d" % recv_l
     for i in range(0,len(trans_data)):
       if (trans_data[i] != recv_data[i]):
         print "ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i])
@@ -175,7 +175,7 @@ def check_simulation_results(pars_obj):
     if (err_cnt):
       print "ERR134: Results not Matched. Simulation unsuccessful!"
     else:
-      print "Receive and transmit data exactly matches..." 
+      print "Receive and transmit data exactly matches..."
       print "Simulation Successful!"
 
 

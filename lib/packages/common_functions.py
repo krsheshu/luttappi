@@ -2,8 +2,8 @@ from myhdl import always_comb,always, Signal, block
 import random
 
 class Reset():
-  LOW=0 
-  HIGH=1 
+  LOW=0
+  HIGH=1
 
 #ceil of the log base 2
 def CLogB2(x):
@@ -26,7 +26,7 @@ def simple_wire_assign(dout,din):
   @always_comb
   def simple_wire_assign_process():
     dout.next = din
-    if __debug__:   # to create a reg keyword in verilog 
+    if __debug__:   # to create a reg keyword in verilog
       pass
   return simple_wire_assign_process
 
@@ -36,7 +36,7 @@ def simple_wire_assign(dout,din):
   @always_comb
   def simple_wire_assign_process():
     dout.next = din
-    if __debug__:   # to create a reg keyword in verilog 
+    if __debug__:   # to create a reg keyword in verilog
       pass
   return simple_wire_assign_process
 
@@ -45,7 +45,7 @@ def conditional_wire_assign(dout, condition, din1, din2):
   @always_comb
   def conditional_wire_assign_process():
     dout.next = din1 if (condition == 1) else din2
-    if __debug__:   # to create a reg keyword in verilog 
+    if __debug__:   # to create a reg keyword in verilog
       pass
   return conditional_wire_assign_process
 
@@ -55,7 +55,7 @@ def conditional_wire_assign_lt(dout, op1, op2, din1, din2):
   @always_comb
   def conditional_wire_assign_lt_process():
     dout.next = din1 if (op1 < op2) else din2
-    if __debug__:   # to create a reg keyword in verilog 
+    if __debug__:   # to create a reg keyword in verilog
       pass
   return conditional_wire_assign_lt_process
 
@@ -80,7 +80,7 @@ def conditional_reg_assign(reset, clk, dout, reset_val, condition, din):
       dout.next = din
     else:
       dout.next = dout
-  
+
   return conditional_reg_assign_process
 
 @block

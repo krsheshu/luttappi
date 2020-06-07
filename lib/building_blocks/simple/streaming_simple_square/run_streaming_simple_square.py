@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 import os
 import sys
@@ -11,7 +11,7 @@ from subprocess import call
 #------------Project General Module Imports----------#
 #set paths for the required modules
 current_dir=os.getcwd()
-from scr.set_myhdl_lib_paths import set_myhdl_lib_paths 
+from scr.set_myhdl_lib_paths import set_myhdl_lib_paths
 # setup paths in myhdl lib
 set_myhdl_lib_paths()
 from testbench_parameters import pass_testbench, Valid
@@ -87,7 +87,7 @@ def myhdl_module_cli():
     #streaming_simple_square_convert()
   if args.simulate:
     valid.pattern0 = DEF_VALID_READY
-    valid.pattern1= DEF_VALID_READY 
+    valid.pattern1= DEF_VALID_READY
     ready_pattern = DEF_VALID_READY
     sim_time = DEFAULT_SIM_TIME
     inst.remove_temp_files(inst.sim_temp_dir)       # remove previous files
@@ -113,13 +113,13 @@ def myhdl_module_cli():
   if args.simulatehdl:
     print(sv_sim_scr)
     inst.sim_hdl(sv_sim_scr)
-  
+
   return effective_args
 
 #----------main---------------#
 if __name__ == "__main__":
   myhdl_module_parser = myhdl_module_cli()
-  
+
   if not myhdl_module_parser:
     sys.exit('ERR124: No argument specified')
 

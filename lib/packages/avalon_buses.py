@@ -124,4 +124,4 @@ class PipelineST():
           self.data = Signal(float(0.0))
         else:
           self.data = Signal(intbv(0,min=-(2**(data_width-1)-1), max=(2**(data_width-1)-1)))#[data_width:])
-        
+

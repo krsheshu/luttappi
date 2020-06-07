@@ -6,7 +6,7 @@ from streaming_ip_comb import streaming_ip_comb
 
 
 def streaming_ip_comb_convert():
-  
+
   DATA_WIDTH = 64
   EMPTY_WIDTH = 3
   ERROR_WIDTH = 3

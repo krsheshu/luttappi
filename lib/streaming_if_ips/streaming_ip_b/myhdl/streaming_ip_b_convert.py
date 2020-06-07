@@ -6,7 +6,7 @@ from streaming_ip_b import streaming_ip_b
 
 
 def streaming_ip_b_convert():
-  
+
   DATA_WIDTH = 64
   EMPTY_WIDTH = 3
   ERROR_WIDTH = 3

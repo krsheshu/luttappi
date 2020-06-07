@@ -51,6 +51,6 @@ def snk_bfm(  reset, clk, ready_i_pattern, av_snk, av_src ):
       #print str(num_counter.nb)+". SnkBfm: received data:", data.next, ": ", data.next
     else:
       av_src.valid_o.next=0
-      
+
 
   return beh_o_logic, beh_shift, beh_data_capture

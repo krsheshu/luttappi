@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 #
 import os
 import sys
@@ -14,7 +14,7 @@ current_dir=os.getcwd()
 myhdl_base=os.path.join(current_dir,"..")     #path to myhdl_base
 sys.path.append(myhdl_base)
 #import myhdl library
-from scr_myhdl_lib_paths import set_myhdl_lib_paths 
+from scr_myhdl_lib_paths import set_myhdl_lib_paths
 # setup paths in myhdl lib
 set_myhdl_lib_paths()
 from testbench_parameters import testbench_parameters, pass_testbench
@@ -111,13 +111,13 @@ def myhdl_module_cli():
   if args.simulatehdl:
     print(sv_sim_scr)
     inst.sim_hdl(sv_sim_scr)
-  
+
   return effective_args
 
 #----------main---------------#
 if __name__ == "__main__":
   myhdl_module_parser = myhdl_module_cli()
-  
+
   if not myhdl_module_parser:
     sys.exit('No argument specified')
 

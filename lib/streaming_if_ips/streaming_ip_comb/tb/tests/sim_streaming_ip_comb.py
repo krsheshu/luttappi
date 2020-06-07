@@ -17,20 +17,20 @@ nb2=0 # A global currently inevitable
 def sim_streaming_ip_comb(pars_obj):
   PATTERN_WIDTH = 16
   DATA_WIDTH = 8
-   
+
   reset = Signal(bool(1))
   clk = Signal(bool(0))
   elapsed_time=Signal(0)
-  data_enable = Signal(bool(0))  
-  
+  data_enable = Signal(bool(0))
+
   asi_snk_bfm = AvalonST_SNK(DATA_WIDTH)
   av_snk_dut = AvalonST_SNK(DATA_WIDTH)
   aso_src_bfm = AvalonST_SRC(DATA_WIDTH)
   av_src_dut = AvalonST_SRC(DATA_WIDTH)
   src_bfm_i = AvalonST_SNK(DATA_WIDTH)
   src_bfm_o = AvalonST_SRC(DATA_WIDTH)
-  
-  
+
+
   clkgen=clk_driver(elapsed_time,clk,period=20)
 
   src_bfm_inst = src_bfm(reset, clk, pars_obj.valid, src_bfm_i, aso_src_bfm)
@@ -68,7 +68,7 @@ def sim_streaming_ip_comb(pars_obj):
   @always_comb
   def transmit_data_process():
     if (aso_src_bfm.ready_i == 1 and aso_src_bfm.valid_o == 1):
-      src_bfm_i.data_i.next = data_in 
+      src_bfm_i.data_i.next = data_in
 
   #Dataout is just an increment (for next valid data)
   @always(clk.posedge, reset.posedge)
@@ -78,11 +78,11 @@ def sim_streaming_ip_comb(pars_obj):
       data_in.next = int(INIT_DATA)
     elif (aso_src_bfm.ready_i == 1 and aso_src_bfm.valid_o == 1 and src_bfm_i.valid_i == 1):
       nb1+=1
-      #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i 
+      #print str(nb1) + ". Transmitted data to src bfm:",  ": ", src_bfm_i.data_i
       trans_data.append(int(data_in))
       data_in.next = data_in + 1
-  
-  
+
+
   @always(clk.posedge)
   def receive_data_process():
     global recv_data,nb2
@@ -92,20 +92,20 @@ def sim_streaming_ip_comb(pars_obj):
       recv_data.append(int(src_bfm_o.data_o))
       sim_time_now=now()
       if (nb2 == MAX_NB_TRANSFERS):
-        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")  
+        raise StopSimulation("Simulation Finished in %d clks: In total " %now() + str(MAX_NB_TRANSFERS) + " data words received")
 
   @always(clk.posedge)
   def simulation_time_check():
     sim_time_now=now()
     if(sim_time_now>MAX_SIM_TIME):
-        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")  
-  
+        raise StopSimulation("Warning! Simulation Exited upon reaching max simulation time of " + str(MAX_SIM_TIME) + " clocks")
+
   @always(clk.posedge)
   def cnt_ready_pulses():
     global ready_pulses
     if (asi_snk_bfm.ready_o == 1):
-      ready_pulses+=1 
-      #print "ready received from bfm" 
+      ready_pulses+=1
+      #print "ready received from bfm"
 
 
   return instances()
@@ -116,7 +116,7 @@ def check_simulation_results(pars_obj):
   err_cnt=0
   trans_l=0
   rest_l=0
-  recv_l=0 
+  recv_l=0
   print("Transmitted data: ", str(trans_data))
   print("Received data: ", str(recv_data))
   print("Num ready pulses: ", str(ready_pulses))
@@ -124,12 +124,12 @@ def check_simulation_results(pars_obj):
   recv_l=len(recv_data)
   rest_l=trans_l-recv_l
   if (len(recv_data) < MAX_NB_TRANSFERS):
-    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS)) 
+    print("ERR123: Expected number of data words not received! Received/Expected datawords: %d/%d " %(len(recv_data),MAX_NB_TRANSFERS))
     print("ERR124: Simulation unsuccessful!.")
 
   else:
-    print("Total num transmitted data= %d" % trans_l)  
-    print("Total num received data= %d" % recv_l) 
+    print("Total num transmitted data= %d" % trans_l)
+    print("Total num received data= %d" % recv_l)
     for i in range(0,len(trans_data)):
       if (trans_data[i] != recv_data[i]):
         print("ERR131: Mismatch found for tx_index %d. tx_data= %d recv_data=%d" % (i,trans_data[i],recv_data[i]))
@@ -137,7 +137,7 @@ def check_simulation_results(pars_obj):
     if (err_cnt):
       print("ERR134: Results not Matched. Simulation unsuccessful!")
     else:
-      print("Receive and transmit data exactly matches...") 
+      print("Receive and transmit data exactly matches...")
       print("Simulation Successful!")
 
 

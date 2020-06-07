@@ -20,7 +20,7 @@ def set_myhdl_lib_paths():
 
   print("setting the paths of the building blocks chain lib")
   sys.path.append(os.path.join(os.path.dirname(__file__), "../building_blocks/chain/streaming_chain_adder/myhdl"))
-  
+
   print("setting the paths of the streaming if ips")
   sys.path.append(os.path.join(os.path.dirname(__file__), "../streaming_if_ips/streaming_ip_a/myhdl/"))
   sys.path.append(os.path.join(os.path.dirname(__file__), "../streaming_if_ips/streaming_ip_b/myhdl/"))

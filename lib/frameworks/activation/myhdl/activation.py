@@ -1,4 +1,4 @@
-#----Activation Class 
+#----Activation Class
 
 #----imports
 from myhdl import always, always_comb, Signal, instances, block,intbv
@@ -7,13 +7,13 @@ from common_functions import conditional_reg_assign,CLogB2, simple_wire_assign, 
 
 #---- Class description
 #----Parameters for Activation Class
-class ActivationPars(): 
+class ActivationPars():
   def __init__(self):
     """ Initialize Activation parameters """
-    self.DATAWIDTH          = 1 
+    self.DATAWIDTH          = 1
     self.CHANNEL_WIDTH      = 2
     self.INIT_DATA          = 0
-  
+
   def __call__(self,pars):
     """ Overwrite Activation parameters """
     self.DATAWIDTH          = pars.DATAWIDTH
@@ -23,29 +23,29 @@ class ActivationPars():
 
 #-----Class Description
 class Activation():
-  
+
   def __init__(self):
     """ Activation Init"""
     self.DATAWIDTH = 2
     self.CHANNEL_WIDTH= 1
     self.INIT_DATA=0
-    
+
     self.classifier= PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
 
   def __call__(self,pars):
     """ Overwrite Activation Ios """
     self.classifier= PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-  
+
   # Use simple step activation function. if x <= 0, prob=0 else prob=1
-  @block 
+  @block
   def block_step_connect(self, pars, reset, clk, pipe_in, pipe_out):
     """ Activation block """
-   
+
     # Reset value to incorporate float and intbv formats
     zero = 0.0 if (isinstance(pars.INIT_DATA,float)) else 0
     one = 1.0 if (isinstance(pars.INIT_DATA,float)) else 1
-    
-    # Simple Step Activation Function 
+
+    # Simple Step Activation Function
     @always(clk.posedge, reset.posedge)
     def activation_process():
       if reset:  # Synchronous reset_acc
@@ -55,7 +55,7 @@ class Activation():
         self.classifier.data.next = one if (pipe_in.data > zero) else zero
       else:
         self.classifier.data.next = self.classifier.data
-       
+
 
     """ Output pipesrc instance """
     data= simple_wire_assign(pipe_out.data, self.classifier.data)
@@ -64,9 +64,9 @@ class Activation():
     valid= simple_reg_assign(reset, clk, pipe_out.valid, 0, pipe_in.valid)
     channel= simple_reg_assign(reset, clk, pipe_out.channel, 0, pipe_in.channel)
 
-     
-    return instances() 
-  
+
+    return instances()
+
   def validate(self, ipFile, opFile):
     """ Validation block """
     pass

@@ -3,14 +3,14 @@ from myhdl import Signal, intbv, toVerilog, toVHDL, instances, block
 
 from avalon_buses import PipelineST
 
-from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo 
-from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo 
+from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo
+from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo
 from accumulator import Accumulator, AccumulatorPars
 from activation import Activation, ActivationPars
 from logistic_regression import LogisticRegression, LogisticRegressionPars, LogisticRegressionIo
 
 def logistic_regression_convert():
-  
+
   reset = Signal(bool(0))
   clk = Signal(bool(0))
   LEN_THETA=3
@@ -24,13 +24,13 @@ def logistic_regression_convert():
   pars.NB_PIPELINE_STAGES=NB_PIPELINE_STAGES
   pars.DATAWIDTH=DATAWIDTH
   pars.CHANNEL_WIDTH=CHANNEL_WIDTH
-  pars.INIT_DATA=INIT_DATA     
+  pars.INIT_DATA=INIT_DATA
   pars.LEN_THETA=LEN_THETA
   pars.CMD_FILE='tb/tests/mult_pipeline.list'
 
   lRIO=LogisticRegressionIo()
   lRIO(pars)
-   
+
   lRModule=LogisticRegression()
   lRInst=lRModule.block_connect(pars, reset, clk, lRIO.pipe_inpA, lRIO.pipe_inpB, lRIO.pipe_out_activ )
 
