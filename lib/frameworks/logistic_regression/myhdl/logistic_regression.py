@@ -1,12 +1,12 @@
 #----logisticRegression Class
 from myhdl import Signal, intbv, toVerilog, toVHDL, instances, always_comb, block
 
-from avalon_buses import PipelineST
+from avalon_buses       import PipelineST
 
-from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo
-from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo
-from accumulator import Accumulator, AccumulatorPars
-from activation import Activation, ActivationPars
+from operand_pipeline   import OperandPipeline
+from command_pipeline   import CommandPipeline
+from accumulator        import Accumulator
+from activation         import Activation
 
 #---- Class LogisticRegressionIo
 class LogisticRegressionIo():
@@ -93,47 +93,29 @@ class LogisticRegression():
     # --- Initializing Pipeline A
     pipe_outA  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
 
-    operand_a=OperandPipeline()
-    ioA=OperandPipelineIo()
-    ioA(pars)
+    operand_a=OperandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
+    ioA=operand_a.Io
+
     # --- Initializing Pipeline B
     pipe_outB  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
 
-    operand_b=OperandPipeline()
-    ioB=OperandPipelineIo()
-    ioB(pars)
+    operand_b=OperandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
+    ioB=operand_b.Io
 
     # --- Initializing Command Pipeline
     pipe_multRes  = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    multcmdFile=pars.CMD_FILE
-    parsMult= CommandPipelinePars()
-    parsMult.DATAWIDTH= pars.DATAWIDTH
-    parsMult.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-    parsMult.INIT_DATA = pars.INIT_DATA
-    parsMult(parsMult,multcmdFile)
-    multPipe=CommandPipeline()
-    ioMult=CommandPipelineIo()
-    ioMult(pars)
+    multPipe=CommandPipeline( pars.NB_PIPELINE_STAGES, pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA, pars.CMD_FILE )
+    ioMult=multPipe.Io
 
     # ---- Initializing Accumulator Block
 
     pipe_out_acc = PipelineST(pars.DATAWIDTH,pars.CHANNEL_WIDTH,pars.INIT_DATA)
-    parsAcc= AccumulatorPars()
-    parsAcc.DATAWIDTH= pars.DATAWIDTH
-    parsAcc.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-    parsAcc.INIT_DATA = pars.INIT_DATA
-    parsAcc.NB_ACCUMULATIONS = pars.LEN_THETA
-    accuPipe= Accumulator()
-    accuPipe(parsAcc)
+    accuPipe= Accumulator( pars.DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA, pars.LEN_THETA )
 
     # ---- Initializing Activation Block
 
-    parsActiv= ActivationPars()
-    parsActiv.DATAWIDTH= 3    # 0 or 1 for classification
-    parsActiv.CHANNEL_WIDTH = pars.CHANNEL_WIDTH
-    parsActiv.INIT_DATA = pars.INIT_DATA
-    activPipe= Activation()
-    activPipe(parsActiv)
+    ACT_DATAWIDTH= 3    # 0 or 1 for classification
+    activPipe= Activation(  ACT_DATAWIDTH, pars.CHANNEL_WIDTH, pars.INIT_DATA )
     #----------------------------------------------------------------
 
     #----------------- Connecting Pipeline Blocks -------------------
@@ -145,27 +127,27 @@ class LogisticRegression():
       ioB.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
       ioA.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
 
-    trainingData=(operand_a.block_connect(pars, reset, clk, pipe_inpA_if, pipe_outA, ioA))
-    theta=(operand_b.block_connect(pars, reset, clk, pipe_inpB_if, pipe_outB, ioB))
+    trainingData =  ( operand_a.top ( reset, clk, pipe_inpA_if, pipe_outA, ioA ) )
+    theta        =  ( operand_b.top ( reset, clk, pipe_inpB_if, pipe_outB, ioB ) )
     #----------------------------------------------------------------
 
     #----------------- Connecting Command Pipeline -------------------
     # Mult Pipeline
-    command=(multPipe.block_connect(parsMult, reset, clk, ioA, ioB, pipe_multRes, ioMult))
+    command     =   ( multPipe.top ( reset, clk, ioA, ioB, pipe_multRes, ioMult ) )
     self.mult_out=pipe_multRes
     #----------------------------------------------------------------
 
     #----------------- Connecting Accumulator  --------------
     # Accu
     acc_reset=Signal(bool(0))
-    accumulator=(accuPipe.block_connect(parsAcc, reset, clk, acc_reset, pipe_multRes, pipe_out_acc))
+    accumulator=    ( accuPipe.top ( reset, clk, acc_reset, pipe_multRes, pipe_out_acc ) )
     self.accu_out=pipe_out_acc
 
     #----------------------------------------------------------------
 
     #----------------- Connecting Activation  --------------
     # Simple Step Activation function
-    activation=(activPipe.block_step_connect(parsActiv, reset, clk, pipe_out_acc, pipe_out_active_if ))
+    activation  =   ( activPipe.top ( reset, clk, pipe_out_acc, pipe_out_active_if ) )
 
     #----------------------------------------------------------------
 

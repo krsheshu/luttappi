@@ -1,13 +1,13 @@
 
 from myhdl import Signal, intbv, toVerilog, toVHDL, instances, block
 
-from avalon_buses import PipelineST
+from avalon_buses           import PipelineST
 
-from operand_pipeline import OperandPipeline, OperandPipelinePars, OperandPipelineIo
-from command_pipeline import CommandPipeline, CommandPipelinePars, CommandPipelineIo
-from accumulator import Accumulator, AccumulatorPars
-from activation import Activation, ActivationPars
-from logistic_regression import LogisticRegression, LogisticRegressionPars, LogisticRegressionIo
+from operand_pipeline       import OperandPipeline
+from command_pipeline       import CommandPipeline
+from accumulator            import Accumulator
+from activation             import Activation
+from logistic_regression    import LogisticRegression, LogisticRegressionPars, LogisticRegressionIo
 
 def logistic_regression_convert():
 

@@ -23,7 +23,7 @@ import os
 floatDataBus=True
 
 # NB_TRAINING_SAMPLES - Controls the number of training data to be verified
-NB_TRAINING_SAMPLES=4
+NB_TRAINING_SAMPLES=1
 
 # When using intbv for the data (not the floating point simulation),
 # determine the decimal shift needed in the theta and training data parameters
@@ -149,6 +149,48 @@ def sim_logistic_regression_2(pars_obj):
   moduleLR8=LogisticRegression()
   moduleLR9=LogisticRegression()
 
+  #global floatDataBus
+  #if (True == floatDataBus):
+  #  pars.INIT_DATA=FLOAT_INIT_DATA  # requires floating point computation
+  #  INIT_DATA=FLOAT_INIT_DATA       # requires floating point computation
+  #else:
+  #  pars.INIT_DATA=INT_INIT_DATA    # requires intbv computation
+  #  INIT_DATA=INT_INIT_DATA         # requires intbv computation
+
+  #pars.CMD_FILE =  '../tests/mult_pipeline.list'
+  #pars.LEN_THETA  = LEN_THETA
+
+  #ioLR0 = LogisticRegressionIo()
+  #ioLR0(pars)
+  #ioLR1 = LogisticRegressionIo()
+  #ioLR1(pars)
+  #ioLR2 = LogisticRegressionIo()
+  #ioLR2(pars)
+  #ioLR3 = LogisticRegressionIo()
+  #ioLR3(pars)
+  #ioLR4 = LogisticRegressionIo()
+  #ioLR4(pars)
+  #ioLR5 = LogisticRegressionIo()
+  #ioLR5(pars)
+  #ioLR6 = LogisticRegressionIo()
+  #ioLR6(pars)
+  #ioLR7 = LogisticRegressionIo()
+  #ioLR7(pars)
+  #ioLR8 = LogisticRegressionIo()
+  #ioLR8(pars)
+  #ioLR9 = LogisticRegressionIo()
+  #ioLR9(pars)
+
+  #moduleLR0=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR1=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR2=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR3=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR4=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR5=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR6=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR7=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR8=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
+  #moduleLR9=LogisticRegression( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA )
   # --- Initializing Pipeline A
   pipe_inpA  = ioLR0.pipe_inpA
 
