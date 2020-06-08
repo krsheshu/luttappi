@@ -1,5 +1,3 @@
-#----logisticRegression Class
-
 import myhdl
 
 from avalon_buses       import PipelineST
@@ -52,9 +50,9 @@ class LogisticRegression():
             pipe_out_activ  ):
 
     #------ Wrapping the interfaces due to conversion issues!
-    pipe_inpA_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-    pipe_inpB_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-    pipe_out_active_if = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
+    pipe_inpA_if        = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    pipe_inpB_if        = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    pipe_out_active_if  = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
 
     @myhdl.always_comb
     def interface_wrap_process():
@@ -79,21 +77,15 @@ class LogisticRegression():
 
     #----------------- Initializing Pipeline Streams ----------------
 
-    # --- Initializing Pipeline A
-    pipe_outA  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
-
     operand_a=OperandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
-    ioA=operand_a.Io
-
-    # --- Initializing Pipeline B
-    pipe_outB  = PipelineST(self.DATAWIDTH,self.CHANNEL_WIDTH,self.INIT_DATA)
+    pipeA_stage=operand_a.stage_o
 
     operand_b=OperandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
-    ioB=operand_b.Io
+    pipeB_stage=operand_b.stage_o
 
     # --- Initializing Command Pipeline
     multPipe=CommandPipeline( self.NB_PIPELINE_STAGES, self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA, self.CMD_FILE )
-    ioMult=multPipe.Io
+    multC_stage=multPipe.stage_o
 
     # ---- Initializing Accumulator Block
 
@@ -102,31 +94,22 @@ class LogisticRegression():
     # ---- Initializing Activation Block
 
     ACT_DATAWIDTH= 3    # 0 or 1 for classification
-    activPipe= Activation(  ACT_DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    activPipe       =   Activation(  ACT_DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
     #----------------------------------------------------------------
 
-    #----------------- Connecting Pipeline Blocks -------------------
-    @myhdl.always_comb
-    def shiftOperand_Signal():
-      """ Enabling shift by default myhdl.always
-          The input pipeline control is done through
-          valid data through pipe_inpA & pipe_outB """
-      ioB.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
-      ioA.shiftEn_i.next = 1 if  (pipe_inpA_if.valid == 1 and pipe_inpB_if.valid == 1) else 0
-
-    trainingData =  ( operand_a.top ( reset, clk, pipe_inpA_if, pipe_outA, ioA ) )
-    theta        =  ( operand_b.top ( reset, clk, pipe_inpB_if, pipe_outB, ioB ) )
+    trainingData    =   ( operand_a.top ( reset, clk, pipe_inpA_if, pipeA_stage ) )
+    theta           =   ( operand_b.top ( reset, clk, pipe_inpB_if, pipeB_stage ) )
     #----------------------------------------------------------------
 
     #----------------- Connecting Command Pipeline -------------------
     # Mult Pipeline
-    command     =   ( multPipe.top ( reset, clk, ioA, ioB, self.pipe_multRes, ioMult ) )
+    command     =   ( multPipe.top ( reset, clk, pipeA_stage, pipeB_stage, multC_stage ) )
     #----------------------------------------------------------------
 
     #----------------- Connecting Accumulator  --------------
     # Accu
-    acc_reset=myhdl.Signal(bool(0))
-    accumulator=    ( accuPipe.top ( reset, clk, acc_reset, self.pipe_multRes, self.pipe_out_acc ) )
+    acc_reset   =   myhdl.Signal(bool(0))
+    accumulator =   ( accuPipe.top ( reset, clk, acc_reset, multC_stage [ 0 ] , self.pipe_out_acc ) )
 
     #----------------------------------------------------------------
 

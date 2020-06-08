@@ -1,20 +1,7 @@
-#----operationPipeline Class
-
-#----imports
-from avalon_buses import PipelineST
-from common_functions import simple_wire_assign, simple_reg_assign, conditional_wire_assign
 import myhdl
 
-class CommandPipelineIo():
-  def __init__( self                    ,
-                NB_PIPELINE_STAGES =   4,
-                DATAWIDTH          =  32,
-                CHANNEL_WIDTH      =   1,
-                INIT_DATA          =   0):
-
-    self.stage_o    = [ PipelineST (    DATAWIDTH       ,
-                                        CHANNEL_WIDTH   ,
-                                        INIT_DATA       ) for i in range ( NB_PIPELINE_STAGES ) ]
+from avalon_buses       import PipelineST
+from common_functions   import simple_wire_assign, simple_reg_assign, conditional_wire_assign
 
 
 class CommandPipeline():
@@ -31,34 +18,41 @@ class CommandPipeline():
     self.CHANNEL_WIDTH      = CHANNEL_WIDTH
     self.INIT_DATA          = INIT_DATA
 
-    self.STAGE_NB           = 2
+    self.OPERATION_STAGE    = 1
     self.OPCODE             = 0x00  # NOP by default
     self.OPCODEBITS         = 8
     self.CMD_FILE           = CMD_FILE
 
-    self.Io                 = CommandPipelineIo (   self.NB_PIPELINE_STAGES ,
-                                                    self.DATAWIDTH          ,
-                                                    self.CHANNEL_WIDTH      ,
-                                                    self.INIT_DATA          )
+
+    self.stage_o            = [ PipelineST (    self.DATAWIDTH       ,
+                                                self.CHANNEL_WIDTH   ,
+                                                self.INIT_DATA       ) for i in range ( self.NB_PIPELINE_STAGES ) ]
 
     """ Convert cmfFile to a cmdStringList of Pipeline operators"""
-    cmdStringList=None
-    f=open(self.CMD_FILE)
-    cmdStringList=f.readlines()
+    cmdStringList   =   None
+    f               =   open( self.CMD_FILE )
+    cmdStringList   =   f.readlines()
     f.close()
-    cmdStr = [s.rstrip() for s in cmdStringList]
 
-    for i in range(len(cmdStr)):
-      if (cmdStr[i] != "NOP"):
-        if ( cmdStr[i] == "ADD"):     # A+B
+    cmdStr = [ s.rstrip ( ) for s in cmdStringList ]
+
+    for i in range ( len ( cmdStr ) ):
+
+      if ( cmdStr [ i ] != "NOP" ):
+
+        if      ( cmdStr [ i ] == "ADD" ):     # A+B
           self.OPCODE             = 0x31
-        elif ( cmdStr[i] == "SUB"):   # A-B
+
+        elif    ( cmdStr [ i ] == "SUB" ):   # A-B
           self.OPCODE             = 0x32
-        elif ( cmdStr[i] == "SUBR"):  # B-A
+
+        elif    ( cmdStr [ i ] == "SUBR" ):  # B-A
           self.OPCODE             = 0x33
-        elif ( cmdStr[i] == "MULT"):  # A*B
+
+        elif    ( cmdStr [ i ] == "MULT" ):  # A*B
           self.OPCODE             = 0x34
-        elif ( cmdStr[i] == "NOP"):   # No Operation
+
+        elif    ( cmdStr [ i ] == "NOP" ):   # No Operation
           self.OPCODE             = 0x00
         break
 
@@ -73,15 +67,20 @@ class CommandPipeline():
 
     @myhdl.always(clk.posedge)
     def atomic_operation_assign_process():
-      if ( cmd == 0x31):     # A+B
+
+      if    ( cmd == 0x31 ):   # A+B
         stage_o.data.next = stage_iA.data + stage_iB.data
-      elif ( cmd == 0x32):   # A-B
+
+      elif  ( cmd == 0x32 ):   # A-B
         stage_o.data.next = stage_iA.data - stage_iB.data
-      elif ( cmd == 0x33):  # B-A
+
+      elif  ( cmd == 0x33 ):  # B-A
         stage_o.data.next = stage_iB.data - stage_iA.data
-      elif ( cmd == 0x34):  # A*B
+
+      elif  ( cmd == 0x34 ):  # A*B
         stage_o.data.next = stage_iA.data * stage_iB.data
-      elif ( cmd == 0x00):   # No Operation
+
+      elif  ( cmd == 0x00 ):   # No Operation
         stage_o.data.next = stage_o.data
 
       if (stage_iA.valid == 1 and stage_iB.valid == 1):
@@ -108,8 +107,7 @@ class CommandPipeline():
                 clk             ,
                 pipe_stageA     ,
                 pipe_stageB     ,
-                pipest_src      ,
-                io              ):
+                stage_o         ):
 
     stage = [ PipelineST (  self.DATAWIDTH      ,
                             self.CHANNEL_WIDTH  ,
@@ -117,14 +115,6 @@ class CommandPipeline():
 
     # Reset value to incorporate float and myhdl.intbv formats
     reset_val = 0.0 if (isinstance(self.INIT_DATA,float)) else 0
-
-    """ Output pipesrc instance """
-    data_out_inst       = simple_wire_assign ( pipest_src.data      , io.stage_o [ self.NB_PIPELINE_STAGES - 1 ].data   )
-    sop_out_inst        = simple_wire_assign ( pipest_src.sop       , io.stage_o [ self.NB_PIPELINE_STAGES - 1 ].sop    )
-    eop_out_inst        = simple_wire_assign ( pipest_src.eop       , io.stage_o [ self.NB_PIPELINE_STAGES - 1 ].eop    )
-    valid_out_inst      = simple_wire_assign ( pipest_src.valid     , io.stage_o [ self.NB_PIPELINE_STAGES - 1 ].valid)
-    channel_out_inst    = simple_wire_assign ( pipest_src.channel   , io.stage_o [ self.NB_PIPELINE_STAGES - 1 ].channel)
-
 
     wire_stage_data_inst    = []
     wire_stage_sop_inst     = []
@@ -134,13 +124,13 @@ class CommandPipeline():
 
     for i in range(self.NB_PIPELINE_STAGES):
       """ module outputs """
-      wire_stage_data_inst.append       ( simple_wire_assign ( io.stage_o[i].data   , stage[i].data     ) )
-      wire_stage_sop_inst.append        ( simple_wire_assign ( io.stage_o[i].sop    , stage[i].sop      ) )
-      wire_stage_eop_inst.append        ( simple_wire_assign ( io.stage_o[i].eop    , stage[i].eop      ) )
-      wire_stage_valid_inst.append      ( simple_wire_assign ( io.stage_o[i].valid  , stage[i].valid    ) )
-      wire_stage_channel_inst.append    ( simple_wire_assign ( io.stage_o[i].channel, stage[i].channel  ) )
+      wire_stage_data_inst.append       ( simple_wire_assign ( self.stage_o[i].data   , stage[i].data     ) )
+      wire_stage_sop_inst.append        ( simple_wire_assign ( self.stage_o[i].sop    , stage[i].sop      ) )
+      wire_stage_eop_inst.append        ( simple_wire_assign ( self.stage_o[i].eop    , stage[i].eop      ) )
+      wire_stage_valid_inst.append      ( simple_wire_assign ( self.stage_o[i].valid  , stage[i].valid    ) )
+      wire_stage_channel_inst.append    ( simple_wire_assign ( self.stage_o[i].channel, stage[i].channel  ) )
 
-    """ Call myhdl.block atomic operation on each stage """
+    """ Call block atomic operation for the specific stage """
 
     reg_stage_inst   = []
 
@@ -149,8 +139,8 @@ class CommandPipeline():
     reg_stage_inst.append ( self.block_atomic_oper( reset                                   ,
                                                     clk                                     ,
                                                     cmd                                     ,
-                                                    pipe_stageA.stage_o [ self.STAGE_NB ]   ,
-                                                    pipe_stageB.stage_o [ self.STAGE_NB ]   ,
+                                                    pipe_stageA[ self.OPERATION_STAGE ]     ,
+                                                    pipe_stageB[ self.OPERATION_STAGE ]     ,
                                                     stage [ 0 ]                             ))
 
     for j in range(1,self.NB_PIPELINE_STAGES):

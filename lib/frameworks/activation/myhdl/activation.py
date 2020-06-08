@@ -1,9 +1,7 @@
-#----Activation Class
-
-#----imports
-from avalon_buses import PipelineST
-from common_functions import conditional_reg_assign,CLogB2, simple_wire_assign, simple_reg_assign
 import myhdl
+
+from avalon_buses       import PipelineST
+from common_functions   import conditional_reg_assign, simple_wire_assign, simple_reg_assign
 
 class Activation():
 
