@@ -5,16 +5,16 @@ from common_functions   import conditional_reg_assign, simple_wire_assign, simpl
 
 class Activation():
 
-  def __init__( self                    ,
-                DATAWIDTH          =  32,
-                CHANNEL_WIDTH      =   1,
-                INIT_DATA          =   0):
+  def __init__( self                     ,
+                DATAWIDTH           =  32,
+                CHANNEL_WIDTH       =   1,
+                INIT_DATA           =   0):
 
-    self.DATAWIDTH          = DATAWIDTH
-    self.CHANNEL_WIDTH      = CHANNEL_WIDTH
-    self.INIT_DATA          = INIT_DATA
+    self.DATAWIDTH                  = DATAWIDTH
+    self.CHANNEL_WIDTH              = CHANNEL_WIDTH
+    self.INIT_DATA                  = INIT_DATA
 
-    self.classifier = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    self.classifier                 = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
 
 
   # Use simple step activation function. if x <= 0, prob=0 else prob=1

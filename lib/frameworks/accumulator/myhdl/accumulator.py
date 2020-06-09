@@ -4,18 +4,18 @@ from common_functions   import conditional_reg_assign, CLogB2, simple_wire_assig
 
 class Accumulator():
 
-  def __init__( self                    ,
-                DATAWIDTH          =  32,
-                CHANNEL_WIDTH      =   1,
-                INIT_DATA          =   0,
-                NB_ACCUMULATIONS   =   3):
+  def __init__( self                     ,
+                DATAWIDTH           =  32,
+                CHANNEL_WIDTH       =   1,
+                INIT_DATA           =   0,
+                NB_ACCUMULATIONS    =   3):
 
-    self.DATAWIDTH          = DATAWIDTH
-    self.CHANNEL_WIDTH      = CHANNEL_WIDTH
-    self.INIT_DATA          = INIT_DATA
-    self.NB_ACCUMULATIONS   = NB_ACCUMULATIONS
+    self.DATAWIDTH                  = DATAWIDTH
+    self.CHANNEL_WIDTH              = CHANNEL_WIDTH
+    self.INIT_DATA                  = INIT_DATA
+    self.NB_ACCUMULATIONS           = NB_ACCUMULATIONS
 
-    self.accu= PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
+    self.accu                       = PipelineST ( self.DATAWIDTH, self.CHANNEL_WIDTH, self.INIT_DATA )
 
   @myhdl.block
   def top(  self            ,

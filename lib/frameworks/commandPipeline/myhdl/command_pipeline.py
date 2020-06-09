@@ -6,27 +6,27 @@ from common_functions   import simple_wire_assign, simple_reg_assign, conditiona
 
 class CommandPipeline():
 
-  def __init__( self                    ,
-                NB_PIPELINE_STAGES =   4,
-                DATAWIDTH          =  32,
-                CHANNEL_WIDTH      =   1,
-                INIT_DATA          =   0,
-                CMD_FILE           =  ""):
+  def __init__( self                     ,
+                NB_PIPELINE_STAGES  =   4,
+                DATAWIDTH           =  32,
+                CHANNEL_WIDTH       =   1,
+                INIT_DATA           =   0,
+                CMD_FILE            =  ""):
 
-    self.NB_PIPELINE_STAGES = NB_PIPELINE_STAGES
-    self.DATAWIDTH          = DATAWIDTH
-    self.CHANNEL_WIDTH      = CHANNEL_WIDTH
-    self.INIT_DATA          = INIT_DATA
+    self.NB_PIPELINE_STAGES         = NB_PIPELINE_STAGES
+    self.DATAWIDTH                  = DATAWIDTH
+    self.CHANNEL_WIDTH              = CHANNEL_WIDTH
+    self.INIT_DATA                  = INIT_DATA
 
-    self.OPERATION_STAGE    = 1
-    self.OPCODE             = 0x00  # NOP by default
-    self.OPCODEBITS         = 8
-    self.CMD_FILE           = CMD_FILE
+    self.OPERATION_STAGE            = 1
+    self.OPCODE                     = 0x00  # NOP by default
+    self.OPCODEBITS                 = 8
+    self.CMD_FILE                   = CMD_FILE
 
 
-    self.stage_o            = [ PipelineST (    self.DATAWIDTH       ,
-                                                self.CHANNEL_WIDTH   ,
-                                                self.INIT_DATA       ) for i in range ( self.NB_PIPELINE_STAGES ) ]
+    self.stage_o                    = [ PipelineST (    self.DATAWIDTH       ,
+                                                        self.CHANNEL_WIDTH   ,
+                                                        self.INIT_DATA       ) for i in range ( self.NB_PIPELINE_STAGES ) ]
 
     """ Convert cmfFile to a cmdStringList of Pipeline operators"""
     cmdStringList   =   None

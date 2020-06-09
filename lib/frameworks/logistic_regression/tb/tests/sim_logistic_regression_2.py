@@ -124,31 +124,31 @@ def sim_logistic_regression_2(pars_obj):
   moduleLR9 = LogisticRegression ( NB_PIPELINE_STAGES, DATAWIDTH, CHANNEL_WIDTH, INIT_DATA, LEN_THETA, CMD_FILE  )
 
   # --- Initializing Pipeline A
-  pipe_inpA  = moduleLR0.Io.pipe_inpA
+  pipe_inpA  = moduleLR0.pipeST_A_i
 
   # --- Initializing Pipeline B
-  pipe_theta0  = moduleLR0.Io.pipe_inpB
-  pipe_theta1  = moduleLR1.Io.pipe_inpB
-  pipe_theta2  = moduleLR2.Io.pipe_inpB
-  pipe_theta3  = moduleLR3.Io.pipe_inpB
-  pipe_theta4  = moduleLR4.Io.pipe_inpB
-  pipe_theta5  = moduleLR5.Io.pipe_inpB
-  pipe_theta6  = moduleLR6.Io.pipe_inpB
-  pipe_theta7  = moduleLR7.Io.pipe_inpB
-  pipe_theta8  = moduleLR8.Io.pipe_inpB
-  pipe_theta9  = moduleLR9.Io.pipe_inpB
+  pipe_theta0  = moduleLR0.pipeST_B_i
+  pipe_theta1  = moduleLR1.pipeST_B_i
+  pipe_theta2  = moduleLR2.pipeST_B_i
+  pipe_theta3  = moduleLR3.pipeST_B_i
+  pipe_theta4  = moduleLR4.pipeST_B_i
+  pipe_theta5  = moduleLR5.pipeST_B_i
+  pipe_theta6  = moduleLR6.pipeST_B_i
+  pipe_theta7  = moduleLR7.pipeST_B_i
+  pipe_theta8  = moduleLR8.pipeST_B_i
+  pipe_theta9  = moduleLR9.pipeST_B_i
 
   # --- Initializing Activation Out
-  pipe_out_activ0 = moduleLR0.Io.pipe_out_activ
-  pipe_out_activ1 = moduleLR1.Io.pipe_out_activ
-  pipe_out_activ2 = moduleLR2.Io.pipe_out_activ
-  pipe_out_activ3 = moduleLR3.Io.pipe_out_activ
-  pipe_out_activ4 = moduleLR4.Io.pipe_out_activ
-  pipe_out_activ5 = moduleLR5.Io.pipe_out_activ
-  pipe_out_activ6 = moduleLR6.Io.pipe_out_activ
-  pipe_out_activ7 = moduleLR7.Io.pipe_out_activ
-  pipe_out_activ8 = moduleLR8.Io.pipe_out_activ
-  pipe_out_activ9 = moduleLR9.Io.pipe_out_activ
+  pipe_out_activ0 = moduleLR0.pipeST_o
+  pipe_out_activ1 = moduleLR1.pipeST_o
+  pipe_out_activ2 = moduleLR2.pipeST_o
+  pipe_out_activ3 = moduleLR3.pipeST_o
+  pipe_out_activ4 = moduleLR4.pipeST_o
+  pipe_out_activ5 = moduleLR5.pipeST_o
+  pipe_out_activ6 = moduleLR6.pipeST_o
+  pipe_out_activ7 = moduleLR7.pipeST_o
+  pipe_out_activ8 = moduleLR8.pipeST_o
+  pipe_out_activ9 = moduleLR9.pipeST_o
 
   #----------------- Connecting Logistic Regression Block--------------
   # Simple Step Activation function
@@ -307,13 +307,13 @@ def sim_logistic_regression_2(pars_obj):
   def receive_data_process():
     global recv_data,tap_data_mmult,nbR,acc_out,prediction_res
 
-    # Collecting multiplier data
-    if (moduleLR0.pipe_multRes.valid == 1):
-      if (False == floatDataBus):
-        pipe_multRes= moduleLR0.pipe_multRes.data
-      else:
-        pipe_multRes= (round(float(moduleLR0.pipe_multRes.data),DEF_ROUND))
-      tap_mult.extend([pipe_multRes])
+    ## Collecting multiplier data
+    #if (moduleLR0.pipe_multRes.valid == 1):
+    #  if (False == floatDataBus):
+    #    pipe_multRes= moduleLR0.pipe_multRes.data
+    #  else:
+    #    pipe_multRes= (round(float(moduleLR0.pipe_multRes.data),DEF_ROUND))
+    #  tap_mult.extend([pipe_multRes])
 
     displayAccOut ( nbR, moduleLR0.pipe_out_acc , 0 )
     displayAccOut ( nbR, moduleLR1.pipe_out_acc , 1 )
