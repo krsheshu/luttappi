@@ -51,13 +51,16 @@ class LogisticRegression():
     self.pipeB_stage =   self.operand_b.pipeST_stage_o
 
     # --- Initializing Command Pipeline
+    OPCODE      = "MULT"
+    OPSTAGE     = 2
     self.multPipe    =   CommandPipeline(   self.NB_PIPELINE_STAGES ,
                                             self.DATAWIDTH          ,
                                             self.CHANNEL_WIDTH      ,
                                             self.INIT_DATA          ,
-                                            self.CMD_FILE           )
+                                            OPCODE                  ,
+                                            OPSTAGE                 )
 
-    self.multC_stage =   self.multPipe.stage_o
+    self.multC_stage =   self.multPipe.pipeST_stage_o
 
     # ---- Initializing Accumulator Block
 
@@ -97,7 +100,7 @@ class LogisticRegression():
 
     #----------------- Connecting Accumulator  --------------
     # Accu
-    acc_reset   =   myhdl.Signal(bool(0))
+    acc_reset   =  self.accuPipe.reset_acc
 
     accumulator =   ( self.accuPipe.top ( reset, clk, acc_reset, self.multC_stage [ 0 ] , self.pipe_out_acc ) )
 

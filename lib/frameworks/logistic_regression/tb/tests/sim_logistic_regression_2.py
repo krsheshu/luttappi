@@ -20,7 +20,7 @@ import os
 floatDataBus=True
 
 # NB_TRAINING_SAMPLES - Controls the number of training data to be verified
-NB_TRAINING_SAMPLES=1
+NB_TRAINING_SAMPLES=4
 
 # When using myhdl.intbv for the data (not the floating point simulation),
 # determine the decimal shift needed in the theta and training data parameters
