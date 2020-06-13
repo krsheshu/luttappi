@@ -17,7 +17,7 @@ import os
 # These pars control the data format
 # floatDataBus = False for simulation in real scenario with myhdl.intbv mult
 # floatDataBus = True for simulation with floating point mult
-floatDataBus = True
+floatDataBus = False
 
 # NB_TRAINING_SAMPLES - Controls the number of training data to be verified
 NB_TRAINING_SAMPLES = 4
@@ -263,27 +263,27 @@ def sim_logistic_regression_2(pars_obj):
         global line_nb
         if shiftEn_i == 1 and nbTA == nbTB and nbTA < MAX_NB_TRANSFERS:
 
-            pipe_inpA.data.next = test_file_list[line_nb]
+            pipe_inpA.data.next = test_file_list[line_nb] if floatDataBus == True else int(test_file_list[line_nb])
             pipe_inpA.valid.next = 1
-            pipe_theta0.data.next = theta_file0_list[line_nb]
+            pipe_theta0.data.next = theta_file0_list[line_nb] if floatDataBus == True else int(theta_file0_list[line_nb])
             pipe_theta0.valid.next = 1
-            pipe_theta1.data.next = theta_file1_list[line_nb]
+            pipe_theta1.data.next = theta_file1_list[line_nb] if floatDataBus == True else int(theta_file1_list[line_nb])
             pipe_theta1.valid.next = 1
-            pipe_theta2.data.next = theta_file2_list[line_nb]
+            pipe_theta2.data.next = theta_file2_list[line_nb] if floatDataBus == True else int(theta_file2_list[line_nb])
             pipe_theta2.valid.next = 1
-            pipe_theta3.data.next = theta_file3_list[line_nb]
+            pipe_theta3.data.next = theta_file3_list[line_nb] if floatDataBus == True else int(theta_file3_list[line_nb])
             pipe_theta3.valid.next = 1
-            pipe_theta4.data.next = theta_file4_list[line_nb]
+            pipe_theta4.data.next = theta_file4_list[line_nb] if floatDataBus == True else int(theta_file4_list[line_nb])
             pipe_theta4.valid.next = 1
-            pipe_theta5.data.next = theta_file5_list[line_nb]
+            pipe_theta5.data.next = theta_file5_list[line_nb] if floatDataBus == True else int(theta_file5_list[line_nb])
             pipe_theta5.valid.next = 1
-            pipe_theta6.data.next = theta_file6_list[line_nb]
+            pipe_theta6.data.next = theta_file6_list[line_nb] if floatDataBus == True else int(theta_file6_list[line_nb])
             pipe_theta6.valid.next = 1
-            pipe_theta7.data.next = theta_file7_list[line_nb]
+            pipe_theta7.data.next = theta_file7_list[line_nb] if floatDataBus == True else int(theta_file7_list[line_nb])
             pipe_theta7.valid.next = 1
-            pipe_theta8.data.next = theta_file8_list[line_nb]
+            pipe_theta8.data.next = theta_file8_list[line_nb] if floatDataBus == True else int(theta_file8_list[line_nb])
             pipe_theta8.valid.next = 1
-            pipe_theta9.data.next = theta_file9_list[line_nb]
+            pipe_theta9.data.next = theta_file9_list[line_nb] if floatDataBus == True else int(theta_file9_list[line_nb])
             pipe_theta9.valid.next = 1
             line_nb += 1
 
