@@ -34,6 +34,8 @@ function create_env {
     echo "Installing scipy"
     pip install scipy
     echo "Installing python-opencv"
+    pip install yapf
+    echo "Installing yapf"
     pip install opencv-python
     echo "All requirements installed!"
     echo "Deactivating environment! "
