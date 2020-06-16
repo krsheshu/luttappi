@@ -134,7 +134,7 @@ class LogisticRegression1vsAllModel():
         nbImages1Row=int(math.sqrt(nbClassifyImages))
         nbImages1Col=int(math.sqrt(nbClassifyImages))
 
-        testImgs=np.zeros((self.imgH*nbImages1Col, self.imgW*nbImages1Row))
+        testImgs=np.zeros((self.imgH*nbImages1Col, self.imgW*nbImages1Row), dtype=np.uint8)
 
         rowNb=[]
         for i in range(nbClassifyImages):
@@ -144,7 +144,7 @@ class LogisticRegression1vsAllModel():
           for j in range(nbImages1Row):
             tmp=np.reshape(img[rowNb[i*nbImages1Row+j],:], (20,20))
             tmp=np.transpose(tmp)
-            testImgs[i*self.imgH:i*self.imgH+self.imgH,j*self.imgW:j*self.imgW+self.imgW]=tmp
+            testImgs[i*self.imgH:i*self.imgH+self.imgH,j*self.imgW:j*self.imgW+self.imgW] = np.interp(tmp, (tmp.min(), tmp.max()), (0, 255))
 
         sampleImgName="sampleImages.tif"
         cv2.imwrite(sampleImgName,testImgs)
